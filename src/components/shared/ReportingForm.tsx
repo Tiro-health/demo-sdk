@@ -1,6 +1,5 @@
+import { useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import type { Study } from '@/types/study';
 
 interface ReportingFormProps {
@@ -13,57 +12,94 @@ function generatePatientId(study: Study): string {
   return `${dob}-${lastName}`;
 }
 
+const RADIOLOGY_QUESTIONNAIRE = {
+  resourceType: 'Questionnaire',
+  id: 'radiology-report',
+  status: 'draft',
+  title: 'Radiology Report',
+  item: [
+    {
+      linkId: 'findings',
+      type: 'text',
+      text: 'Findings',
+    },
+    {
+      linkId: 'impression',
+      type: 'text',
+      text: 'Impression',
+    },
+    {
+      linkId: 'recommendations',
+      type: 'text',
+      text: 'Recommendations',
+    },
+  ],
+};
+
 export function ReportingForm({ study }: ReportingFormProps) {
+  const formRef = useRef<HTMLElement>(null);
   const patientId = generatePatientId(study);
+
+  useEffect(() => {
+    const form = formRef.current;
+    if (!form) return;
+
+    const handleUpdate = (event: Event) => {
+      const detail = (event as CustomEvent).detail;
+      console.log('Form updated:', detail.response);
+    };
+
+    const handleSubmit = (event: Event) => {
+      const detail = (event as CustomEvent).detail;
+      console.log('Form submitted:', detail.response);
+    };
+
+    const handleError = (event: Event) => {
+      const detail = (event as CustomEvent).detail;
+      console.error('Form error:', detail.error, 'Type:', detail.type);
+    };
+
+    const handleReady = (event: Event) => {
+      const detail = (event as CustomEvent).detail;
+      console.log('Questionnaire loaded:', detail.questionnaire);
+    };
+
+    form.addEventListener('tiro-update', handleUpdate);
+    form.addEventListener('tiro-submit', handleSubmit);
+    form.addEventListener('tiro-error', handleError);
+    form.addEventListener('tiro-ready', handleReady);
+
+    return () => {
+      form.removeEventListener('tiro-update', handleUpdate);
+      form.removeEventListener('tiro-submit', handleSubmit);
+      form.removeEventListener('tiro-error', handleError);
+      form.removeEventListener('tiro-ready', handleReady);
+    };
+  }, []);
 
   return (
     <Card className="h-full flex flex-col">
       <CardHeader className="pb-2">
         <CardTitle className="text-lg">Reporting</CardTitle>
+        <div className="text-sm text-muted-foreground space-y-1">
+          <div>Patient: {study.patient.firstName} {study.patient.lastName} ({patientId})</div>
+          <div>Accession: {study.accessionNumber}</div>
+        </div>
       </CardHeader>
-      <CardContent className="flex-1 flex flex-col gap-4 min-h-0">
-        <form
-          action="/launch.html"
-          method="GET"
-          target="sdk-frame"
-          className="flex flex-col gap-3"
+      <CardContent className="flex-1 flex flex-col min-h-0 overflow-hidden">
+        <tiro-form-filler
+          ref={formRef}
+          id="radiology-form"
+          sdc-endpoint-address="https://sdc-staging.tiro.health/fhir/r5"
+          className="flex-1 overflow-auto"
         >
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1">
-              <label htmlFor="accessionNumber" className="text-sm font-medium">
-                Accession Number
-              </label>
-              <Input
-                id="accessionNumber"
-                name="accessionNumber"
-                value={study.accessionNumber}
-                readOnly
-                className="bg-muted"
-              />
-            </div>
-            <div className="space-y-1">
-              <label htmlFor="patientId" className="text-sm font-medium">
-                Patient ID
-              </label>
-              <Input
-                id="patientId"
-                name="patientId"
-                value={patientId}
-                readOnly
-                className="bg-muted"
-              />
-            </div>
-          </div>
-          <Button type="submit" className="w-full">
-            Launch Report
-          </Button>
-        </form>
-        <iframe
-          name="sdk-frame"
-          className="flex-1 rounded-md border border-border bg-background"
-          title="Tiro.health SDK"
-          allow="clipboard-read; clipboard-write"
-        />
+          <script
+            type="application/fhir+json"
+            slot="questionnaire"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(RADIOLOGY_QUESTIONNAIRE) }}
+          />
+          <button type="submit" />
+        </tiro-form-filler>
       </CardContent>
     </Card>
   );
