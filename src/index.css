@@ -1,0 +1,73 @@
+@import "tailwindcss";
+
+@theme {
+  --color-background: oklch(1 0 0);
+  --color-foreground: oklch(0.145 0 0);
+  --color-card: oklch(1 0 0);
+  --color-card-foreground: oklch(0.145 0 0);
+  --color-popover: oklch(1 0 0);
+  --color-popover-foreground: oklch(0.145 0 0);
+  --color-primary: oklch(0.145 0 0);
+  --color-primary-foreground: oklch(0.985 0 0);
+  --color-secondary: oklch(0.961 0 0);
+  --color-secondary-foreground: oklch(0.145 0 0);
+  --color-muted: oklch(0.961 0 0);
+  --color-muted-foreground: oklch(0.454 0.004 285.5);
+  --color-accent: oklch(0.961 0 0);
+  --color-accent-foreground: oklch(0.145 0 0);
+  --color-destructive: oklch(0.577 0.245 27.325);
+  --color-destructive-foreground: oklch(0.985 0 0);
+  --color-border: oklch(0.898 0 0);
+  --color-input: oklch(0.898 0 0);
+  --color-ring: oklch(0.145 0 0);
+  --radius-lg: 0.5rem;
+  --radius-md: calc(0.5rem - 2px);
+  --radius-sm: calc(0.5rem - 4px);
+}
+
+.dark {
+  --color-background: oklch(0.145 0 0);
+  --color-foreground: oklch(0.985 0 0);
+  --color-card: oklch(0.145 0 0);
+  --color-card-foreground: oklch(0.985 0 0);
+  --color-popover: oklch(0.145 0 0);
+  --color-popover-foreground: oklch(0.985 0 0);
+  --color-primary: oklch(0.985 0 0);
+  --color-primary-foreground: oklch(0.145 0 0);
+  --color-secondary: oklch(0.262 0.003 285.885);
+  --color-secondary-foreground: oklch(0.985 0 0);
+  --color-muted: oklch(0.262 0.003 285.885);
+  --color-muted-foreground: oklch(0.641 0.005 285.938);
+  --color-accent: oklch(0.262 0.003 285.885);
+  --color-accent-foreground: oklch(0.985 0 0);
+  --color-destructive: oklch(0.627 0.258 29.234);
+  --color-destructive-foreground: oklch(0.985 0 0);
+  --color-border: oklch(0.262 0.003 285.885);
+  --color-input: oklch(0.262 0.003 285.885);
+  --color-ring: oklch(0.831 0 0);
+}
+
+/* Force dark mode on body - handled in main.tsx via classList.add('dark') */
+
+/* Custom study row styles */
+.study-row {
+  @apply bg-[oklch(0.18_0_0)] border border-border rounded-md;
+  @apply hover:bg-[oklch(0.22_0_0)] transition-colors duration-150;
+  @apply focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none;
+  @apply cursor-pointer;
+}
+
+.study-row-selected {
+  @apply ring-2 ring-primary;
+}
+
+/* Header blur effect */
+.header-blur {
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+/* SDK iframe */
+.sdk-iframe {
+  @apply w-full h-full border-0 rounded-md;
+}
