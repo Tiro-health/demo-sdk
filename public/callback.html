@@ -4,60 +4,28 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SDK Callback</title>
-  <style>
-    body {
-      background: #1a1a1a;
-      color: #e5e5e5;
-      padding: 2rem;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      line-height: 1.6;
-    }
-    h1 {
-      margin-bottom: 1rem;
-      font-size: 2rem;
-    }
-    p {
-      margin-bottom: 1.5rem;
-    }
-    a {
-      color: #60a5fa;
-      text-decoration: none;
-      font-weight: 500;
-      border-bottom: 1px solid transparent;
-      transition: border-color 0.2s;
-    }
-    a:hover {
-      border-bottom-color: #60a5fa;
-    }
-    button {
-      background: #2563eb;
-      color: white;
-      padding: 0.5rem 1rem;
-      border: none;
-      border-radius: 0.375rem;
-      font-weight: 500;
-      cursor: pointer;
-      transition: background-color 0.2s;
-      margin-right: 1rem;
-      margin-bottom: 1rem;
-    }
-    button:hover {
-      background: #1d4ed8;
-    }
-    .success {
-      color: #4ade80;
-    }
-    .actions {
-      margin: 2rem 0;
-      padding-top: 1rem;
-      border-top: 1px solid #404040;
-    }
-    .nav-links {
-      margin-top: 2rem;
-      padding-top: 2rem;
-      border-top: 1px solid #404040;
-    }
 
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet" />
+
+  <style>
     /* Style the print content */
     print-preview::part(table) {
       border-collapse: collapse;
@@ -78,55 +46,59 @@
     }
   </style>
 </head>
-<body>
-  <h1>SDK Callback Page</h1>
-  <p class="success">✓ Callback received! Navigation from launch page successful.</p>
+<body class="dark bg-neutral-900 text-neutral-200 p-8 font-sans leading-relaxed">
+  <h1 class="mb-4 text-3xl font-bold">SDK Callback Page</h1>
+  <p class="text-green-400 mb-6">✓ Callback received! Navigation from launch page successful.</p>
 
-  <div class="actions">
-    <h2 style="margin-bottom: 1rem; font-size: 1.25rem; color: #a3a3a3;">Print Preview Demo</h2>
-    <p>Click the button below to open a print preview of a sample radiology report:</p>
-    <button id="preview-btn">📄 Open Print Preview</button>
+  <div class="my-8 pt-4 border-t border-neutral-700">
+    <h2 class="mb-4 text-xl text-neutral-400">Print Preview Demo</h2>
+    <p class="mb-4">Click the button below to open a print preview of a sample radiology report:</p>
+    <button id="preview-btn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-medium cursor-pointer transition-colors mr-4 mb-4">
+      📄 Open Print Preview
+    </button>
   </div>
 
-  <div class="nav-links">
-    <a href="/launch.html">← Back to Launch</a>
+  <div class="mt-8 pt-8 border-t border-neutral-700">
+    <a href="/launch.html" class="text-blue-400 hover:border-b hover:border-blue-400 font-medium transition-colors">
+      ← Back to Launch
+    </a>
   </div>
 
   <!-- Print Preview Component -->
   <print-preview id="printer">
     <paper-sheet>
-      <div style="padding: 2rem;">
-        <h1>Radiology Report</h1>
-        <p><strong>Patient:</strong> John Doe</p>
-        <p><strong>MRN:</strong> 12345678</p>
-        <p><strong>Study Date:</strong> January 15, 2025</p>
-        <p><strong>Modality:</strong> Chest X-Ray (PA and Lateral)</p>
-        <hr style="margin: 1.5rem 0; border: none; border-top: 2px solid #333;">
+      <div class="p-8">
+        <h1 class="text-2xl font-bold mb-4 text-black">Radiology Report</h1>
+        <p class="text-black"><strong>Patient:</strong> John Doe</p>
+        <p class="text-black"><strong>MRN:</strong> 12345678</p>
+        <p class="text-black"><strong>Study Date:</strong> January 15, 2025</p>
+        <p class="text-black"><strong>Modality:</strong> Chest X-Ray (PA and Lateral)</p>
+        <hr class="my-6 border-t-2 border-neutral-800">
 
-        <h2>Clinical Indication</h2>
-        <p>Patient presents with fever, cough, and shortness of breath. Suspected pneumonia.</p>
+        <h2 class="text-xl font-semibold mt-4 mb-2 text-black">Clinical Indication</h2>
+        <p class="text-black">Patient presents with fever, cough, and shortness of breath. Suspected pneumonia.</p>
 
-        <h2>Technique</h2>
-        <p>PA and lateral chest radiographs were obtained.</p>
+        <h2 class="text-xl font-semibold mt-4 mb-2 text-black">Technique</h2>
+        <p class="text-black">PA and lateral chest radiographs were obtained.</p>
 
-        <h2>Findings</h2>
-        <p>The heart size is normal. There is a focal opacity in the right lower lobe consistent with pneumonia. No pleural effusion or pneumothorax is identified. The visualized osseous structures are unremarkable.</p>
+        <h2 class="text-xl font-semibold mt-4 mb-2 text-black">Findings</h2>
+        <p class="text-black">The heart size is normal. There is a focal opacity in the right lower lobe consistent with pneumonia. No pleural effusion or pneumothorax is identified. The visualized osseous structures are unremarkable.</p>
 
-        <h2>Impression</h2>
-        <p>Right lower lobe pneumonia.</p>
+        <h2 class="text-xl font-semibold mt-4 mb-2 text-black">Impression</h2>
+        <p class="text-black">Right lower lobe pneumonia.</p>
 
-        <h2>Recommendations</h2>
-        <p>Clinical correlation and appropriate antibiotic therapy recommended. Follow-up imaging after treatment to ensure resolution.</p>
+        <h2 class="text-xl font-semibold mt-4 mb-2 text-black">Recommendations</h2>
+        <p class="text-black">Clinical correlation and appropriate antibiotic therapy recommended. Follow-up imaging after treatment to ensure resolution.</p>
 
-        <hr style="margin: 1.5rem 0; border: none; border-top: 2px solid #333;">
-        <p><strong>Radiologist:</strong> Dr. Michael Jones, MD</p>
-        <p><strong>Report Date:</strong> January 15, 2025 14:30</p>
+        <hr class="my-6 border-t-2 border-neutral-800">
+        <p class="text-black"><strong>Radiologist:</strong> Dr. Michael Jones, MD</p>
+        <p class="text-black"><strong>Report Date:</strong> January 15, 2025 14:30</p>
       </div>
     </paper-sheet>
 
     <paper-sheet>
-      <div style="padding: 2rem;">
-        <h1>FHIR Task Details</h1>
+      <div class="p-8">
+        <h1 class="text-2xl font-bold mb-4 text-black">FHIR Task Details</h1>
 
         <table part="table">
           <thead>
@@ -171,11 +143,11 @@
           </tbody>
         </table>
 
-        <h2>Reason Code</h2>
-        <p><strong>SNOMED CT:</strong> 301228006 - Suspected pneumonia</p>
+        <h2 class="text-xl font-semibold mt-4 mb-2 text-black">Reason Code</h2>
+        <p class="text-black"><strong>SNOMED CT:</strong> 301228006 - Suspected pneumonia</p>
 
-        <h2>Notes</h2>
-        <p>Patient presents with fever, cough, and shortness of breath. Please evaluate for pneumonia or other pulmonary pathology.</p>
+        <h2 class="text-xl font-semibold mt-4 mb-2 text-black">Notes</h2>
+        <p class="text-black">Patient presents with fever, cough, and shortness of breath. Please evaluate for pneumonia or other pulmonary pathology.</p>
       </div>
     </paper-sheet>
   </print-preview>
