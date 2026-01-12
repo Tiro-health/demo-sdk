@@ -1,8 +1,7 @@
 import { useParams, useNavigate } from '@tanstack/react-router';
 import { useStudyById } from '@/hooks/useStudies';
-import { TwoColumnLayout } from '@/components/layouts/TwoColumnLayout';
-import { SDKPanel } from '@/components/shared/SDKPanel';
-import { StudyDetailsContent } from './StudyDetailsContent';
+import { DicomViewer } from '@/components/shared/DicomViewer';
+import { ReportingForm } from '@/components/shared/ReportingForm';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 
@@ -23,13 +22,16 @@ export function StudyDetailsPage() {
   }
 
   return (
-    <TwoColumnLayout sidebar={<SDKPanel />}>
-      <div className="space-y-4">
-        <Button onClick={() => navigate({ to: '/' })} variant="ghost">
+    <div className="h-[calc(100vh-3.5rem)] p-4">
+      <div className="mb-4">
+        <Button onClick={() => navigate({ to: '/' })} variant="ghost" size="sm">
           <ArrowLeft className="mr-2 h-4 w-4" /> Back to Worklist
         </Button>
-        <StudyDetailsContent study={study} />
       </div>
-    </TwoColumnLayout>
+      <div className="grid grid-cols-2 gap-4 h-[calc(100%-3rem)]">
+        <DicomViewer />
+        <ReportingForm study={study} />
+      </div>
+    </div>
   );
 }
