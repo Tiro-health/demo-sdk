@@ -1,4 +1,5 @@
 import { useParams, useNavigate } from '@tanstack/react-router';
+import { Group, Panel, Separator } from 'react-resizable-panels';
 import { useStudyById } from '@/hooks/useStudies';
 import { DicomViewer } from '@/components/shared/DicomViewer';
 import { ReportingForm } from '@/components/shared/ReportingForm';
@@ -28,10 +29,15 @@ export function StudyDetailsPage() {
           <ArrowLeft className="mr-2 h-4 w-4" /> Back to Worklist
         </Button>
       </div>
-      <div className="grid grid-cols-2 gap-4 h-[calc(100%-3rem)]">
-        <DicomViewer />
-        <ReportingForm study={study} />
-      </div>
+      <Group orientation="horizontal" className="h-[calc(100%-3rem)]">
+        <Panel defaultSize={50} minSize={30}>
+          <DicomViewer />
+        </Panel>
+        <Separator className="resize-handle mx-2" />
+        <Panel defaultSize={50} minSize={30}>
+          <ReportingForm study={study} />
+        </Panel>
+      </Group>
     </div>
   );
 }

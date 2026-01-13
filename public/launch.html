@@ -43,9 +43,14 @@
   </head>
   <body class="dark">
     <!-- Loading overlay (hidden by default) -->
-    <div id="loading-overlay" class="fixed inset-0 bg-neutral-950/95 flex items-center justify-center z-50 hidden">
+    <div
+      id="loading-overlay"
+      class="fixed inset-0 bg-neutral-950/95 items-center justify-center z-50 hidden"
+    >
       <div class="text-center">
-        <div class="animate-spin rounded-full h-12 w-12 border-4 border-neutral-600 border-t-blue-500 mb-4 mx-auto"></div>
+        <div
+          class="animate-spin rounded-full h-12 w-12 border-4 border-neutral-600 border-t-blue-500 mb-4 mx-auto"
+        ></div>
         <p class="text-neutral-200 text-lg">Generating report...</p>
         <p class="text-neutral-500 text-sm mt-2">This may take a few seconds</p>
       </div>
@@ -54,18 +59,10 @@
     <div
       class="h-full flex flex-col p-4 bg-neutral-950 text-neutral-200 font-sans"
     >
-      <div class="pb-3 border-b border-neutral-800 mb-4">
-        <h1 class="m-0 mb-2 text-xl font-semibold">Radiology Report</h1>
-        <div class="text-sm text-neutral-400 flex gap-6">
-          <span id="patient-info"></span>
-          <span id="accession-info"></span>
-        </div>
-      </div>
-
       <div class="flex-1 min-h-0 overflow-auto">
         <tiro-form-filler
           id="report-form"
-          sdc-endpoint-address="https://sdc-service-staging-35032072625.europe-west1.run.app/"
+          sdc-endpoint-address="https://sdc-service-dev-35032072625.europe-west1.run.app/fhir/r5"
         >
           <script type="application/fhir+json" slot="questionnaire">
             {
@@ -136,7 +133,11 @@
               ]
             }
           </script>
-          <button type="submit" form="questionnaire-form">Submit Report</button>
+          <div class="mt-4 flex justify-end">
+            <button type="submit" form="questionnaire-form" class="text-sm">
+              Submit Report
+            </button>
+          </div>
         </tiro-form-filler>
       </div>
     </div>
@@ -149,7 +150,8 @@
       // Configuration
       // ============================================
       // Use local SDC server for development
-      const EXTRACT_ENDPOINT = "http://localhost:8000/fhir/r5/QuestionnaireResponse/$extract";
+      const EXTRACT_ENDPOINT =
+        "http://localhost:8000/fhir/r5/QuestionnaireResponse/$extract";
 
       // ============================================
       // URL Parameters
@@ -157,14 +159,6 @@
       const params = new URLSearchParams(window.location.search);
       const patientId = params.get("patientId");
       const accessionNumber = params.get("accessionNumber");
-
-      // Display context info
-      if (patientId) {
-        document.getElementById("patient-info").textContent = `Patient: ${patientId}`;
-      }
-      if (accessionNumber) {
-        document.getElementById("accession-info").textContent = `Accession: ${accessionNumber}`;
-      }
 
       // ============================================
       // DOM Elements
@@ -176,7 +170,8 @@
       // SDC Client Setup
       // ============================================
       const sdcClient = new TiroWebSdk.SDCClient({
-        baseUrl: "https://sdc-service-staging-35032072625.europe-west1.run.app/fhir/r5",
+        baseUrl:
+          "https://sdc-service-staging-35032072625.europe-west1.run.app/fhir/r5",
       });
       form.sdcClient = sdcClient;
       console.log("SDC client configured:", sdcClient.getConfig());
@@ -187,10 +182,12 @@
 
       function showLoading() {
         loadingOverlay.classList.remove("hidden");
+        loadingOverlay.classList.add("flex");
       }
 
       function hideLoading() {
         loadingOverlay.classList.add("hidden");
+        loadingOverlay.classList.remove("flex");
       }
 
       function showError(message, error = null) {
@@ -205,7 +202,9 @@
        * Extract the Questionnaire JSON from the form slot
        */
       function getQuestionnaireFromForm() {
-        const scriptTag = document.querySelector('tiro-form-filler script[type="application/fhir+json"]');
+        const scriptTag = document.querySelector(
+          'tiro-form-filler script[type="application/fhir+json"]',
+        );
         if (!scriptTag) {
           console.error("Questionnaire script tag not found in form");
           return null;
@@ -224,13 +223,13 @@
       function buildExtractRequest(qr, questionnaire) {
         const containedQuestionnaire = {
           ...questionnaire,
-          id: questionnaire.id || "contained-questionnaire"
+          id: questionnaire.id || "contained-questionnaire",
         };
 
         return {
           ...qr,
           questionnaire: `#${containedQuestionnaire.id}`,
-          contained: [containedQuestionnaire]
+          contained: [containedQuestionnaire],
         };
       }
 
@@ -246,9 +245,9 @@
           method: "POST",
           headers: {
             "Content-Type": "application/fhir+json",
-            "Accept": "application/fhir+json"
+            Accept: "application/fhir+json",
           },
-          body: JSON.stringify(extractRequest)
+          body: JSON.stringify(extractRequest),
         });
 
         if (!response.ok) {
@@ -256,7 +255,9 @@
           try {
             const errorData = await response.json();
             if (errorData.issue && errorData.issue.length > 0) {
-              errorMessage = errorData.issue.map(i => i.diagnostics || i.details?.text).join("; ");
+              errorMessage = errorData.issue
+                .map((i) => i.diagnostics || i.details?.text)
+                .join("; ");
             }
           } catch (e) {
             // Ignore JSON parsing error for error response
@@ -270,7 +271,7 @@
           throw new Error("Invalid response: expected Parameters resource");
         }
 
-        const returnParam = data.parameter?.find(p => p.name === "return");
+        const returnParam = data.parameter?.find((p) => p.name === "return");
         if (!returnParam || !returnParam.resource) {
           throw new Error("No DocumentReference in response");
         }
@@ -291,7 +292,7 @@
 
         return {
           pdfData: attachment.data,
-          title: attachment.title || "Report"
+          title: attachment.title || "Report",
         };
       }
 
@@ -327,7 +328,11 @@
 
           // Call the $extract endpoint
           const { pdfData, title } = await callExtractEndpoint(extractRequest);
-          console.log("PDF extracted successfully, size:", pdfData.length, "chars");
+          console.log(
+            "PDF extracted successfully, size:",
+            pdfData.length,
+            "chars",
+          );
 
           // Generate unique key for localStorage
           const id = crypto.randomUUID();
@@ -340,22 +345,26 @@
             context: {
               patientId: patientId,
               accessionNumber: accessionNumber,
-              submittedAt: new Date().toISOString()
-            }
+              submittedAt: new Date().toISOString(),
+            },
           };
           localStorage.setItem(key, JSON.stringify(storageData));
           console.log("PDF stored in localStorage:", key);
 
           // Navigate to callback page
           window.location.href = `/callback.html?report=${encodeURIComponent(key)}`;
-
         } catch (error) {
           showError(error.message || "Failed to generate report", error);
         }
       });
 
       form.addEventListener("tiro-error", (event) => {
-        console.error("Form error:", event.detail.error, "Type:", event.detail.type);
+        console.error(
+          "Form error:",
+          event.detail.error,
+          "Type:",
+          event.detail.type,
+        );
       });
     </script>
   </body>
