@@ -20,6 +20,28 @@
       };
     </script>
 
+    <!-- Theme detection script (runs before render to prevent flash) -->
+    <script>
+      (function () {
+        const params = new URLSearchParams(window.location.search);
+        const themeParam = params.get("theme");
+
+        let isDark;
+        if (themeParam === "dark") {
+          isDark = true;
+        } else if (themeParam === "light") {
+          isDark = false;
+        } else {
+          // Default to system preference
+          isDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+        }
+
+        if (isDark) {
+          document.documentElement.classList.add("dark");
+        }
+      })();
+    </script>
+
     <!-- Google Fonts (required for Tiro Web SDK) -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -39,26 +61,156 @@
         display: block;
         height: 100%;
       }
+
+      /* Magic Clipboard Popover - Light mode */
+      [popover] {
+        background: rgb(255, 255, 255);
+        border: 1px solid rgb(229, 229, 229);
+        border-radius: 0.5rem;
+        padding: 0;
+        width: min(500px, 90vw);
+        max-height: 80vh;
+        overflow: hidden;
+      }
+
+      /* Magic Clipboard Popover - Dark mode */
+      .dark [popover] {
+        background: rgb(23, 23, 23);
+        border: 1px solid rgb(38, 38, 38);
+      }
+
+      [popover]::backdrop {
+        background: rgba(0, 0, 0, 0.5);
+      }
+
+      .popover-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid rgb(229, 229, 229);
+      }
+
+      .dark .popover-header {
+        border-bottom-color: rgb(38, 38, 38);
+      }
+
+      .popover-header h2 {
+        margin: 0;
+        font-size: 1rem;
+        font-weight: 600;
+        color: rgb(23, 23, 23);
+      }
+
+      .dark .popover-header h2 {
+        color: rgb(229, 229, 229);
+      }
+
+      .popover-close {
+        background: none;
+        border: none;
+        color: rgb(115, 115, 115);
+        font-size: 1.25rem;
+        cursor: pointer;
+        padding: 0.25rem;
+        line-height: 1;
+      }
+
+      .popover-close:hover {
+        color: rgb(23, 23, 23);
+      }
+
+      .dark .popover-close:hover {
+        color: rgb(229, 229, 229);
+      }
+
+      .popover-content {
+        padding: 1rem;
+        max-height: calc(80vh - 3rem);
+        overflow-y: auto;
+      }
+
+      tiro-magic-clipboard {
+        display: block;
+      }
     </style>
   </head>
-  <body class="dark">
+  <body
+    class="bg-neutral-50 text-neutral-800 dark:bg-neutral-950 dark:text-neutral-200"
+  >
     <!-- Loading overlay (hidden by default) -->
     <div
       id="loading-overlay"
-      class="fixed inset-0 bg-neutral-950/95 items-center justify-center z-50 hidden"
+      class="fixed inset-0 bg-white/95 dark:bg-neutral-950/95 items-center justify-center z-50 hidden"
     >
       <div class="text-center">
         <div
-          class="animate-spin rounded-full h-12 w-12 border-4 border-neutral-600 border-t-blue-500 mb-4 mx-auto"
+          class="animate-spin rounded-full h-12 w-12 border-4 border-neutral-300 dark:border-neutral-600 border-t-blue-500 mb-4 mx-auto"
         ></div>
-        <p class="text-neutral-200 text-lg">Generating report...</p>
+        <p class="text-neutral-800 dark:text-neutral-200 text-lg">
+          Generating report...
+        </p>
         <p class="text-neutral-500 text-sm mt-2">This may take a few seconds</p>
       </div>
     </div>
 
-    <div
-      class="h-full flex flex-col p-4 bg-neutral-950 text-neutral-200 font-sans"
-    >
+    <!-- Magic Clipboard Popover -->
+    <div id="magic-clipboard-popover" popover>
+      <div class="popover-header">
+        <h2>Magic Clipboard</h2>
+        <button
+          class="popover-close"
+          popovertarget="magic-clipboard-popover"
+          popovertargetaction="hide"
+        >
+          ×
+        </button>
+      </div>
+      <div class="popover-content">
+        <tiro-magic-clipboard for="report-form"></tiro-magic-clipboard>
+      </div>
+    </div>
+
+    <div class="h-full flex flex-col p-4 font-sans">
+      <!-- Toolbar -->
+      <div class="flex justify-end mb-3 gap-2">
+        <button
+          popovertarget="magic-clipboard-popover"
+          class="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-md bg-blue-600 hover:bg-blue-700 text-white transition-colors"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path
+              d="m21.64 3.64-1.28-1.28a1.21 1.21 0 0 0-1.72 0L2.36 18.64a1.21 1.21 0 0 0 0 1.72l1.28 1.28a1.2 1.2 0 0 0 1.72 0L21.64 5.36a1.2 1.2 0 0 0 0-1.72"
+            />
+            <path d="m14 7 3 3" />
+            <path d="M5 6v4" />
+            <path d="M19 14v4" />
+            <path d="M10 2v2" />
+            <path d="M7 8H3" />
+            <path d="M21 16h-4" />
+            <path d="M11 3H9" />
+          </svg>
+          Autofill
+        </button>
+        <button
+          type="submit"
+          formId="questionnaire-form"
+          class="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-md bg-blue-600 hover:bg-blue-700 text-white transition-colors"
+        >
+          Submit
+        </button>
+      </div>
+
       <div class="flex-1 min-h-0 overflow-auto">
         <tiro-form-filler
           id="report-form"
@@ -133,11 +285,6 @@
               ]
             }
           </script>
-          <div class="mt-4 flex justify-end">
-            <button type="submit" form="questionnaire-form" class="text-sm">
-              Submit Report
-            </button>
-          </div>
         </tiro-form-filler>
       </div>
     </div>
@@ -365,6 +512,28 @@
           "Type:",
           event.detail.type,
         );
+      });
+
+      // ============================================
+      // Magic Clipboard Event Listeners
+      // ============================================
+      const clipboard = document.querySelector("tiro-magic-clipboard");
+      const popover = document.getElementById("magic-clipboard-popover");
+
+      clipboard.addEventListener("tiro-populate-start", () => {
+        console.log("Magic clipboard: starting population...");
+      });
+
+      clipboard.addEventListener("tiro-populate-complete", (event) => {
+        console.log(
+          "Magic clipboard: population complete",
+          event.detail.response,
+        );
+        popover.hidePopover();
+      });
+
+      clipboard.addEventListener("tiro-populate-error", (event) => {
+        console.error("Magic clipboard error:", event.detail.error);
       });
     </script>
   </body>
