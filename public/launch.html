@@ -42,6 +42,15 @@
     </style>
   </head>
   <body class="dark">
+    <!-- Loading overlay (hidden by default) -->
+    <div id="loading-overlay" class="fixed inset-0 bg-neutral-950/95 flex items-center justify-center z-50 hidden">
+      <div class="text-center">
+        <div class="animate-spin rounded-full h-12 w-12 border-4 border-neutral-600 border-t-blue-500 mb-4 mx-auto"></div>
+        <p class="text-neutral-200 text-lg">Generating report...</p>
+        <p class="text-neutral-500 text-sm mt-2">This may take a few seconds</p>
+      </div>
+    </div>
+
     <div
       class="h-full flex flex-col p-4 bg-neutral-950 text-neutral-200 font-sans"
     >
@@ -61,8 +70,20 @@
           <script type="application/fhir+json" slot="questionnaire">
             {
               "resourceType": "Questionnaire",
+              "id": "radiology-report",
               "status": "draft",
               "title": "Radiology Report",
+              "url": "http://demo.tiro.health/Questionnaire/radiology-report",
+              "version": "1.0.0",
+              "extension": [
+                {
+                  "url": "http://fhir.tiro.health/StructureDefinition/narrative-template",
+                  "valueExpression": {
+                    "language": "text/liquid",
+                    "expression": "<h1>Radiology Report</h1>{% for item in all_items %}<div class=\"section\"><h2>{{ item.text }}</h2>{% for answer in item.answer %}<p>{{ answer.valueString }}</p>{% endfor %}{% for nested in item.item %}{% for answer in nested.answer %}<p>{{ answer.valueString }}</p>{% endfor %}{% endfor %}</div>{% endfor %}"
+                  }
+                }
+              ],
               "item": [
                 {
                   "linkId": "findings",
@@ -124,33 +145,160 @@
     <script src="https://storage.googleapis.com/atticus-assets.tiro.health/sdk-dev/latest/tiro-web-sdk.iife.js"></script>
 
     <script>
-      // Read URL parameters
+      // ============================================
+      // Configuration
+      // ============================================
+      // Use local SDC server for development
+      const EXTRACT_ENDPOINT = "http://localhost:8000/fhir/r5/QuestionnaireResponse/$extract";
+
+      // ============================================
+      // URL Parameters
+      // ============================================
       const params = new URLSearchParams(window.location.search);
       const patientId = params.get("patientId");
       const accessionNumber = params.get("accessionNumber");
 
       // Display context info
       if (patientId) {
-        document.getElementById("patient-info").textContent =
-          `Patient: ${patientId}`;
+        document.getElementById("patient-info").textContent = `Patient: ${patientId}`;
       }
       if (accessionNumber) {
-        document.getElementById("accession-info").textContent =
-          `Accession: ${accessionNumber}`;
+        document.getElementById("accession-info").textContent = `Accession: ${accessionNumber}`;
       }
 
-      // Get form element
+      // ============================================
+      // DOM Elements
+      // ============================================
       const form = document.getElementById("report-form");
+      const loadingOverlay = document.getElementById("loading-overlay");
 
-      // Set up SDC client programmatically (fixes IIFE build issue with attribute)
+      // ============================================
+      // SDC Client Setup
+      // ============================================
       const sdcClient = new TiroWebSdk.SDCClient({
-        baseUrl:
-          "https://sdc-service-staging-35032072625.europe-west1.run.app/fhir/r5",
+        baseUrl: "https://sdc-service-staging-35032072625.europe-west1.run.app/fhir/r5",
       });
       form.sdcClient = sdcClient;
       console.log("SDC client configured:", sdcClient.getConfig());
 
-      // Event listeners
+      // ============================================
+      // Utility Functions
+      // ============================================
+
+      function showLoading() {
+        loadingOverlay.classList.remove("hidden");
+      }
+
+      function hideLoading() {
+        loadingOverlay.classList.add("hidden");
+      }
+
+      function showError(message, error = null) {
+        hideLoading();
+        if (error) {
+          console.error(message, error);
+        }
+        alert(`Error: ${message}`);
+      }
+
+      /**
+       * Extract the Questionnaire JSON from the form slot
+       */
+      function getQuestionnaireFromForm() {
+        const scriptTag = document.querySelector('tiro-form-filler script[type="application/fhir+json"]');
+        if (!scriptTag) {
+          console.error("Questionnaire script tag not found in form");
+          return null;
+        }
+        try {
+          return JSON.parse(scriptTag.textContent);
+        } catch (e) {
+          console.error("Failed to parse Questionnaire JSON:", e);
+          return null;
+        }
+      }
+
+      /**
+       * Build QuestionnaireResponse with contained Questionnaire for $extract
+       */
+      function buildExtractRequest(qr, questionnaire) {
+        const containedQuestionnaire = {
+          ...questionnaire,
+          id: questionnaire.id || "contained-questionnaire"
+        };
+
+        return {
+          ...qr,
+          questionnaire: `#${containedQuestionnaire.id}`,
+          contained: [containedQuestionnaire]
+        };
+      }
+
+      /**
+       * Call the $extract endpoint and return the PDF data
+       */
+      async function callExtractEndpoint(extractRequest) {
+        const url = new URL(EXTRACT_ENDPOINT);
+        // Note: Skipping subject parameter as backend expects numeric IDs
+        // In production, this would use actual patient database IDs
+
+        const response = await fetch(url.toString(), {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/fhir+json",
+            "Accept": "application/fhir+json"
+          },
+          body: JSON.stringify(extractRequest)
+        });
+
+        if (!response.ok) {
+          let errorMessage = `HTTP ${response.status}`;
+          try {
+            const errorData = await response.json();
+            if (errorData.issue && errorData.issue.length > 0) {
+              errorMessage = errorData.issue.map(i => i.diagnostics || i.details?.text).join("; ");
+            }
+          } catch (e) {
+            // Ignore JSON parsing error for error response
+          }
+          throw new Error(errorMessage);
+        }
+
+        const data = await response.json();
+
+        if (data.resourceType !== "Parameters") {
+          throw new Error("Invalid response: expected Parameters resource");
+        }
+
+        const returnParam = data.parameter?.find(p => p.name === "return");
+        if (!returnParam || !returnParam.resource) {
+          throw new Error("No DocumentReference in response");
+        }
+
+        const docRef = returnParam.resource;
+        if (docRef.resourceType !== "DocumentReference") {
+          throw new Error("Expected DocumentReference resource");
+        }
+
+        const attachment = docRef.content?.[0]?.attachment;
+        if (!attachment || !attachment.data) {
+          throw new Error("No PDF attachment in DocumentReference");
+        }
+
+        if (attachment.contentType !== "application/pdf") {
+          throw new Error(`Unexpected content type: ${attachment.contentType}`);
+        }
+
+        return {
+          pdfData: attachment.data,
+          title: attachment.title || "Report"
+        };
+      }
+
+      // ============================================
+      // Event Listeners
+      // ============================================
+
       form.addEventListener("tiro-ready", (event) => {
         console.log("Questionnaire loaded:", event.detail.questionnaire);
       });
@@ -159,37 +307,55 @@
         console.log("Form updated:", event.detail.response);
       });
 
-      form.addEventListener("tiro-submit", (event) => {
+      form.addEventListener("tiro-submit", async (event) => {
         console.log("Form submitted:", event.detail.response);
 
         const qr = event.detail.response;
 
-        // Generate unique key
-        const id = crypto.randomUUID();
-        const key = `QuestionnaireResponse/${id}`;
+        try {
+          showLoading();
 
-        // Store QR with context in localStorage
-        const storageData = {
-          questionnaireResponse: qr,
-          context: {
-            patientId: patientId,
-            accessionNumber: accessionNumber,
-            submittedAt: new Date().toISOString(),
-          },
-        };
-        localStorage.setItem(key, JSON.stringify(storageData));
+          // Get the Questionnaire from the form
+          const questionnaire = getQuestionnaireFromForm();
+          if (!questionnaire) {
+            throw new Error("Could not retrieve Questionnaire from form");
+          }
 
-        // Navigate to callback with key
-        window.location.href = `/callback.html?qr=${encodeURIComponent(key)}`;
+          // Build the request with contained Questionnaire
+          const extractRequest = buildExtractRequest(qr, questionnaire);
+          console.log("Calling $extract with:", extractRequest);
+
+          // Call the $extract endpoint
+          const { pdfData, title } = await callExtractEndpoint(extractRequest);
+          console.log("PDF extracted successfully, size:", pdfData.length, "chars");
+
+          // Generate unique key for localStorage
+          const id = crypto.randomUUID();
+          const key = `Report/${id}`;
+
+          // Store PDF data with context
+          const storageData = {
+            pdfData: pdfData,
+            title: title,
+            context: {
+              patientId: patientId,
+              accessionNumber: accessionNumber,
+              submittedAt: new Date().toISOString()
+            }
+          };
+          localStorage.setItem(key, JSON.stringify(storageData));
+          console.log("PDF stored in localStorage:", key);
+
+          // Navigate to callback page
+          window.location.href = `/callback.html?report=${encodeURIComponent(key)}`;
+
+        } catch (error) {
+          showError(error.message || "Failed to generate report", error);
+        }
       });
 
       form.addEventListener("tiro-error", (event) => {
-        console.error(
-          "Form error:",
-          event.detail.error,
-          "Type:",
-          event.detail.type,
-        );
+        console.error("Form error:", event.detail.error, "Type:", event.detail.type);
       });
     </script>
   </body>

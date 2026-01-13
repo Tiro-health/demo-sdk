@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SDK Callback</title>
+  <title>Report Viewer</title>
 
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -24,369 +24,169 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet" />
-
-  <!-- PDF.js Library -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.min.mjs" type="module"></script>
-
-  <!-- html2pdf.js Library -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-
-  <style>
-    /* Style the print content */
-    print-preview::part(table) {
-      border-collapse: collapse;
-      width: 100%;
-      margin: 1rem 0;
-    }
-
-    print-preview::part(th),
-    print-preview::part(td) {
-      border: 1px solid #333;
-      padding: 0.5rem;
-      text-align: left;
-    }
-
-    print-preview::part(th) {
-      background-color: #f5f5f5;
-      font-weight: bold;
-    }
-  </style>
 </head>
 <body class="dark bg-neutral-900 text-neutral-200 p-8 font-sans leading-relaxed">
-  <h1 class="mb-4 text-3xl font-bold">SDK Callback Page</h1>
-  <p class="text-green-400 mb-6">✓ Callback received! Navigation from launch page successful.</p>
+  <h1 class="mb-4 text-3xl font-bold">Report Viewer</h1>
 
-  <!-- Submitted Report Section (shown when QR param present) -->
-  <div id="submitted-report-section" class="my-8 pt-4 border-t border-neutral-700 hidden">
-    <h2 class="mb-4 text-xl text-neutral-400">Submitted Radiology Report</h2>
-    <p class="mb-4">Report generated from QuestionnaireResponse:</p>
-    <div class="flex gap-4 mb-4">
-      <button id="download-report-btn" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md font-medium cursor-pointer transition-colors">
-        📥 Download PDF
-      </button>
-      <span id="qr-key" class="text-neutral-500 text-sm self-center font-mono"></span>
+  <!-- PDF Report Viewer Section (shown when report param present) -->
+  <div id="pdf-report-section" class="my-8 hidden">
+    <p class="text-green-400 mb-6">Your report has been generated successfully.</p>
+
+    <!-- Report metadata -->
+    <div id="report-metadata" class="mb-4 text-sm text-neutral-400">
+      <!-- Populated by JavaScript -->
     </div>
 
-    <!-- Rendered report content -->
-    <div id="submitted-report-content" class="bg-white text-black p-8 rounded-lg max-w-2xl">
-      <div style="font-family: 'Inter', sans-serif;">
-        <h1 style="font-size: 24px; font-weight: bold; margin-bottom: 16px; color: #1a1a1a;">Radiology Report</h1>
+    <!-- Action buttons -->
+    <div class="flex gap-4 mb-6">
+      <button id="download-pdf-btn" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md font-medium cursor-pointer transition-colors flex items-center gap-2">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+        </svg>
+        Download PDF
+      </button>
+      <button id="print-pdf-btn" class="bg-neutral-700 hover:bg-neutral-600 text-white px-4 py-2 rounded-md font-medium cursor-pointer transition-colors flex items-center gap-2">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+        </svg>
+        Print
+      </button>
+    </div>
 
-        <div id="report-metadata" style="margin-bottom: 24px; padding-bottom: 16px; border-bottom: 2px solid #e5e5e5;">
-          <!-- Patient/accession info populated by JS -->
+    <!-- PDF Viewer with navigation -->
+    <div class="bg-neutral-800 rounded-lg overflow-hidden max-w-4xl">
+      <!-- Page navigation -->
+      <div class="flex items-center justify-between px-4 py-3 bg-neutral-900 border-b border-neutral-700">
+        <div class="flex items-center gap-3">
+          <button id="prev-page" class="bg-neutral-700 hover:bg-neutral-600 text-white px-3 py-1.5 rounded font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+            ← Prev
+          </button>
+          <span id="page-info" class="text-neutral-400 min-w-[120px] text-center">Page 1 of 1</span>
+          <button id="next-page" class="bg-neutral-700 hover:bg-neutral-600 text-white px-3 py-1.5 rounded font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+            Next →
+          </button>
         </div>
+        <div class="flex items-center gap-3">
+          <button id="zoom-out" class="bg-neutral-700 hover:bg-neutral-600 text-white px-3 py-1.5 rounded font-medium transition-colors">
+            −
+          </button>
+          <span id="zoom-level" class="text-neutral-400 min-w-[60px] text-center">100%</span>
+          <button id="zoom-in" class="bg-neutral-700 hover:bg-neutral-600 text-white px-3 py-1.5 rounded font-medium transition-colors">
+            +
+          </button>
+        </div>
+      </div>
 
-        <div id="report-findings">
-          <h2 style="font-size: 18px; font-weight: 600; margin: 16px 0 8px; color: #333;">Findings</h2>
-          <p id="findings-text" style="margin-bottom: 16px; line-height: 1.6; white-space: pre-wrap;"></p>
-        </div>
-
-        <div id="report-impression">
-          <h2 style="font-size: 18px; font-weight: 600; margin: 16px 0 8px; color: #333;">Impression</h2>
-          <p id="impression-text" style="margin-bottom: 16px; line-height: 1.6; background: #f5f5f5; padding: 12px; border-left: 4px solid #333; white-space: pre-wrap;"></p>
-        </div>
-
-        <div id="report-recommendations">
-          <h2 style="font-size: 18px; font-weight: 600; margin: 16px 0 8px; color: #333;">Recommendations</h2>
-          <p id="recommendations-text" style="margin-bottom: 16px; line-height: 1.6; white-space: pre-wrap;"></p>
-        </div>
-
-        <div id="report-footer" style="margin-top: 32px; padding-top: 16px; border-top: 2px solid #e5e5e5;">
-          <!-- Timestamp populated by JS -->
-        </div>
+      <!-- Canvas container -->
+      <div class="p-4 flex justify-center overflow-auto max-h-[70vh]">
+        <canvas id="pdf-canvas" class="shadow-lg"></canvas>
       </div>
     </div>
   </div>
 
-  <div class="my-8 pt-4 border-t border-neutral-700">
-    <h2 class="mb-4 text-xl text-neutral-400">Print Preview Demo</h2>
-    <p class="mb-4">Click the button below to open a print preview of a sample radiology report:</p>
-    <button id="preview-btn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-medium cursor-pointer transition-colors mr-4 mb-4">
-      📄 Open Print Preview
-    </button>
-  </div>
-
-  <!-- PDF Viewer Section -->
-  <div class="my-8 pt-4 border-t border-neutral-700">
-    <h2 class="mb-4 text-xl text-neutral-400">PDF Viewer Demo</h2>
-    <p class="mb-4">Sample PDF rendered using PDF.js:</p>
-    <div class="flex items-center gap-4 mb-4">
-      <button id="prev-page" class="bg-neutral-700 hover:bg-neutral-600 text-white px-3 py-1.5 rounded-md font-medium cursor-pointer transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
-        ← Prev
-      </button>
-      <span id="page-info" class="text-neutral-400">Page 1 of 1</span>
-      <button id="next-page" class="bg-neutral-700 hover:bg-neutral-600 text-white px-3 py-1.5 rounded-md font-medium cursor-pointer transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
-        Next →
-      </button>
-    </div>
-    <div class="bg-neutral-800 p-4 rounded-lg inline-block">
-      <canvas id="pdf-canvas" class="block"></canvas>
+  <!-- Error state -->
+  <div id="pdf-error-section" class="my-8 hidden">
+    <div class="bg-red-900/30 border border-red-700 rounded-lg p-6 text-center max-w-md">
+      <p class="text-red-400 text-lg mb-2">Failed to load report</p>
+      <p id="error-message" class="text-neutral-400 text-sm"></p>
     </div>
   </div>
 
-  <!-- HTML to PDF Section -->
-  <div class="my-8 pt-4 border-t border-neutral-700">
-    <h2 class="mb-4 text-xl text-neutral-400">HTML to PDF Generator</h2>
-    <p class="mb-4">Generate a PDF from HTML content using html2pdf.js:</p>
-    <button id="generate-pdf-btn" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md font-medium cursor-pointer transition-colors mr-4 mb-4">
-      📥 Generate PDF from HTML
-    </button>
-
-    <!-- Sample HTML content to convert to PDF -->
-    <div id="pdf-content" class="bg-white text-black p-8 rounded-lg mt-4 max-w-2xl">
-      <div style="font-family: 'Inter', sans-serif;">
-        <h1 style="font-size: 24px; font-weight: bold; margin-bottom: 16px; color: #1a1a1a;">Sample Radiology Report</h1>
-
-        <div style="margin-bottom: 24px; padding-bottom: 16px; border-bottom: 2px solid #e5e5e5;">
-          <p style="margin: 4px 0;"><strong>Patient:</strong> Jane Smith</p>
-          <p style="margin: 4px 0;"><strong>MRN:</strong> 98765432</p>
-          <p style="margin: 4px 0;"><strong>DOB:</strong> March 15, 1985</p>
-          <p style="margin: 4px 0;"><strong>Study Date:</strong> January 12, 2026</p>
-          <p style="margin: 4px 0;"><strong>Modality:</strong> CT Chest with Contrast</p>
-          <p style="margin: 4px 0;"><strong>Accession:</strong> ACC-2026-001234</p>
-        </div>
-
-        <h2 style="font-size: 18px; font-weight: 600; margin: 16px 0 8px; color: #333;">Clinical History</h2>
-        <p style="margin-bottom: 16px; line-height: 1.6;">56-year-old female with persistent cough and weight loss. Rule out malignancy.</p>
-
-        <h2 style="font-size: 18px; font-weight: 600; margin: 16px 0 8px; color: #333;">Technique</h2>
-        <p style="margin-bottom: 16px; line-height: 1.6;">CT of the chest was performed with intravenous contrast. Axial images were obtained from the thoracic inlet to the upper abdomen with coronal and sagittal reformations.</p>
-
-        <h2 style="font-size: 18px; font-weight: 600; margin: 16px 0 8px; color: #333;">Findings</h2>
-        <p style="margin-bottom: 16px; line-height: 1.6;">
-          <strong>Lungs:</strong> No pulmonary nodules or masses identified. No consolidation or ground-glass opacities. Airways are patent.<br><br>
-          <strong>Pleura:</strong> No pleural effusion or pneumothorax.<br><br>
-          <strong>Mediastinum:</strong> No lymphadenopathy. Heart size is normal. No pericardial effusion.<br><br>
-          <strong>Bones:</strong> No suspicious osseous lesions. Mild degenerative changes of the thoracic spine.
-        </p>
-
-        <h2 style="font-size: 18px; font-weight: 600; margin: 16px 0 8px; color: #333;">Impression</h2>
-        <p style="margin-bottom: 16px; line-height: 1.6; background: #f5f5f5; padding: 12px; border-left: 4px solid #333;">
-          1. No evidence of pulmonary malignancy.<br>
-          2. No acute cardiopulmonary abnormality.<br>
-          3. Recommend clinical correlation for persistent symptoms.
-        </p>
-
-        <div style="margin-top: 32px; padding-top: 16px; border-top: 2px solid #e5e5e5;">
-          <p style="margin: 4px 0;"><strong>Radiologist:</strong> Dr. Sarah Johnson, MD</p>
-          <p style="margin: 4px 0;"><strong>Electronically Signed:</strong> January 12, 2026 at 14:35</p>
-        </div>
-      </div>
-    </div>
+  <!-- No report state -->
+  <div id="no-report-section" class="my-8 hidden">
+    <p class="text-neutral-400 mb-4">No report to display. Submit a report from the form first.</p>
   </div>
 
   <div class="mt-8 pt-8 border-t border-neutral-700">
     <a href="/launch.html" class="text-blue-400 hover:border-b hover:border-blue-400 font-medium transition-colors">
-      ← Back to Launch
+      ← Back to Form
     </a>
   </div>
 
-  <!-- Print Preview Component -->
-  <print-preview id="printer">
-    <paper-sheet>
-      <div class="p-8">
-        <h1 class="text-2xl font-bold mb-4 text-black">Radiology Report</h1>
-        <p class="text-black"><strong>Patient:</strong> John Doe</p>
-        <p class="text-black"><strong>MRN:</strong> 12345678</p>
-        <p class="text-black"><strong>Study Date:</strong> January 15, 2025</p>
-        <p class="text-black"><strong>Modality:</strong> Chest X-Ray (PA and Lateral)</p>
-        <hr class="my-6 border-t-2 border-neutral-800">
-
-        <h2 class="text-xl font-semibold mt-4 mb-2 text-black">Clinical Indication</h2>
-        <p class="text-black">Patient presents with fever, cough, and shortness of breath. Suspected pneumonia.</p>
-
-        <h2 class="text-xl font-semibold mt-4 mb-2 text-black">Technique</h2>
-        <p class="text-black">PA and lateral chest radiographs were obtained.</p>
-
-        <h2 class="text-xl font-semibold mt-4 mb-2 text-black">Findings</h2>
-        <p class="text-black">The heart size is normal. There is a focal opacity in the right lower lobe consistent with pneumonia. No pleural effusion or pneumothorax is identified. The visualized osseous structures are unremarkable.</p>
-
-        <h2 class="text-xl font-semibold mt-4 mb-2 text-black">Impression</h2>
-        <p class="text-black">Right lower lobe pneumonia.</p>
-
-        <h2 class="text-xl font-semibold mt-4 mb-2 text-black">Recommendations</h2>
-        <p class="text-black">Clinical correlation and appropriate antibiotic therapy recommended. Follow-up imaging after treatment to ensure resolution.</p>
-
-        <hr class="my-6 border-t-2 border-neutral-800">
-        <p class="text-black"><strong>Radiologist:</strong> Dr. Michael Jones, MD</p>
-        <p class="text-black"><strong>Report Date:</strong> January 15, 2025 14:30</p>
-      </div>
-    </paper-sheet>
-
-    <paper-sheet>
-      <div class="p-8">
-        <h1 class="text-2xl font-bold mb-4 text-black">FHIR Task Details</h1>
-
-        <table part="table">
-          <thead>
-            <tr>
-              <th part="th">Field</th>
-              <th part="th">Value</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td part="td">Task ID</td>
-              <td part="td">task-001</td>
-            </tr>
-            <tr>
-              <td part="td">Status</td>
-              <td part="td">Requested</td>
-            </tr>
-            <tr>
-              <td part="td">Intent</td>
-              <td part="td">Order</td>
-            </tr>
-            <tr>
-              <td part="td">Priority</td>
-              <td part="td">Routine</td>
-            </tr>
-            <tr>
-              <td part="td">Code</td>
-              <td part="td">Diagnostic imaging study (LOINC: 18748-4)</td>
-            </tr>
-            <tr>
-              <td part="td">Requester</td>
-              <td part="td">Dr. Sarah Smith</td>
-            </tr>
-            <tr>
-              <td part="td">Owner</td>
-              <td part="td">Dr. Michael Jones, Radiologist</td>
-            </tr>
-            <tr>
-              <td part="td">Authored On</td>
-              <td part="td">2025-01-15T10:00:00Z</td>
-            </tr>
-          </tbody>
-        </table>
-
-        <h2 class="text-xl font-semibold mt-4 mb-2 text-black">Reason Code</h2>
-        <p class="text-black"><strong>SNOMED CT:</strong> 301228006 - Suspected pneumonia</p>
-
-        <h2 class="text-xl font-semibold mt-4 mb-2 text-black">Notes</h2>
-        <p class="text-black">Patient presents with fever, cough, and shortness of breath. Please evaluate for pneumonia or other pulmonary pathology.</p>
-      </div>
-    </paper-sheet>
-  </print-preview>
-
   <script type="module">
     // ============================================
-    // Submitted Report Handler (QR from launch page)
+    // PDF.js Setup
     // ============================================
-    const urlParams = new URLSearchParams(window.location.search);
-    const qrKey = urlParams.get('qr');
-
-    if (qrKey) {
-      const storageData = localStorage.getItem(qrKey);
-
-      if (storageData) {
-        const data = JSON.parse(storageData);
-        const qr = data.questionnaireResponse;
-        const context = data.context;
-
-        // Show the report section
-        document.getElementById('submitted-report-section').classList.remove('hidden');
-        document.getElementById('qr-key').textContent = qrKey;
-
-        // Populate metadata
-        const metadataHtml = `
-          <p style="margin: 4px 0;"><strong>Patient ID:</strong> ${context.patientId || 'N/A'}</p>
-          <p style="margin: 4px 0;"><strong>Accession:</strong> ${context.accessionNumber || 'N/A'}</p>
-          <p style="margin: 4px 0;"><strong>Submitted:</strong> ${new Date(context.submittedAt).toLocaleString()}</p>
-        `;
-        document.getElementById('report-metadata').innerHTML = metadataHtml;
-
-        // Helper to extract answer text from QR item
-        function getAnswerText(items, linkId) {
-          if (!items) return '';
-
-          for (const item of items) {
-            if (item.linkId === linkId) {
-              if (item.answer && item.answer.length > 0) {
-                return item.answer[0].valueString || '';
-              }
-            }
-            // Check nested items
-            if (item.item) {
-              const nested = getAnswerText(item.item, linkId);
-              if (nested) return nested;
-            }
-          }
-          return '';
-        }
-
-        // Populate report sections from QR
-        const findings = getAnswerText(qr.item, 'findings-text') || getAnswerText(qr.item, 'findings');
-        const impression = getAnswerText(qr.item, 'impression');
-        const recommendations = getAnswerText(qr.item, 'recommendations');
-
-        document.getElementById('findings-text').textContent = findings || '(No findings entered)';
-        document.getElementById('impression-text').textContent = impression || '(No impression entered)';
-        document.getElementById('recommendations-text').textContent = recommendations || '(No recommendations entered)';
-
-        // Footer
-        document.getElementById('report-footer').innerHTML = `
-          <p style="margin: 4px 0;"><strong>Report ID:</strong> ${qrKey}</p>
-          <p style="margin: 4px 0;"><strong>Generated:</strong> ${new Date().toLocaleString()}</p>
-        `;
-
-        // Download PDF button
-        document.getElementById('download-report-btn').addEventListener('click', () => {
-          const reportContent = document.getElementById('submitted-report-content');
-          const opt = {
-            margin: 10,
-            filename: `radiology-report-${context.accessionNumber || 'unknown'}.pdf`,
-            image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2, useCORS: true },
-            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-          };
-          html2pdf().set(opt).from(reportContent).save();
-        });
-
-        console.log('Report loaded from localStorage:', qrKey, data);
-      } else {
-        console.warn('QR key not found in localStorage:', qrKey);
-      }
-    }
-
-    // ============================================
-    // Print Preview Component
-    // ============================================
-    // Import the print-preview component
-    import PrintPreview from 'https://unpkg.com/@browser.style/print-preview@1.0.11/index.js';
-
-    // Query using element tag instead of ID (library changes the ID)
-    const printer = document.querySelector('print-preview');
-    const previewBtn = document.querySelector('#preview-btn');
-
-    if (previewBtn && printer) {
-      previewBtn.addEventListener('click', () => {
-        printer.preview();
-      });
-    }
-
-    // PDF.js Viewer
     import * as pdfjsLib from 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.min.mjs';
-
-    // Set worker source
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.worker.min.mjs';
 
-    // PDF viewer state
+    // ============================================
+    // State
+    // ============================================
     let pdfDoc = null;
     let currentPage = 1;
     let totalPages = 0;
-    const scale = 1.5;
+    let currentScale = 1.5;
+    let pdfBase64 = null;
+    let reportContext = null;
+    let reportTitle = null;
 
+    // ============================================
+    // DOM Elements
+    // ============================================
+    const pdfSection = document.getElementById('pdf-report-section');
+    const errorSection = document.getElementById('pdf-error-section');
+    const noReportSection = document.getElementById('no-report-section');
+    const errorMessage = document.getElementById('error-message');
     const canvas = document.getElementById('pdf-canvas');
     const ctx = canvas.getContext('2d');
     const prevBtn = document.getElementById('prev-page');
     const nextBtn = document.getElementById('next-page');
     const pageInfo = document.getElementById('page-info');
+    const zoomIn = document.getElementById('zoom-in');
+    const zoomOut = document.getElementById('zoom-out');
+    const zoomLevel = document.getElementById('zoom-level');
+    const downloadBtn = document.getElementById('download-pdf-btn');
+    const printBtn = document.getElementById('print-pdf-btn');
+    const metadataDiv = document.getElementById('report-metadata');
 
-    // Render a specific page
+    // ============================================
+    // Utility Functions
+    // ============================================
+
+    function showError(message) {
+      pdfSection.classList.add('hidden');
+      noReportSection.classList.add('hidden');
+      errorSection.classList.remove('hidden');
+      errorMessage.textContent = message;
+    }
+
+    function showNoReport() {
+      pdfSection.classList.add('hidden');
+      errorSection.classList.add('hidden');
+      noReportSection.classList.remove('hidden');
+    }
+
+    function base64ToUint8Array(base64) {
+      const binaryString = atob(base64);
+      const len = binaryString.length;
+      const bytes = new Uint8Array(len);
+      for (let i = 0; i < len; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+      return bytes;
+    }
+
+    function base64ToBlob(base64, contentType) {
+      const bytes = base64ToUint8Array(base64);
+      return new Blob([bytes], { type: contentType });
+    }
+
+    function generateFilename() {
+      const accession = reportContext?.accessionNumber || 'report';
+      const date = new Date().toISOString().split('T')[0];
+      return `radiology-report-${accession}-${date}.pdf`;
+    }
+
+    // ============================================
+    // PDF Rendering
+    // ============================================
+
     async function renderPage(pageNum) {
+      if (!pdfDoc) return;
+
       const page = await pdfDoc.getPage(pageNum);
-      const viewport = page.getViewport({ scale });
+      const viewport = page.getViewport({ scale: currentScale });
 
       canvas.height = viewport.height;
       canvas.width = viewport.width;
@@ -398,14 +198,35 @@
 
       await page.render(renderContext).promise;
 
-      // Update UI
       currentPage = pageNum;
       pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
       prevBtn.disabled = currentPage <= 1;
       nextBtn.disabled = currentPage >= totalPages;
     }
 
-    // Navigation handlers
+    function updateZoomDisplay() {
+      zoomLevel.textContent = `${Math.round(currentScale * 100)}%`;
+    }
+
+    async function loadPDF(base64Data) {
+      try {
+        const pdfData = base64ToUint8Array(base64Data);
+        pdfDoc = await pdfjsLib.getDocument({ data: pdfData }).promise;
+        totalPages = pdfDoc.numPages;
+        console.log(`PDF loaded: ${totalPages} pages`);
+
+        updateZoomDisplay();
+        await renderPage(1);
+      } catch (error) {
+        console.error('Error loading PDF:', error);
+        showError('Failed to render PDF. The document may be corrupted.');
+      }
+    }
+
+    // ============================================
+    // Event Handlers
+    // ============================================
+
     prevBtn.addEventListener('click', () => {
       if (currentPage > 1) {
         renderPage(currentPage - 1);
@@ -418,40 +239,92 @@
       }
     });
 
-    // Load PDF
-    async function loadPDF() {
-      const pdfUrl = 'https://mozilla.github.io/pdf.js/web/compressed.tracemonkey-pldi-09.pdf';
-
-      try {
-        pdfDoc = await pdfjsLib.getDocument(pdfUrl).promise;
-        totalPages = pdfDoc.numPages;
-        console.log(`PDF loaded: ${totalPages} pages`);
-        renderPage(1);
-      } catch (error) {
-        console.error('Error loading PDF:', error);
-        pageInfo.textContent = 'Error loading PDF';
+    zoomIn.addEventListener('click', () => {
+      if (currentScale < 3) {
+        currentScale += 0.25;
+        updateZoomDisplay();
+        renderPage(currentPage);
       }
-    }
-
-    loadPDF();
-
-    // HTML to PDF Generator
-    const generatePdfBtn = document.getElementById('generate-pdf-btn');
-    const pdfContent = document.getElementById('pdf-content');
-
-    generatePdfBtn.addEventListener('click', () => {
-      const opt = {
-        margin: 10,
-        filename: 'radiology-report.pdf',
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-      };
-
-      // Generate and download PDF
-      html2pdf().set(opt).from(pdfContent).save();
-      console.log('PDF generation started');
     });
+
+    zoomOut.addEventListener('click', () => {
+      if (currentScale > 0.5) {
+        currentScale -= 0.25;
+        updateZoomDisplay();
+        renderPage(currentPage);
+      }
+    });
+
+    downloadBtn.addEventListener('click', () => {
+      if (!pdfBase64) return;
+
+      const blob = base64ToBlob(pdfBase64, 'application/pdf');
+      const url = URL.createObjectURL(blob);
+
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = generateFilename();
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    });
+
+    printBtn.addEventListener('click', () => {
+      if (!pdfBase64) return;
+
+      const blob = base64ToBlob(pdfBase64, 'application/pdf');
+      const url = URL.createObjectURL(blob);
+
+      const printWindow = window.open(url, '_blank');
+      if (printWindow) {
+        printWindow.addEventListener('load', () => {
+          printWindow.print();
+        });
+      }
+    });
+
+    // ============================================
+    // Initialize
+    // ============================================
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const reportKey = urlParams.get('report');
+
+    if (reportKey) {
+      const storageData = localStorage.getItem(reportKey);
+
+      if (storageData) {
+        try {
+          const data = JSON.parse(storageData);
+          pdfBase64 = data.pdfData;
+          reportContext = data.context;
+          reportTitle = data.title;
+
+          if (!pdfBase64) {
+            showError('No PDF data found in stored report');
+          } else {
+            pdfSection.classList.remove('hidden');
+
+            metadataDiv.innerHTML = `
+              <span class="mr-4"><strong>Patient:</strong> ${reportContext?.patientId || 'N/A'}</span>
+              <span class="mr-4"><strong>Accession:</strong> ${reportContext?.accessionNumber || 'N/A'}</span>
+              <span><strong>Generated:</strong> ${reportContext?.submittedAt ? new Date(reportContext.submittedAt).toLocaleString() : 'N/A'}</span>
+            `;
+
+            loadPDF(pdfBase64);
+            console.log('Report loaded from localStorage:', reportKey);
+          }
+        } catch (e) {
+          console.error('Failed to parse stored data:', e);
+          showError('Failed to parse stored report data');
+        }
+      } else {
+        showError(`Report not found: ${reportKey}`);
+      }
+    } else {
+      showNoReport();
+    }
   </script>
 </body>
 </html>
