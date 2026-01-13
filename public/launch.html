@@ -1,125 +1,196 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Radiology Report</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Radiology Report</title>
 
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          fontFamily: {
-            sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
-          }
-        }
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ["Inter", "system-ui", "-apple-system", "sans-serif"],
+            },
+          },
+        },
+      };
+    </script>
+
+    <!-- Google Fonts (required for Tiro Web SDK) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Lexend:wght@100..900&family=Fira+Mono:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Tiro Web SDK CSS -->
+    <link
+      rel="stylesheet"
+      href="https://storage.googleapis.com/atticus-assets.tiro.health/sdk-dev/latest/style.css"
+    />
+
+    <style>
+      tiro-form-filler {
+        display: block;
+        height: 100%;
       }
-    }
-  </script>
+    </style>
+  </head>
+  <body class="dark">
+    <div
+      class="h-full flex flex-col p-4 bg-neutral-950 text-neutral-200 font-sans"
+    >
+      <div class="pb-3 border-b border-neutral-800 mb-4">
+        <h1 class="m-0 mb-2 text-xl font-semibold">Radiology Report</h1>
+        <div class="text-sm text-neutral-400 flex gap-6">
+          <span id="patient-info"></span>
+          <span id="accession-info"></span>
+        </div>
+      </div>
 
-  <!-- Google Fonts (required for Tiro Web SDK) -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Lexend:wght@100..900&family=Fira+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
-
-  <!-- Tiro Web SDK CSS -->
-  <link rel="stylesheet" href="https://storage.googleapis.com/atticus-assets.tiro.health/sdk-dev/latest/style.css" />
-
-  <style>
-    tiro-form-filler {
-      display: block;
-      height: 100%;
-    }
-  </style>
-</head>
-<body class="dark">
-  <div class="h-full flex flex-col p-4 bg-neutral-950 text-neutral-200 font-sans">
-    <div class="pb-3 border-b border-neutral-800 mb-4">
-      <h1 class="m-0 mb-2 text-xl font-semibold">Radiology Report</h1>
-      <div class="text-sm text-neutral-400 flex gap-6">
-        <span id="patient-info"></span>
-        <span id="accession-info"></span>
+      <div class="flex-1 min-h-0 overflow-auto">
+        <tiro-form-filler
+          id="report-form"
+          sdc-endpoint-address="https://sdc-service-staging-35032072625.europe-west1.run.app/"
+        >
+          <script type="application/fhir+json" slot="questionnaire">
+            {
+              "resourceType": "Questionnaire",
+              "status": "draft",
+              "title": "Radiology Report",
+              "item": [
+                {
+                  "linkId": "findings",
+                  "type": "group",
+                  "text": "Findings",
+                  "extension": [
+                    {
+                      "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+                      "valueCodeableConcept": {
+                        "coding": [
+                          {
+                            "system": "http://fhir.tiro.health/CodeSystem/tiro-item-control",
+                            "code": "block"
+                          }
+                        ]
+                      }
+                    }
+                  ],
+                  "item": [
+                    {
+                      "linkId": "findings-text",
+                      "type": "text",
+                      "text": "Findings Text",
+                      "extension": [
+                        {
+                          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+                          "valueCodeableConcept": {
+                            "coding": [
+                              {
+                                "system": "http://fhir.tiro.health/CodeSystem/tiro-item-control",
+                                "code": "notes"
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "linkId": "impression",
+                  "type": "text",
+                  "text": "Impression"
+                },
+                {
+                  "linkId": "recommendations",
+                  "type": "text",
+                  "text": "Recommendations"
+                }
+              ]
+            }
+          </script>
+          <button type="submit" form="questionnaire-form">Submit Report</button>
+        </tiro-form-filler>
       </div>
     </div>
 
-    <div class="flex-1 min-h-0 overflow-auto">
-      <tiro-form-filler id="report-form">
-        <script type="application/fhir+json" slot="questionnaire">
-          {
-            "resourceType": "Questionnaire",
-            "id": "radiology-report",
-            "status": "draft",
-            "title": "Radiology Report",
-            "item": [
-              {
-                "linkId": "findings",
-                "type": "text",
-                "text": "Findings"
-              },
-              {
-                "linkId": "impression",
-                "type": "text",
-                "text": "Impression"
-              },
-              {
-                "linkId": "recommendations",
-                "type": "text",
-                "text": "Recommendations"
-              }
-            ]
-          }
-        </script>
-        <button type="submit">Submit Report</button>
-      </tiro-form-filler>
-    </div>
-  </div>
+    <!-- Tiro Web SDK IIFE Bundle -->
+    <script src="https://storage.googleapis.com/atticus-assets.tiro.health/sdk-dev/latest/tiro-web-sdk.iife.js"></script>
 
-  <!-- Tiro Web SDK IIFE Bundle -->
-  <script src="https://storage.googleapis.com/atticus-assets.tiro.health/sdk-dev/latest/tiro-web-sdk.iife.js"></script>
+    <script>
+      // Read URL parameters
+      const params = new URLSearchParams(window.location.search);
+      const patientId = params.get("patientId");
+      const accessionNumber = params.get("accessionNumber");
 
-  <script>
-    // Read URL parameters
-    const params = new URLSearchParams(window.location.search);
-    const patientId = params.get('patientId');
-    const accessionNumber = params.get('accessionNumber');
-
-    // Display context info
-    if (patientId) {
-      document.getElementById('patient-info').textContent = `Patient: ${patientId}`;
-    }
-    if (accessionNumber) {
-      document.getElementById('accession-info').textContent = `Accession: ${accessionNumber}`;
-    }
-
-    // Get form element
-    const form = document.getElementById('report-form');
-
-    // Event listeners
-    form.addEventListener('tiro-ready', (event) => {
-      console.log('Questionnaire loaded:', event.detail.questionnaire);
-    });
-
-    form.addEventListener('tiro-update', (event) => {
-      console.log('Form updated:', event.detail.response);
-    });
-
-    form.addEventListener('tiro-submit', (event) => {
-      console.log('Form submitted:', event.detail.response);
-      // Could post message to parent window here
-      if (window.parent !== window) {
-        window.parent.postMessage({
-          type: 'tiro-submit',
-          response: event.detail.response
-        }, '*');
+      // Display context info
+      if (patientId) {
+        document.getElementById("patient-info").textContent =
+          `Patient: ${patientId}`;
       }
-    });
+      if (accessionNumber) {
+        document.getElementById("accession-info").textContent =
+          `Accession: ${accessionNumber}`;
+      }
 
-    form.addEventListener('tiro-error', (event) => {
-      console.error('Form error:', event.detail.error, 'Type:', event.detail.type);
-    });
-  </script>
-</body>
+      // Get form element
+      const form = document.getElementById("report-form");
+
+      // Set up SDC client programmatically (fixes IIFE build issue with attribute)
+      const sdcClient = new TiroWebSdk.SDCClient({
+        baseUrl:
+          "https://sdc-service-staging-35032072625.europe-west1.run.app/fhir/r5",
+      });
+      form.sdcClient = sdcClient;
+      console.log("SDC client configured:", sdcClient.getConfig());
+
+      // Event listeners
+      form.addEventListener("tiro-ready", (event) => {
+        console.log("Questionnaire loaded:", event.detail.questionnaire);
+      });
+
+      form.addEventListener("tiro-update", (event) => {
+        console.log("Form updated:", event.detail.response);
+      });
+
+      form.addEventListener("tiro-submit", (event) => {
+        console.log("Form submitted:", event.detail.response);
+
+        const qr = event.detail.response;
+
+        // Generate unique key
+        const id = crypto.randomUUID();
+        const key = `QuestionnaireResponse/${id}`;
+
+        // Store QR with context in localStorage
+        const storageData = {
+          questionnaireResponse: qr,
+          context: {
+            patientId: patientId,
+            accessionNumber: accessionNumber,
+            submittedAt: new Date().toISOString(),
+          },
+        };
+        localStorage.setItem(key, JSON.stringify(storageData));
+
+        // Navigate to callback with key
+        window.location.href = `/callback.html?qr=${encodeURIComponent(key)}`;
+      });
+
+      form.addEventListener("tiro-error", (event) => {
+        console.error(
+          "Form error:",
+          event.detail.error,
+          "Type:",
+          event.detail.type,
+        );
+      });
+    </script>
+  </body>
 </html>

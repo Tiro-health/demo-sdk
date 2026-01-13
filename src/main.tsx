@@ -4,10 +4,6 @@ import { RouterProvider, createRouter } from '@tanstack/react-router';
 import { routeTree } from './routeTree.gen';
 import './index.css';
 
-// Tiro Web SDK - registers custom elements
-import '@tiro-health/web-sdk';
-import '@tiro-health/web-sdk/style.css';
-
 // Force dark mode
 document.documentElement.classList.add('dark');
 
