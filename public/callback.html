@@ -1,330 +1,54 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Report Viewer</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Report</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        height: 100%;
+        background: #171717;
+      }
+      iframe {
+        width: 100%;
+        height: 100%;
+        border: none;
+      }
+    </style>
+  </head>
+  <body>
+    <iframe id="pdf-viewer"></iframe>
 
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          fontFamily: {
-            sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+    <script>
+      const urlParams = new URLSearchParams(window.location.search);
+      const reportKey = urlParams.get("report");
+
+      if (reportKey) {
+        const storageData = localStorage.getItem(reportKey);
+        if (storageData) {
+          try {
+            const data = JSON.parse(storageData);
+            if (data.pdfData) {
+              const binaryString = atob(data.pdfData);
+              const bytes = new Uint8Array(binaryString.length);
+              for (let i = 0; i < binaryString.length; i++) {
+                bytes[i] = binaryString.charCodeAt(i);
+              }
+              const blob = new Blob([bytes], { type: "application/pdf" });
+              document.getElementById("pdf-viewer").src =
+                URL.createObjectURL(blob);
+            }
+          } catch (e) {
+            console.error("Failed to load PDF:", e);
           }
         }
       }
-    }
-  </script>
-
-  <!-- Google Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet" />
-</head>
-<body class="dark bg-neutral-900 text-neutral-200 p-8 font-sans leading-relaxed">
-  <h1 class="mb-4 text-3xl font-bold">Report Viewer</h1>
-
-  <!-- PDF Report Viewer Section (shown when report param present) -->
-  <div id="pdf-report-section" class="my-8 hidden">
-    <p class="text-green-400 mb-6">Your report has been generated successfully.</p>
-
-    <!-- Report metadata -->
-    <div id="report-metadata" class="mb-4 text-sm text-neutral-400">
-      <!-- Populated by JavaScript -->
-    </div>
-
-    <!-- Action buttons -->
-    <div class="flex gap-4 mb-6">
-      <button id="download-pdf-btn" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md font-medium cursor-pointer transition-colors flex items-center gap-2">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-        </svg>
-        Download PDF
-      </button>
-      <button id="print-pdf-btn" class="bg-neutral-700 hover:bg-neutral-600 text-white px-4 py-2 rounded-md font-medium cursor-pointer transition-colors flex items-center gap-2">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-        </svg>
-        Print
-      </button>
-    </div>
-
-    <!-- PDF Viewer with navigation -->
-    <div class="bg-neutral-800 rounded-lg overflow-hidden max-w-4xl">
-      <!-- Page navigation -->
-      <div class="flex items-center justify-between px-4 py-3 bg-neutral-900 border-b border-neutral-700">
-        <div class="flex items-center gap-3">
-          <button id="prev-page" class="bg-neutral-700 hover:bg-neutral-600 text-white px-3 py-1.5 rounded font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
-            ← Prev
-          </button>
-          <span id="page-info" class="text-neutral-400 min-w-[120px] text-center">Page 1 of 1</span>
-          <button id="next-page" class="bg-neutral-700 hover:bg-neutral-600 text-white px-3 py-1.5 rounded font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
-            Next →
-          </button>
-        </div>
-        <div class="flex items-center gap-3">
-          <button id="zoom-out" class="bg-neutral-700 hover:bg-neutral-600 text-white px-3 py-1.5 rounded font-medium transition-colors">
-            −
-          </button>
-          <span id="zoom-level" class="text-neutral-400 min-w-[60px] text-center">100%</span>
-          <button id="zoom-in" class="bg-neutral-700 hover:bg-neutral-600 text-white px-3 py-1.5 rounded font-medium transition-colors">
-            +
-          </button>
-        </div>
-      </div>
-
-      <!-- Canvas container -->
-      <div class="p-4 flex justify-center overflow-auto max-h-[70vh]">
-        <canvas id="pdf-canvas" class="shadow-lg"></canvas>
-      </div>
-    </div>
-  </div>
-
-  <!-- Error state -->
-  <div id="pdf-error-section" class="my-8 hidden">
-    <div class="bg-red-900/30 border border-red-700 rounded-lg p-6 text-center max-w-md">
-      <p class="text-red-400 text-lg mb-2">Failed to load report</p>
-      <p id="error-message" class="text-neutral-400 text-sm"></p>
-    </div>
-  </div>
-
-  <!-- No report state -->
-  <div id="no-report-section" class="my-8 hidden">
-    <p class="text-neutral-400 mb-4">No report to display. Submit a report from the form first.</p>
-  </div>
-
-  <div class="mt-8 pt-8 border-t border-neutral-700">
-    <a href="/launch.html" class="text-blue-400 hover:border-b hover:border-blue-400 font-medium transition-colors">
-      ← Back to Form
-    </a>
-  </div>
-
-  <script type="module">
-    // ============================================
-    // PDF.js Setup
-    // ============================================
-    import * as pdfjsLib from 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.min.mjs';
-    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.worker.min.mjs';
-
-    // ============================================
-    // State
-    // ============================================
-    let pdfDoc = null;
-    let currentPage = 1;
-    let totalPages = 0;
-    let currentScale = 1.5;
-    let pdfBase64 = null;
-    let reportContext = null;
-    let reportTitle = null;
-
-    // ============================================
-    // DOM Elements
-    // ============================================
-    const pdfSection = document.getElementById('pdf-report-section');
-    const errorSection = document.getElementById('pdf-error-section');
-    const noReportSection = document.getElementById('no-report-section');
-    const errorMessage = document.getElementById('error-message');
-    const canvas = document.getElementById('pdf-canvas');
-    const ctx = canvas.getContext('2d');
-    const prevBtn = document.getElementById('prev-page');
-    const nextBtn = document.getElementById('next-page');
-    const pageInfo = document.getElementById('page-info');
-    const zoomIn = document.getElementById('zoom-in');
-    const zoomOut = document.getElementById('zoom-out');
-    const zoomLevel = document.getElementById('zoom-level');
-    const downloadBtn = document.getElementById('download-pdf-btn');
-    const printBtn = document.getElementById('print-pdf-btn');
-    const metadataDiv = document.getElementById('report-metadata');
-
-    // ============================================
-    // Utility Functions
-    // ============================================
-
-    function showError(message) {
-      pdfSection.classList.add('hidden');
-      noReportSection.classList.add('hidden');
-      errorSection.classList.remove('hidden');
-      errorMessage.textContent = message;
-    }
-
-    function showNoReport() {
-      pdfSection.classList.add('hidden');
-      errorSection.classList.add('hidden');
-      noReportSection.classList.remove('hidden');
-    }
-
-    function base64ToUint8Array(base64) {
-      const binaryString = atob(base64);
-      const len = binaryString.length;
-      const bytes = new Uint8Array(len);
-      for (let i = 0; i < len; i++) {
-        bytes[i] = binaryString.charCodeAt(i);
-      }
-      return bytes;
-    }
-
-    function base64ToBlob(base64, contentType) {
-      const bytes = base64ToUint8Array(base64);
-      return new Blob([bytes], { type: contentType });
-    }
-
-    function generateFilename() {
-      const accession = reportContext?.accessionNumber || 'report';
-      const date = new Date().toISOString().split('T')[0];
-      return `radiology-report-${accession}-${date}.pdf`;
-    }
-
-    // ============================================
-    // PDF Rendering
-    // ============================================
-
-    async function renderPage(pageNum) {
-      if (!pdfDoc) return;
-
-      const page = await pdfDoc.getPage(pageNum);
-      const viewport = page.getViewport({ scale: currentScale });
-
-      canvas.height = viewport.height;
-      canvas.width = viewport.width;
-
-      const renderContext = {
-        canvasContext: ctx,
-        viewport: viewport
-      };
-
-      await page.render(renderContext).promise;
-
-      currentPage = pageNum;
-      pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
-      prevBtn.disabled = currentPage <= 1;
-      nextBtn.disabled = currentPage >= totalPages;
-    }
-
-    function updateZoomDisplay() {
-      zoomLevel.textContent = `${Math.round(currentScale * 100)}%`;
-    }
-
-    async function loadPDF(base64Data) {
-      try {
-        const pdfData = base64ToUint8Array(base64Data);
-        pdfDoc = await pdfjsLib.getDocument({ data: pdfData }).promise;
-        totalPages = pdfDoc.numPages;
-        console.log(`PDF loaded: ${totalPages} pages`);
-
-        updateZoomDisplay();
-        await renderPage(1);
-      } catch (error) {
-        console.error('Error loading PDF:', error);
-        showError('Failed to render PDF. The document may be corrupted.');
-      }
-    }
-
-    // ============================================
-    // Event Handlers
-    // ============================================
-
-    prevBtn.addEventListener('click', () => {
-      if (currentPage > 1) {
-        renderPage(currentPage - 1);
-      }
-    });
-
-    nextBtn.addEventListener('click', () => {
-      if (currentPage < totalPages) {
-        renderPage(currentPage + 1);
-      }
-    });
-
-    zoomIn.addEventListener('click', () => {
-      if (currentScale < 3) {
-        currentScale += 0.25;
-        updateZoomDisplay();
-        renderPage(currentPage);
-      }
-    });
-
-    zoomOut.addEventListener('click', () => {
-      if (currentScale > 0.5) {
-        currentScale -= 0.25;
-        updateZoomDisplay();
-        renderPage(currentPage);
-      }
-    });
-
-    downloadBtn.addEventListener('click', () => {
-      if (!pdfBase64) return;
-
-      const blob = base64ToBlob(pdfBase64, 'application/pdf');
-      const url = URL.createObjectURL(blob);
-
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = generateFilename();
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    });
-
-    printBtn.addEventListener('click', () => {
-      if (!pdfBase64) return;
-
-      const blob = base64ToBlob(pdfBase64, 'application/pdf');
-      const url = URL.createObjectURL(blob);
-
-      const printWindow = window.open(url, '_blank');
-      if (printWindow) {
-        printWindow.addEventListener('load', () => {
-          printWindow.print();
-        });
-      }
-    });
-
-    // ============================================
-    // Initialize
-    // ============================================
-
-    const urlParams = new URLSearchParams(window.location.search);
-    const reportKey = urlParams.get('report');
-
-    if (reportKey) {
-      const storageData = localStorage.getItem(reportKey);
-
-      if (storageData) {
-        try {
-          const data = JSON.parse(storageData);
-          pdfBase64 = data.pdfData;
-          reportContext = data.context;
-          reportTitle = data.title;
-
-          if (!pdfBase64) {
-            showError('No PDF data found in stored report');
-          } else {
-            pdfSection.classList.remove('hidden');
-
-            metadataDiv.innerHTML = `
-              <span class="mr-4"><strong>Patient:</strong> ${reportContext?.patientId || 'N/A'}</span>
-              <span class="mr-4"><strong>Accession:</strong> ${reportContext?.accessionNumber || 'N/A'}</span>
-              <span><strong>Generated:</strong> ${reportContext?.submittedAt ? new Date(reportContext.submittedAt).toLocaleString() : 'N/A'}</span>
-            `;
-
-            loadPDF(pdfBase64);
-            console.log('Report loaded from localStorage:', reportKey);
-          }
-        } catch (e) {
-          console.error('Failed to parse stored data:', e);
-          showError('Failed to parse stored report data');
-        }
-      } else {
-        showError(`Report not found: ${reportKey}`);
-      }
-    } else {
-      showNoReport();
-    }
-  </script>
-</body>
+    </script>
+  </body>
 </html>

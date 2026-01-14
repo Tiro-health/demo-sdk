@@ -204,7 +204,7 @@
         </button>
         <button
           type="submit"
-          formId="questionnaire-form"
+          form="questionnaire-form"
           class="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-md bg-blue-600 hover:bg-blue-700 text-white transition-colors"
         >
           Submit
@@ -214,16 +214,13 @@
       <div class="flex-1 min-h-0 overflow-auto">
         <tiro-form-filler
           id="report-form"
-          sdc-endpoint-address="https://sdc-service-dev-35032072625.europe-west1.run.app/fhir/r5"
+          sdc-endpoint-address="http://127.0.0.1:8000/fhir/r5"
         >
           <script type="application/fhir+json" slot="questionnaire">
             {
               "resourceType": "Questionnaire",
-              "id": "radiology-report",
               "status": "draft",
               "title": "Radiology Report",
-              "url": "http://demo.tiro.health/Questionnaire/radiology-report",
-              "version": "1.0.0",
               "extension": [
                 {
                   "url": "http://fhir.tiro.health/StructureDefinition/narrative-template",
@@ -235,47 +232,18 @@
               ],
               "item": [
                 {
-                  "linkId": "findings",
-                  "type": "group",
-                  "text": "Findings",
-                  "extension": [
-                    {
-                      "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
-                      "valueCodeableConcept": {
-                        "coding": [
-                          {
-                            "system": "http://fhir.tiro.health/CodeSystem/tiro-item-control",
-                            "code": "block"
-                          }
-                        ]
-                      }
-                    }
-                  ],
-                  "item": [
-                    {
-                      "linkId": "findings-text",
-                      "type": "text",
-                      "text": "Findings Text",
-                      "extension": [
-                        {
-                          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
-                          "valueCodeableConcept": {
-                            "coding": [
-                              {
-                                "system": "http://fhir.tiro.health/CodeSystem/tiro-item-control",
-                                "code": "notes"
-                              }
-                            ]
-                          }
-                        }
-                      ]
-                    }
-                  ]
-                },
-                {
                   "linkId": "impression",
                   "type": "text",
-                  "text": "Impression"
+                  "text": "Impression",
+                  "extension": [
+                    {
+                      "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+                      "valueExpression": {
+                        "language": "text/fhirpath",
+                        "expression": "%custom.parameter.where(name='example').value"
+                      }
+                    }
+                  ]
                 },
                 {
                   "linkId": "recommendations",
@@ -294,18 +262,18 @@
 
     <script>
       // ============================================
-      // Configuration
-      // ============================================
-      // Use local SDC server for development
-      const EXTRACT_ENDPOINT =
-        "http://localhost:8000/fhir/r5/QuestionnaireResponse/$extract";
-
-      // ============================================
       // URL Parameters
       // ============================================
       const params = new URLSearchParams(window.location.search);
-      const patientId = params.get("patientId");
-      const accessionNumber = params.get("accessionNumber");
+      const paramResource = {
+        resourceType: "Parameters",
+        parameter: Array.from(
+          params.entries().map(([name, value]) => ({
+            name,
+            valueString: value,
+          })),
+        ),
+      };
 
       // ============================================
       // DOM Elements
@@ -314,18 +282,26 @@
       const loadingOverlay = document.getElementById("loading-overlay");
 
       // ============================================
-      // SDC Client Setup
-      // ============================================
-      const sdcClient = new TiroWebSdk.SDCClient({
-        baseUrl:
-          "https://sdc-service-staging-35032072625.europe-west1.run.app/fhir/r5",
-      });
-      form.sdcClient = sdcClient;
-      console.log("SDC client configured:", sdcClient.getConfig());
-
-      // ============================================
       // Utility Functions
       // ============================================
+      const launchContext = {
+        custom: paramResource,
+        patient: {
+          resourceType: "Patient",
+          identifier: [
+            {
+              value: params.get("patientId") || "example-patient-id",
+            },
+          ],
+        },
+      };
+      const patientId =
+        launchContext.patient.identifier[0].value || "example-patient-id";
+      const accessionNumber =
+        params.get("accessionNumber") || "example-accession-number";
+      form.setAttribute("launch-context", JSON.stringify(launchContext));
+
+      console.log(form.questionnaire);
 
       function showLoading() {
         loadingOverlay.classList.remove("hidden");
@@ -345,104 +321,6 @@
         alert(`Error: ${message}`);
       }
 
-      /**
-       * Extract the Questionnaire JSON from the form slot
-       */
-      function getQuestionnaireFromForm() {
-        const scriptTag = document.querySelector(
-          'tiro-form-filler script[type="application/fhir+json"]',
-        );
-        if (!scriptTag) {
-          console.error("Questionnaire script tag not found in form");
-          return null;
-        }
-        try {
-          return JSON.parse(scriptTag.textContent);
-        } catch (e) {
-          console.error("Failed to parse Questionnaire JSON:", e);
-          return null;
-        }
-      }
-
-      /**
-       * Build QuestionnaireResponse with contained Questionnaire for $extract
-       */
-      function buildExtractRequest(qr, questionnaire) {
-        const containedQuestionnaire = {
-          ...questionnaire,
-          id: questionnaire.id || "contained-questionnaire",
-        };
-
-        return {
-          ...qr,
-          questionnaire: `#${containedQuestionnaire.id}`,
-          contained: [containedQuestionnaire],
-        };
-      }
-
-      /**
-       * Call the $extract endpoint and return the PDF data
-       */
-      async function callExtractEndpoint(extractRequest) {
-        const url = new URL(EXTRACT_ENDPOINT);
-        // Note: Skipping subject parameter as backend expects numeric IDs
-        // In production, this would use actual patient database IDs
-
-        const response = await fetch(url.toString(), {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/fhir+json",
-            Accept: "application/fhir+json",
-          },
-          body: JSON.stringify(extractRequest),
-        });
-
-        if (!response.ok) {
-          let errorMessage = `HTTP ${response.status}`;
-          try {
-            const errorData = await response.json();
-            if (errorData.issue && errorData.issue.length > 0) {
-              errorMessage = errorData.issue
-                .map((i) => i.diagnostics || i.details?.text)
-                .join("; ");
-            }
-          } catch (e) {
-            // Ignore JSON parsing error for error response
-          }
-          throw new Error(errorMessage);
-        }
-
-        const data = await response.json();
-
-        if (data.resourceType !== "Parameters") {
-          throw new Error("Invalid response: expected Parameters resource");
-        }
-
-        const returnParam = data.parameter?.find((p) => p.name === "return");
-        if (!returnParam || !returnParam.resource) {
-          throw new Error("No DocumentReference in response");
-        }
-
-        const docRef = returnParam.resource;
-        if (docRef.resourceType !== "DocumentReference") {
-          throw new Error("Expected DocumentReference resource");
-        }
-
-        const attachment = docRef.content?.[0]?.attachment;
-        if (!attachment || !attachment.data) {
-          throw new Error("No PDF attachment in DocumentReference");
-        }
-
-        if (attachment.contentType !== "application/pdf") {
-          throw new Error(`Unexpected content type: ${attachment.contentType}`);
-        }
-
-        return {
-          pdfData: attachment.data,
-          title: attachment.title || "Report",
-        };
-      }
-
       // ============================================
       // Event Listeners
       // ============================================
@@ -458,23 +336,27 @@
       form.addEventListener("tiro-submit", async (event) => {
         console.log("Form submitted:", event.detail.response);
 
-        const qr = event.detail.response;
-
         try {
           showLoading();
 
-          // Get the Questionnaire from the form
-          const questionnaire = getQuestionnaireFromForm();
-          if (!questionnaire) {
-            throw new Error("Could not retrieve Questionnaire from form");
+          // Get Questionnaire from form slot
+          const scriptTag = document.querySelector(
+            'tiro-form-filler script[type="application/fhir+json"]',
+          );
+          const questionnaire = scriptTag
+            ? JSON.parse(scriptTag.textContent)
+            : null;
+          console.log(form.sdcClient);
+          // Call $extract via SDCClient
+          const { pdfData, title } = await form.sdcClient.extract({
+            questionnaireResponse: event.detail.response,
+            questionnaire: questionnaire,
+          });
+
+          if (!pdfData) {
+            throw new Error("No PDF data in extract response");
           }
 
-          // Build the request with contained Questionnaire
-          const extractRequest = buildExtractRequest(qr, questionnaire);
-          console.log("Calling $extract with:", extractRequest);
-
-          // Call the $extract endpoint
-          const { pdfData, title } = await callExtractEndpoint(extractRequest);
           console.log(
             "PDF extracted successfully, size:",
             pdfData.length,
@@ -486,16 +368,18 @@
           const key = `Report/${id}`;
 
           // Store PDF data with context
-          const storageData = {
-            pdfData: pdfData,
-            title: title,
-            context: {
-              patientId: patientId,
-              accessionNumber: accessionNumber,
-              submittedAt: new Date().toISOString(),
-            },
-          };
-          localStorage.setItem(key, JSON.stringify(storageData));
+          localStorage.setItem(
+            key,
+            JSON.stringify({
+              pdfData,
+              title: title || "Report",
+              context: {
+                patientId,
+                accessionNumber,
+                submittedAt: new Date().toISOString(),
+              },
+            }),
+          );
           console.log("PDF stored in localStorage:", key);
 
           // Navigate to callback page
