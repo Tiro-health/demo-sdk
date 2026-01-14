@@ -48,6 +48,10 @@
 }
 
 /* Force dark mode on body - handled in main.tsx via classList.add('dark') */
+html,
+body {
+  background-color: var(--color-background);
+}
 
 /* Custom study row styles */
 .study-row {
@@ -75,8 +79,8 @@
 /* Resizable panel handles */
 .resize-handle {
   @apply w-2 bg-transparent transition-colors duration-150;
-  @apply hover:bg-border/50 active:bg-border;
-  @apply relative;
+  @apply hover:bg-border/50;
+  @apply relative outline-none;
 }
 
 .resize-handle::after {
