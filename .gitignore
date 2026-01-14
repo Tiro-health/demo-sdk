@@ -26,3 +26,5 @@ dist-ssr
 # Playwright MCP screenshots
 .playwright-mcp/
 .claude/settings.local.json
+tsconfig.tsbuildinfo
+.vercel
