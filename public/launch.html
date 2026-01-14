@@ -214,46 +214,9 @@
       <div class="flex-1 min-h-0 overflow-auto">
         <tiro-form-filler
           id="report-form"
+          questionnaire="http://templates.tiro.health/templates/aa87c115c40149e98faba070cacb15c9"
           sdc-endpoint-address="http://127.0.0.1:8000/fhir/r5"
-        >
-          <script type="application/fhir+json" slot="questionnaire">
-            {
-              "resourceType": "Questionnaire",
-              "status": "draft",
-              "title": "Radiology Report",
-              "extension": [
-                {
-                  "url": "http://fhir.tiro.health/StructureDefinition/narrative-template",
-                  "valueExpression": {
-                    "language": "text/liquid",
-                    "expression": "<h1>Radiology Report</h1>{% for item in all_items %}<div class=\"section\"><h2>{{ item.text }}</h2>{% for answer in item.answer %}<p>{{ answer.valueString }}</p>{% endfor %}{% for nested in item.item %}{% for answer in nested.answer %}<p>{{ answer.valueString }}</p>{% endfor %}{% endfor %}</div>{% endfor %}"
-                  }
-                }
-              ],
-              "item": [
-                {
-                  "linkId": "impression",
-                  "type": "text",
-                  "text": "Impression",
-                  "extension": [
-                    {
-                      "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
-                      "valueExpression": {
-                        "language": "text/fhirpath",
-                        "expression": "%custom.parameter.where(name='example').value"
-                      }
-                    }
-                  ]
-                },
-                {
-                  "linkId": "recommendations",
-                  "type": "text",
-                  "text": "Recommendations"
-                }
-              ]
-            }
-          </script>
-        </tiro-form-filler>
+        />
       </div>
     </div>
 
