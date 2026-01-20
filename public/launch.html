@@ -243,7 +243,15 @@
       });
 
       form.addEventListener("tiro-submit", async (event) => {
-        console.log("Form submitted:", event.detail.response);
+        const response = event.detail.response;
+        console.log("Form submitted:", response);
+
+        // Save progress without PDF generation
+        if (response.status === "in-progress") {
+          console.log("Saving progress (no PDF generation)");
+          alert("Progress saved!");
+          return;
+        }
 
         try {
           showLoading();
@@ -258,7 +266,7 @@
           console.log(form.sdcClient);
           // Call $extract via SDCClient
           const { pdfData, title } = await form.sdcClient.extract({
-            questionnaireResponse: event.detail.response,
+            questionnaireResponse: response,
             questionnaire: questionnaire,
           });
 
