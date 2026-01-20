@@ -50,11 +50,8 @@
       rel="stylesheet"
     />
 
-    <!-- Tiro Web SDK CSS -->
-    <link
-      rel="stylesheet"
-      href="https://storage.googleapis.com/atticus-assets.tiro.health/sdk-dev/latest/style.css"
-    />
+    <!-- Tiro Web SDK CSS (local build) -->
+    <link rel="stylesheet" href="/sdk/tiro-web-sdk.css" />
 
     <style>
       tiro-form-filler {
@@ -62,76 +59,20 @@
         height: 100%;
       }
 
-      /* Magic Clipboard Popover - Light mode */
-      [popover] {
-        background: rgb(255, 255, 255);
-        border: 1px solid rgb(229, 229, 229);
-        border-radius: 0.5rem;
-        padding: 0;
-        width: min(500px, 90vw);
-        max-height: 80vh;
-        overflow: hidden;
-      }
-
-      /* Magic Clipboard Popover - Dark mode */
-      .dark [popover] {
-        background: rgb(23, 23, 23);
-        border: 1px solid rgb(38, 38, 38);
-      }
-
-      [popover]::backdrop {
-        background: rgba(0, 0, 0, 0.5);
-      }
-
-      .popover-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 0.75rem 1rem;
-        border-bottom: 1px solid rgb(229, 229, 229);
-      }
-
-      .dark .popover-header {
-        border-bottom-color: rgb(38, 38, 38);
-      }
-
-      .popover-header h2 {
-        margin: 0;
-        font-size: 1rem;
-        font-weight: 600;
-        color: rgb(23, 23, 23);
-      }
-
-      .dark .popover-header h2 {
-        color: rgb(229, 229, 229);
-      }
-
-      .popover-close {
-        background: none;
-        border: none;
-        color: rgb(115, 115, 115);
-        font-size: 1.25rem;
-        cursor: pointer;
-        padding: 0.25rem;
-        line-height: 1;
-      }
-
-      .popover-close:hover {
-        color: rgb(23, 23, 23);
-      }
-
-      .dark .popover-close:hover {
-        color: rgb(229, 229, 229);
-      }
-
-      .popover-content {
-        padding: 1rem;
-        max-height: calc(80vh - 3rem);
-        overflow-y: auto;
-      }
-
       tiro-magic-clipboard {
         display: block;
+      }
+
+      details summary::-webkit-details-marker {
+        display: none;
+      }
+
+      details summary {
+        list-style: none;
+      }
+
+      details[open] .chevron {
+        transform: rotate(180deg);
       }
     </style>
   </head>
@@ -154,30 +95,32 @@
       </div>
     </div>
 
-    <!-- Magic Clipboard Popover -->
-    <div id="magic-clipboard-popover" popover>
-      <div class="popover-header">
-        <h2>Magic Clipboard</h2>
-        <button
-          class="popover-close"
-          popovertarget="magic-clipboard-popover"
-          popovertargetaction="hide"
-        >
-          ×
-        </button>
-      </div>
-      <div class="popover-content">
-        <tiro-magic-clipboard for="report-form"></tiro-magic-clipboard>
-      </div>
-    </div>
-
     <div class="h-full flex flex-col p-4 font-sans">
       <!-- Toolbar -->
       <div class="flex justify-end mb-3 gap-2">
         <button
-          popovertarget="magic-clipboard-popover"
+          type="submit"
+          form="questionnaire-form"
+          name="status"
+          value="in-progress"
+          class="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-md border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-800 hover:bg-neutral-100 dark:hover:bg-neutral-700 text-neutral-700 dark:text-neutral-200 transition-colors"
+        >
+          Save Progress
+        </button>
+        <button
+          type="submit"
+          form="questionnaire-form"
+          name="status"
+          value="completed"
           class="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-md bg-blue-600 hover:bg-blue-700 text-white transition-colors"
         >
+          Validate
+        </button>
+      </div>
+
+      <!-- Autofill Accordion -->
+      <details id="autofill-accordion" class="w-full bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-lg mb-3">
+        <summary class="flex items-center gap-2 px-3 py-2 text-sm font-medium cursor-pointer text-neutral-900 dark:text-neutral-100 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-lg">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="16"
@@ -201,27 +144,25 @@
             <path d="M11 3H9" />
           </svg>
           Autofill
-        </button>
-        <button
-          type="submit"
-          form="questionnaire-form"
-          class="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-md bg-blue-600 hover:bg-blue-700 text-white transition-colors"
-        >
-          Submit
-        </button>
-      </div>
+          <svg class="chevron ml-auto w-4 h-4 transition-transform duration-200" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m6 9 6 6 6-6"/>
+          </svg>
+        </summary>
+        <div class="px-3 py-2 border-t border-neutral-200 dark:border-neutral-800">
+          <tiro-magic-clipboard for="report-form"></tiro-magic-clipboard>
+        </div>
+      </details>
 
       <div class="flex-1 min-h-0 overflow-auto">
         <tiro-form-filler
           id="report-form"
-          questionnaire="http://templates.tiro.health/templates/aa87c115c40149e98faba070cacb15c9"
           sdc-endpoint-address="https://sdc-service-dev-35032072625.europe-west1.run.app/fhir/r5"
         />
       </div>
     </div>
 
-    <!-- Tiro Web SDK IIFE Bundle -->
-    <script src="https://storage.googleapis.com/atticus-assets.tiro.health/sdk-dev/latest/tiro-web-sdk.iife.js"></script>
+    <!-- Tiro Web SDK IIFE Bundle (local build) -->
+    <script src="https://atticus-assets.tiro.health/sdk-dev/latest/tiro-web-sdk.iife.js"></script>
 
     <script>
       // ============================================
@@ -264,7 +205,12 @@
         params.get("accessionNumber") || "example-accession-number";
       form.setAttribute("launch-context", JSON.stringify(launchContext));
 
-      console.log(form.questionnaire);
+      // Set questionnaire from URL parameter or use default
+      const DEFAULT_QUESTIONNAIRE = "http://templates.tiro.health/templates/aa87c115c40149e98faba070cacb15c9";
+      const questionnaire = params.get("questionnaire") || DEFAULT_QUESTIONNAIRE;
+      form.setAttribute("questionnaire", questionnaire);
+
+      console.log("Questionnaire:", form.questionnaire);
 
       function showLoading() {
         loadingOverlay.classList.remove("hidden");
@@ -297,7 +243,15 @@
       });
 
       form.addEventListener("tiro-submit", async (event) => {
-        console.log("Form submitted:", event.detail.response);
+        const response = event.detail.response;
+        console.log("Form submitted:", response);
+
+        // Save progress without PDF generation
+        if (response.status === "in-progress") {
+          console.log("Saving progress (no PDF generation)");
+          alert("Progress saved!");
+          return;
+        }
 
         try {
           showLoading();
@@ -312,7 +266,7 @@
           console.log(form.sdcClient);
           // Call $extract via SDCClient
           const { pdfData, title } = await form.sdcClient.extract({
-            questionnaireResponse: event.detail.response,
+            questionnaireResponse: response,
             questionnaire: questionnaire,
           });
 
@@ -365,7 +319,7 @@
       // Magic Clipboard Event Listeners
       // ============================================
       const clipboard = document.querySelector("tiro-magic-clipboard");
-      const popover = document.getElementById("magic-clipboard-popover");
+      const accordion = document.getElementById("autofill-accordion");
 
       clipboard.addEventListener("tiro-populate-start", () => {
         console.log("Magic clipboard: starting population...");
@@ -376,7 +330,7 @@
           "Magic clipboard: population complete",
           event.detail.response,
         );
-        popover.hidePopover();
+        accordion.removeAttribute("open");
       });
 
       clipboard.addEventListener("tiro-populate-error", (event) => {
