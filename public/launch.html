@@ -50,11 +50,8 @@
       rel="stylesheet"
     />
 
-    <!-- Tiro Web SDK CSS -->
-    <link
-      rel="stylesheet"
-      href="https://storage.googleapis.com/atticus-assets.tiro.health/sdk-dev/latest/style.css"
-    />
+    <!-- Tiro Web SDK CSS (local build) -->
+    <link rel="stylesheet" href="/sdk/tiro-web-sdk.css" />
 
     <style>
       tiro-form-filler {
@@ -214,14 +211,13 @@
       <div class="flex-1 min-h-0 overflow-auto">
         <tiro-form-filler
           id="report-form"
-          questionnaire="http://templates.tiro.health/templates/aa87c115c40149e98faba070cacb15c9"
           sdc-endpoint-address="https://sdc-service-dev-35032072625.europe-west1.run.app/fhir/r5"
         />
       </div>
     </div>
 
-    <!-- Tiro Web SDK IIFE Bundle -->
-    <script src="https://storage.googleapis.com/atticus-assets.tiro.health/sdk-dev/latest/tiro-web-sdk.iife.js"></script>
+    <!-- Tiro Web SDK IIFE Bundle (local build) -->
+    <script src="https://atticus-assets.tiro.health/sdk-dev/latest/tiro-web-sdk.iife.js"></script>
 
     <script>
       // ============================================
@@ -264,7 +260,12 @@
         params.get("accessionNumber") || "example-accession-number";
       form.setAttribute("launch-context", JSON.stringify(launchContext));
 
-      console.log(form.questionnaire);
+      // Set questionnaire from URL parameter or use default
+      const DEFAULT_QUESTIONNAIRE = "http://templates.tiro.health/templates/aa87c115c40149e98faba070cacb15c9";
+      const questionnaire = params.get("questionnaire") || DEFAULT_QUESTIONNAIRE;
+      form.setAttribute("questionnaire", questionnaire);
+
+      console.log("Questionnaire:", form.questionnaire);
 
       function showLoading() {
         loadingOverlay.classList.remove("hidden");
