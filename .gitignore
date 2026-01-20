@@ -28,3 +28,4 @@ dist-ssr
 .claude/settings.local.json
 tsconfig.tsbuildinfo
 .vercel
+public/sdk
