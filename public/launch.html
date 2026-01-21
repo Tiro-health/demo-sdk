@@ -149,7 +149,14 @@
           </svg>
         </summary>
         <div class="px-3 py-2 border-t border-neutral-200 dark:border-neutral-800">
-          <tiro-magic-clipboard for="report-form"></tiro-magic-clipboard>
+          <tiro-magic-clipboard for="report-form">
+            <button
+              type="submit"
+              class="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-md bg-blue-600 hover:bg-blue-700 text-white transition-colors mt-2"
+            >
+              Autofill Template
+            </button>
+          </tiro-magic-clipboard>
         </div>
       </details>
 
@@ -162,7 +169,7 @@
     </div>
 
     <!-- Tiro Web SDK IIFE Bundle (local build) -->
-    <script src="https://atticus-assets.tiro.health/sdk-dev/latest/tiro-web-sdk.iife.js"></script>
+    <script src="/sdk/tiro-web-sdk.iife.js"></script>
 
     <script>
       // ============================================
