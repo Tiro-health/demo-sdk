@@ -59,7 +59,10 @@
     />
 
     <!-- Tiro Web SDK CSS -->
-    <link rel="stylesheet" href="https://atticus-assets.tiro.health/sdk-dev/latest/tiro-web-sdk.css" />
+    <link
+      rel="stylesheet"
+      href="https://atticus-assets.tiro.health/sdk-dev/latest/tiro-web-sdk.css"
+    />
 
     <style>
       tiro-form-filler {
@@ -96,6 +99,68 @@
         --muted: 217.2 32.6% 17.5%;
         --muted-foreground: 215 20.2% 65.1%;
         --accent: 217.2 32.6% 25%;
+      }
+
+      :root {
+        /* Dropdown-specific variables */
+        --dropdown-bg: #ffffff;
+        --dropdown-text: #374151; /* gray-700 */
+        --dropdown-text-muted: #6b7280; /* gray-500 */
+        --dropdown-border: #d1d5db; /* gray-300 */
+        --dropdown-border-hover: #9ca3af; /* gray-400 */
+        --dropdown-hover: #f3f4f6; /* gray-100 */
+        --dropdown-disabled-bg: #eceef0; /* gray-100 */
+        --dropdown-disabled-text: #9ca3af; /* gray-400 */
+        --dropdown-disabled-border: #d1d5db; /* gray-300 */
+        --dropdown-multi-value-bg: #e5e7eb; /* gray-200 */
+        --dropdown-multi-value-hover: #d1d5db; /* gray-300 */
+        --dropdown-focus-ring: #006cd9; /* blue-500 */
+        --dropdown-indicator-color: #374151; /* gray-700 */
+      }
+
+      :root.dark {
+        /* Dropdown-specific variables for dark mode */
+        --dropdown-bg: #121212;
+        --dropdown-text: #e5e7eb; /* gray-200 */
+        --dropdown-text-muted: #9ca3af; /* gray-400 */
+        --dropdown-border: #4b5563; /* gray-600 */
+        --dropdown-border-hover: #6b7280; /* gray-500 */
+        --dropdown-hover: #374151; /* gray-700 */
+        --dropdown-disabled-bg: #374151; /* gray-700 */
+        --dropdown-disabled-text: #6b7280; /* gray-500 */
+        --dropdown-disabled-border: #4b5563; /* gray-600 */
+        --dropdown-multi-value-bg: #4b5563; /* gray-600 */
+        --dropdown-multi-value-hover: #6b7280; /* gray-500 */
+        --dropdown-focus-ring: #3d8eff; /* blue-500 (brighter for dark) */
+        --dropdown-indicator-color: #e5e7eb; /* gray-200 */
+
+        --background: 0 0% 7.1%;
+        --foreground: 210 40% 98%;
+
+        --card: 0 0% 7.1%;
+        --card-foreground: 210 40% 98%;
+
+        --popover: 0 0% 7.1%;
+        --popover-foreground: 210 40% 98%;
+
+        --primary: 210 40% 98%;
+        --primary-foreground: 222.2 47.4% 11.2%;
+
+        --secondary: 217.2 32.6% 17.5%;
+        --secondary-foreground: 210 40% 98%;
+
+        --muted: 217.2 32.6% 17.5%;
+        --muted-foreground: 215 20.2% 65.1%;
+
+        --accent: 217.2 32.6% 17.5%;
+        --accent-foreground: 210 40% 98%;
+
+        --destructive: 0 62.8% 30.6%;
+        --destructive-foreground: 210 40% 98%;
+
+        --border: 217.2 32.6% 17.5%;
+        --input: 217.2 32.6% 17.5%;
+        --ring: 212.7 26.8% 83.9%;
       }
     </style>
   </head>
@@ -142,8 +207,14 @@
       </div>
 
       <!-- Autofill Accordion -->
-      <details id="autofill-accordion" open class="w-full bg-white dark:bg-background border border-neutral-200 dark:border-gray-700 rounded-lg mb-3">
-        <summary class="flex items-center gap-2 px-3 py-2 text-sm font-medium cursor-pointer text-neutral-900 dark:text-neutral-100 hover:bg-neutral-100 dark:hover:bg-accent rounded-lg">
+      <details
+        id="autofill-accordion"
+        open
+        class="w-full bg-white dark:bg-background border border-neutral-200 dark:border-gray-700 rounded-lg mb-3"
+      >
+        <summary
+          class="flex items-center gap-2 px-3 py-2 text-sm font-medium cursor-pointer text-neutral-900 dark:text-neutral-100 hover:bg-neutral-100 dark:hover:bg-accent rounded-lg"
+        >
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="16"
@@ -167,11 +238,22 @@
             <path d="M11 3H9" />
           </svg>
           Autofill
-          <svg class="chevron ml-auto w-4 h-4 transition-transform duration-200" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="m6 9 6 6 6-6"/>
+          <svg
+            class="chevron ml-auto w-4 h-4 transition-transform duration-200"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="m6 9 6 6 6-6" />
           </svg>
         </summary>
-        <div class="px-3 py-2 border-t border-neutral-200 dark:border-neutral-800">
+        <div
+          class="px-3 py-2 border-t border-neutral-200 dark:border-neutral-800"
+        >
           <tiro-magic-clipboard for="report-form">
             <button
               type="submit"
@@ -187,6 +269,7 @@
         <tiro-form-filler
           id="report-form"
           sdc-endpoint-address="https://sdc-service-dev-35032072625.europe-west1.run.app/fhir/r5"
+          compact-grouping
         />
       </div>
     </div>
@@ -199,8 +282,10 @@
       // URL Parameters
       // ============================================
       const params = new URLSearchParams(window.location.search);
-      const DEFAULT_QUESTIONNAIRE = "http://templates.tiro.health/templates/aa87c115c40149e98faba070cacb15c9";
-      const questionnaire = params.get("questionnaire") || DEFAULT_QUESTIONNAIRE;
+      const DEFAULT_QUESTIONNAIRE =
+        "http://templates.tiro.health/templates/aa87c115c40149e98faba070cacb15c9";
+      const questionnaire =
+        params.get("questionnaire") || DEFAULT_QUESTIONNAIRE;
 
       // Build Parameters resource, always including questionnaire
       const paramResource = {
