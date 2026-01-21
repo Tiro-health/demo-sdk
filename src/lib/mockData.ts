@@ -58,6 +58,7 @@ const STUDY_DESCRIPTIONS: Record<Modality, string[]> = {
     'CR Foot 3 Views',
   ],
   MR: [
+    'MRI Bowel',
     'MRI Brain without contrast',
     'MRI Lumbar Spine',
     'MRI Knee without contrast',
@@ -175,6 +176,32 @@ function generateStudy(index: number): Study {
   };
 }
 
+function generateMriBowelStudy(): Study {
+  // Use tomorrow's date to ensure it's always at the top when sorted by dateTime desc
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const year = tomorrow.getFullYear();
+  const month = formatNumber(tomorrow.getMonth() + 1, 2);
+  const day = formatNumber(tomorrow.getDate(), 2);
+
+  return {
+    id: 'study-mri-bowel',
+    studyDate: `${year}-${month}-${day}`,
+    studyTime: '08:00',
+    patient: {
+      firstName: 'Emma',
+      lastName: 'De Vos',
+      gender: 'F',
+      dateOfBirth: '1985-03-15',
+    },
+    modality: 'MR',
+    studyDescription: 'MRI Bowel',
+    researchQuestion: 'Evaluate for Crohn\'s disease activity',
+    urgency: 'Urgent',
+    accessionNumber: 'ACC-2025-000001',
+  };
+}
+
 export function generateStudies(count: number = 40): Study[] {
   const studies: Study[] = [];
 
@@ -188,6 +215,9 @@ export function generateStudies(count: number = 40): Study[] {
     const dateTimeB = new Date(`${b.studyDate}T${b.studyTime}`).getTime();
     return dateTimeB - dateTimeA;
   });
+
+  // Always add MRI Bowel study at the top
+  studies.unshift(generateMriBowelStudy());
 
   return studies;
 }
