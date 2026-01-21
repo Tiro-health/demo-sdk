@@ -15,6 +15,9 @@
             fontFamily: {
               sans: ["Inter", "system-ui", "-apple-system", "sans-serif"],
             },
+            colors: {
+              canvas: "hsl(222.2 84% 4.9%)",
+            },
           },
         },
       };
@@ -77,12 +80,12 @@
     </style>
   </head>
   <body
-    class="bg-neutral-50 text-neutral-800 dark:bg-neutral-950 dark:text-neutral-200"
+    class="bg-neutral-50 text-neutral-800 dark:bg-canvas dark:text-neutral-200"
   >
     <!-- Loading overlay (hidden by default) -->
     <div
       id="loading-overlay"
-      class="fixed inset-0 bg-white/95 dark:bg-neutral-950/95 items-center justify-center z-50 hidden"
+      class="fixed inset-0 bg-white/95 dark:bg-canvas/95 items-center justify-center z-50 hidden"
     >
       <div class="text-center">
         <div
@@ -119,7 +122,7 @@
       </div>
 
       <!-- Autofill Accordion -->
-      <details id="autofill-accordion" open class="w-full bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-lg mb-3">
+      <details id="autofill-accordion" open class="w-full bg-white dark:bg-canvas border border-neutral-200 dark:border-neutral-800 rounded-lg mb-3">
         <summary class="flex items-center gap-2 px-3 py-2 text-sm font-medium cursor-pointer text-neutral-900 dark:text-neutral-100 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-lg">
           <svg
             xmlns="http://www.w3.org/2000/svg"

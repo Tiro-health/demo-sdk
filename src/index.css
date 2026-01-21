@@ -26,11 +26,11 @@
 }
 
 .dark {
-  --color-background: oklch(0.145 0 0);
+  --color-background: hsl(222.2 84% 4.9%);
   --color-foreground: oklch(0.985 0 0);
-  --color-card: oklch(0.145 0 0);
+  --color-card: hsl(222.2 84% 4.9%);
   --color-card-foreground: oklch(0.985 0 0);
-  --color-popover: oklch(0.145 0 0);
+  --color-popover: hsl(222.2 84% 4.9%);
   --color-popover-foreground: oklch(0.985 0 0);
   --color-primary: oklch(0.985 0 0);
   --color-primary-foreground: oklch(0.145 0 0);
@@ -55,8 +55,8 @@ body {
 
 /* Custom study row styles */
 .study-row {
-  @apply bg-[oklch(0.18_0_0)] border border-border rounded-md;
-  @apply hover:bg-[oklch(0.22_0_0)] transition-colors duration-150;
+  @apply bg-[hsl(222.2_84%_8%)] border border-border rounded-md;
+  @apply hover:bg-[hsl(222.2_84%_12%)] transition-colors duration-150;
   @apply focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none;
   @apply cursor-pointer;
 }
