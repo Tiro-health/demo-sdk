@@ -16,9 +16,12 @@
               sans: ["Inter", "system-ui", "-apple-system", "sans-serif"],
             },
             colors: {
-              canvas: "hsl(222.2 84% 4.9%)",
-              muted: "rgb(55 65 81)",
-              "muted-hover": "rgb(75 85 99)",
+              background: "hsl(var(--background))",
+              muted: {
+                DEFAULT: "hsl(var(--muted))",
+                foreground: "hsl(var(--muted-foreground))",
+              },
+              accent: "hsl(var(--accent))",
             },
           },
         },
@@ -79,15 +82,30 @@
       details[open] .chevron {
         transform: rotate(180deg);
       }
+
+      /* Color variables from frontend UI package */
+      :root {
+        --background: 0 0% 100%;
+        --muted: 210 40% 96.1%;
+        --muted-foreground: 215.4 16.3% 46.9%;
+        --accent: 210 40% 90%;
+      }
+
+      :root.dark {
+        --background: 222.2 84% 4.9%;
+        --muted: 217.2 32.6% 17.5%;
+        --muted-foreground: 215 20.2% 65.1%;
+        --accent: 217.2 32.6% 25%;
+      }
     </style>
   </head>
   <body
-    class="bg-neutral-50 text-neutral-800 dark:bg-canvas dark:text-neutral-200"
+    class="bg-neutral-50 text-neutral-800 dark:bg-background dark:text-neutral-200"
   >
     <!-- Loading overlay (hidden by default) -->
     <div
       id="loading-overlay"
-      class="fixed inset-0 bg-white/95 dark:bg-canvas/95 items-center justify-center z-50 hidden"
+      class="fixed inset-0 bg-white/95 dark:bg-background/95 items-center justify-center z-50 hidden"
     >
       <div class="text-center">
         <div
@@ -108,7 +126,7 @@
           form="questionnaire-form"
           name="status"
           value="in-progress"
-          class="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-md border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-muted hover:bg-neutral-100 dark:hover:bg-muted-hover text-neutral-700 dark:text-neutral-200 transition-colors"
+          class="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-md border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-muted hover:bg-neutral-100 dark:hover:bg-accent text-neutral-700 dark:text-neutral-200 transition-colors"
         >
           Save Progress
         </button>
@@ -124,8 +142,8 @@
       </div>
 
       <!-- Autofill Accordion -->
-      <details id="autofill-accordion" open class="w-full bg-white dark:bg-canvas border border-neutral-200 dark:border-neutral-800 rounded-lg mb-3">
-        <summary class="flex items-center gap-2 px-3 py-2 text-sm font-medium cursor-pointer text-neutral-900 dark:text-neutral-100 hover:bg-neutral-100 dark:hover:bg-muted-hover rounded-lg">
+      <details id="autofill-accordion" open class="w-full bg-white dark:bg-background border border-neutral-200 dark:border-neutral-800 rounded-lg mb-3">
+        <summary class="flex items-center gap-2 px-3 py-2 text-sm font-medium cursor-pointer text-neutral-900 dark:text-neutral-100 hover:bg-neutral-100 dark:hover:bg-accent rounded-lg">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="16"
