@@ -199,14 +199,24 @@
       // URL Parameters
       // ============================================
       const params = new URLSearchParams(window.location.search);
+      const DEFAULT_QUESTIONNAIRE = "http://templates.tiro.health/templates/aa87c115c40149e98faba070cacb15c9";
+      const questionnaire = params.get("questionnaire") || DEFAULT_QUESTIONNAIRE;
+
+      // Build Parameters resource, always including questionnaire
       const paramResource = {
         resourceType: "Parameters",
-        parameter: Array.from(
-          params.entries().map(([name, value]) => ({
-            name,
-            valueString: value,
-          })),
-        ),
+        parameter: [
+          ...Array.from(params.entries())
+            .filter(([name]) => name !== "questionnaire")
+            .map(([name, value]) => ({
+              name,
+              valueString: value,
+            })),
+          {
+            name: "questionnaire",
+            valueString: questionnaire,
+          },
+        ],
       };
 
       // ============================================
@@ -235,9 +245,7 @@
         params.get("accessionNumber") || "example-accession-number";
       form.setAttribute("launch-context", JSON.stringify(launchContext));
 
-      // Set questionnaire from URL parameter or use default
-      const DEFAULT_QUESTIONNAIRE = "http://templates.tiro.health/templates/aa87c115c40149e98faba070cacb15c9";
-      const questionnaire = params.get("questionnaire") || DEFAULT_QUESTIONNAIRE;
+      // Set questionnaire on form
       form.setAttribute("questionnaire", questionnaire);
 
       console.log("Questionnaire:", form.questionnaire);
