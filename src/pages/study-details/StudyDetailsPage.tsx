@@ -1,14 +1,34 @@
+import { useMemo } from 'react';
 import { useParams, Link } from '@tanstack/react-router';
 import { Group, Panel, Separator } from 'react-resizable-panels';
 import { useStudyById } from '@/hooks/useStudies';
 import { DicomViewer } from '@/components/shared/DicomViewer';
-import { ReportingForm } from '@/components/shared/ReportingForm';
+import { ParameterForm } from '@/components/shared/ParameterForm';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
+import type { Study } from '@/types/study';
+
+const DEFAULT_QUESTIONNAIRE =
+  "http://templates.tiro.health/templates/aa87c115c40149e98faba070cacb15c9";
+
+function generatePatientId(study: Study): string {
+  const dob = study.patient.dateOfBirth.replace(/-/g, "");
+  const lastName = study.patient.lastName.substring(0, 3).toUpperCase();
+  return `${dob}-${lastName}`;
+}
 
 export function StudyDetailsPage() {
   const { studyId } = useParams({ from: '/study/$studyId' });
   const study = useStudyById(studyId);
+
+  const initialParams = useMemo((): Record<string, string> => {
+    if (!study) return {};
+    return {
+      questionnaire: DEFAULT_QUESTIONNAIRE,
+      patientId: generatePatientId(study),
+      accessionNumber: study.accessionNumber,
+    };
+  }, [study]);
 
   if (!study) {
     return (
@@ -31,7 +51,7 @@ export function StudyDetailsPage() {
         </Panel>
         <Separator className="resize-handle mx-2" />
         <Panel defaultSize={50} minSize={30}>
-          <ReportingForm study={study} />
+          <ParameterForm initialParams={initialParams} />
         </Panel>
       </Group>
     </div>
