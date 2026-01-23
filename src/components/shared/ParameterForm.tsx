@@ -1,48 +1,39 @@
 import { useState, useMemo, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Settings, Trash2, RefreshCw, Plus } from "lucide-react";
-import type { Study } from "@/types/study";
+import { Settings, Trash2, RefreshCw, Plus, Copy } from "lucide-react";
 
-interface ReportingFormProps {
-  study: Study;
+interface ParameterFormProps {
+  initialParams: Record<string, string>;
 }
 
-function generatePatientId(study: Study): string {
-  const dob = study.patient.dateOfBirth.replace(/-/g, "");
-  const lastName = study.patient.lastName.substring(0, 3).toUpperCase();
-  return `${dob}-${lastName}`;
-}
-type Param = { key: string; value: string };
-export function ReportingForm({ study }: ReportingFormProps) {
-  const patientId = generatePatientId(study);
+export function ParameterForm({ initialParams }: ParameterFormProps) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
-  const [customParams, setCustomParams] = useState<Array<Param>>([]);
+  const [params, setParams] = useState<Record<string, string>>(initialParams);
 
   const launchUrl = useMemo(() => {
-    const params = new URLSearchParams();
-    params.set("patientId", patientId);
-    params.set("accessionNumber", study.accessionNumber);
-    customParams.forEach(({ key, value }) => {
-      if (key) params.set(key, value);
+    const searchParams = new URLSearchParams(params);
+    return `/launch.html?${searchParams.toString()}`;
+  }, [params]);
+
+  const deleteParam = (key: string) => {
+    setParams((prev) => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { [key]: _, ...rest } = prev;
+      return rest;
     });
-    return `/launch.html?${params.toString()}`;
-  }, [patientId, study.accessionNumber, customParams]);
+  };
 
   const handleNewParamSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const formElem = e.target as HTMLFormElement;
-    const params = new FormData(formElem);
-    const key = params.get("key")?.toString().trim() || "";
-    const value = params.get("value")?.toString() || "";
-    if (key) {
-      setCustomParams((prev) => [...prev, { key, value }]);
+    const formData = new FormData(formElem);
+    const key = formData.get("key")?.toString().trim() || "";
+    const value = formData.get("value")?.toString() || "";
+    if (key && !(key in params)) {
+      setParams((prev) => ({ ...prev, [key]: value }));
       formElem.reset();
       formElem.key.focus();
     }
-  };
-
-  const deleteParam = (index: number) => {
-    setCustomParams((prev) => prev.filter((_, i) => i !== index));
   };
 
   return (
@@ -52,7 +43,19 @@ export function ReportingForm({ study }: ReportingFormProps) {
           <CardTitle className="text-lg">Reporting</CardTitle>
           <div className="flex items-center gap-2">
             <button
-              onClick={iframeRef.current?.contentWindow?.location.reload}
+              onClick={() => {
+                const fullUrl = window.location.origin + launchUrl;
+                navigator.clipboard.writeText(fullUrl);
+              }}
+              className="cursor-pointer"
+              title="Copy URL"
+            >
+              <Copy className="h-4 w-4 text-muted-foreground hover:text-foreground transition-colors" />
+            </button>
+            <button
+              onClick={() =>
+                iframeRef.current?.contentWindow?.location.reload()
+              }
               className="cursor-pointer"
               title="Refresh iframe"
             >
@@ -62,42 +65,21 @@ export function ReportingForm({ study }: ReportingFormProps) {
               <summary className="cursor-pointer list-none">
                 <Settings className="h-4 w-4 text-muted-foreground hover:text-foreground transition-colors" />
               </summary>
-              <div className="absolute right-0 mt-2 p-3 bg-card border rounded-md shadow-lg z-10 min-w-[280px]">
+              <div className="absolute right-0 mt-2 p-3 bg-card border rounded-md shadow-lg z-10 min-w-70">
                 <p className="text-xs font-medium text-muted-foreground mb-2">
-                  iframe URL Parameters
+                  URL Parameters
                 </p>
                 <div className="space-y-1.5">
-                  {/* Base params (read-only) */}
-                  <div className="flex gap-2 text-xs items-center">
-                    <span className="flex-1 text-muted-foreground truncate">
-                      patientId
-                    </span>
-                    <span className="flex-1 font-mono truncate">
-                      {patientId}
-                    </span>
-                    <div className="w-5" />
-                  </div>
-                  <div className="flex gap-2 text-xs items-center">
-                    <span className="flex-1 text-muted-foreground truncate">
-                      accessionNumber
-                    </span>
-                    <span className="flex-1 font-mono truncate">
-                      {study.accessionNumber}
-                    </span>
-                    <div className="w-5" />
-                  </div>
-
-                  {/* Custom params with delete */}
-                  {customParams.map((param, index) => (
-                    <div key={index} className="flex gap-2 items-center">
+                  {Object.entries(params).map(([key, value]) => (
+                    <div key={key} className="flex gap-2 items-center">
                       <span className="flex-1 text-xs text-muted-foreground truncate">
-                        {param.key}
+                        {key}
                       </span>
                       <span className="flex-1 text-xs font-mono truncate">
-                        {param.value}
+                        {value}
                       </span>
                       <button
-                        onClick={() => deleteParam(index)}
+                        onClick={() => deleteParam(key)}
                         className="text-muted-foreground hover:text-destructive transition-colors"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
