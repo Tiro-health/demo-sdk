@@ -12,6 +12,10 @@ const DEFAULT_QUESTIONNAIRE =
   "http://templates.tiro.health/templates/aa87c115c40149e98faba070cacb15c9";
 const PACS_TEMPLATE_URL =
   "http://templates.tiro.health/templates/8d7ab478ce8b4dc3a84b7b33ab34b335";
+const PACS_CT_CORONAROGRAPHY_TEMPLATE_URL =
+  "http://templates.tiro.health/templates/04cd8b41a7dc491f8fb006f66c60c958";
+const ADVANCED_TEMPLATE_URL =
+  "http://templates.tiro.health/templates/b18e0a6605bb437e90d54f8ec65eeb1d";
 
 function generatePatientId(study: Study): string {
   const dob = study.patient.dateOfBirth.replace(/-/g, "");
@@ -63,6 +67,8 @@ export function StudyDetailsPage() {
             templateOptions={[
               { id: 'radiology', label: 'Radiology reporting', questionnaire: DEFAULT_QUESTIONNAIRE },
               { id: 'basic', label: 'Basic template', questionnaire: PACS_TEMPLATE_URL },
+              { id: 'ct-coronarography', label: 'CT Coronarography', questionnaire: PACS_CT_CORONAROGRAPHY_TEMPLATE_URL },
+              { id: 'advanced', label: 'Advanced template', questionnaire: ADVANCED_TEMPLATE_URL },
             ]}
           />
         </Panel>

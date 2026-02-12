@@ -10,6 +10,7 @@ import { DEMO_CONFIGS } from '@/lib/demoRegistry';
 import type { Specimen } from '@/types/specimen';
 
 const LIS_BASIC_TEMPLATE_URL = 'http://templates.tiro.health/templates/3640e41dba1e4318934e411a054cd721';
+const ADVANCED_TEMPLATE_URL = 'http://templates.tiro.health/templates/b18e0a6605bb437e90d54f8ec65eeb1d';
 
 function generatePatientId(specimen: Specimen): string {
   const dob = specimen.patient.dateOfBirth.replace(/-/g, '');
@@ -63,6 +64,7 @@ export function SpecimenDetailsPage() {
             templateOptions={[
               { id: 'thyroid', label: 'Thyroid reporting', questionnaire: DEMO_CONFIGS.lis.defaultTemplateUrl },
               { id: 'basic', label: 'Basic template', questionnaire: LIS_BASIC_TEMPLATE_URL },
+              { id: 'advanced', label: 'Advanced template', questionnaire: ADVANCED_TEMPLATE_URL },
             ]}
           />
         </Panel>
