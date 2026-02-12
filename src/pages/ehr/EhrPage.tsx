@@ -3,6 +3,7 @@ import { Group, Panel, Separator } from 'react-resizable-panels';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ParameterForm } from '@/components/shared/ParameterForm';
 import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
+import { useClinician } from '@/hooks/useClinician';
 
 const EHR_TEMPLATE_URL = 'http://templates.tiro.health/templates/11bc9b87d0744edb843ca6250ce24494';
 const ADVANCED_TEMPLATE_URL = 'http://templates.tiro.health/templates/b18e0a6605bb437e90d54f8ec65eeb1d';
@@ -196,6 +197,7 @@ const EHR_PATIENTS: EhrPatient[] = [
 
 export function EhrPage() {
   const [selectedPatientId, setSelectedPatientId] = useState<string>(EHR_PATIENTS[0].id);
+  const { clinicianName } = useClinician();
   const selectedPatient = useMemo(
     () => EHR_PATIENTS.find((patient) => patient.id === selectedPatientId) ?? EHR_PATIENTS[0],
     [selectedPatientId]
@@ -209,10 +211,10 @@ export function EhrPage() {
     patientFamily: selectedPatient.family,
     patientBirthDate: selectedPatient.birthDate,
     encounterId: selectedPatient.encounterId,
-    clinicianName: 'dr. Peeters',
+    clinicianName,
     theme: 'light',
     demoType: 'ehr',
-  }), [selectedPatient]);
+  }), [selectedPatient, clinicianName]);
 
   return (
     <div className="h-[calc(100vh-3.5rem)] p-4 bg-[radial-gradient(1200px_520px_at_10%_-10%,rgba(59,130,246,0.10),transparent_65%),radial-gradient(900px_420px_at_100%_-5%,rgba(16,185,129,0.08),transparent_62%),#ffffff]">

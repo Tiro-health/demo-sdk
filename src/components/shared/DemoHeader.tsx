@@ -2,7 +2,9 @@ import { useEffect, useRef, useState } from 'react';
 import { ArrowLeft, Check, ChevronDown } from 'lucide-react';
 import { Link } from '@tanstack/react-router';
 import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DEMO_CONFIGS, type DemoType } from '@/lib/demoRegistry';
+import { useClinician } from '@/hooks/useClinician';
 import type { ReactNode } from 'react';
 
 interface DemoHeaderProps {
@@ -18,6 +20,13 @@ export function DemoHeader({ demoType, contextInfo, showBackButton, backTo }: De
   const config = DEMO_CONFIGS[demoType];
   const Icon = config.icon;
   const demoEntries = Object.values(DEMO_CONFIGS);
+  const { clinicianName, setClinicianName, options } = useClinician();
+  const clinicianInitials = clinicianName
+    .replace(/^dr\.\s*/i, '')
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase() || '')
+    .join('');
 
   useEffect(() => {
     const handleOutsideClick = (event: MouseEvent) => {
@@ -40,7 +49,7 @@ export function DemoHeader({ demoType, contextInfo, showBackButton, backTo }: De
 
   return (
     <header className="header-blur sticky top-0 z-50 border-b border-border/25 bg-background/88 backdrop-blur supports-[backdrop-filter]:bg-background/74">
-      <div className="container flex h-14 items-center justify-between px-4">
+      <div className="container grid h-14 grid-cols-[auto_1fr_auto] items-center gap-4 px-4">
         <div className="flex items-center gap-3">
           {showBackButton && (
             <Button variant="ghost" size="sm" asChild>
@@ -102,7 +111,32 @@ export function DemoHeader({ demoType, contextInfo, showBackButton, backTo }: De
             <p className="text-xs text-muted-foreground">{config.tiroLabel}</p>
           </div>
         </div>
-        {contextInfo}
+        <div className="justify-self-end">
+          {contextInfo && <div className="mr-3 inline-flex items-center align-middle">{contextInfo}</div>}
+          <div className="inline-flex items-center gap-2 rounded-full border border-border/20 bg-background/55 px-2 py-0.5 align-middle">
+            <div className="relative h-7 w-7 shrink-0">
+              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 text-[11px] font-medium text-primary/85">
+                {clinicianInitials}
+              </div>
+              <span className="absolute -bottom-0.5 -right-0.5 h-2 w-2 rounded-full border border-background bg-emerald-500/90" />
+            </div>
+            <div className="hidden md:block leading-tight">
+              <p className="text-[9px] uppercase tracking-wide text-muted-foreground/80">Logged in</p>
+            </div>
+            <Select value={clinicianName} onValueChange={setClinicianName}>
+              <SelectTrigger className="h-8 w-[165px] border-0 bg-transparent px-1.5 text-sm font-medium text-foreground/90 shadow-none focus:ring-0 focus-visible:ring-0">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="border-border/35 bg-card/98 shadow-lg">
+                {options.map((name) => (
+                  <SelectItem key={name} value={name} className="focus:bg-accent">
+                    {name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
       </div>
     </header>
   );

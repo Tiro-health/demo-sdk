@@ -6,6 +6,7 @@ import { DicomViewer } from '@/components/shared/DicomViewer';
 import { ParameterForm } from '@/components/shared/ParameterForm';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
+import { useClinician } from '@/hooks/useClinician';
 import type { Study } from '@/types/study';
 
 const DEFAULT_QUESTIONNAIRE =
@@ -26,6 +27,7 @@ function generatePatientId(study: Study): string {
 export function StudyDetailsPage() {
   const { studyId } = useParams({ from: '/pacs/study/$studyId' });
   const study = useStudyById(studyId);
+  const { clinicianName } = useClinician();
 
   const initialParams = useMemo((): Record<string, string> => {
     if (!study) return {};
@@ -35,9 +37,10 @@ export function StudyDetailsPage() {
       patientId: generatePatientId(study),
       accessionNumber: study.accessionNumber,
       '0008,1030': 'T1 flare',
+      clinicianName,
       theme: 'dark',
     };
-  }, [study]);
+  }, [study, clinicianName]);
 
   if (!study) {
     return (

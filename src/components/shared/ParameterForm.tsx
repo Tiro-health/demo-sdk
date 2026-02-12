@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Settings, Trash2, RefreshCw, Plus, Copy } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -24,16 +24,25 @@ export function ParameterForm({
 }: ParameterFormProps) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [params, setParams] = useState<Record<string, string>>(initialParams);
-  const effectiveTemplateOptions = templateOptions.length > 0
-    ? templateOptions
-    : [{
-        id: "default",
-        label: "Default template",
-        questionnaire: initialParams.questionnaire || "",
-      }];
+  const effectiveTemplateOptions = useMemo(
+    () =>
+      templateOptions.length > 0
+        ? templateOptions
+        : [{
+            id: "default",
+            label: "Default template",
+            questionnaire: initialParams.questionnaire || "",
+          }],
+    [templateOptions, initialParams.questionnaire]
+  );
   const [templatePreset, setTemplatePreset] = useState<string>(
     initialParams.templatePreset || effectiveTemplateOptions[0].id
   );
+
+  useEffect(() => {
+    setParams(initialParams);
+    setTemplatePreset(initialParams.templatePreset || effectiveTemplateOptions[0].id);
+  }, [initialParams, effectiveTemplateOptions]);
 
   const launchUrl = useMemo(() => {
     const searchParams = new URLSearchParams(params);

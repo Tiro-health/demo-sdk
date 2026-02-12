@@ -7,6 +7,7 @@ import { ParameterForm } from '@/components/shared/ParameterForm';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { DEMO_CONFIGS } from '@/lib/demoRegistry';
+import { useClinician } from '@/hooks/useClinician';
 import type { Specimen } from '@/types/specimen';
 
 const LIS_BASIC_TEMPLATE_URL = 'http://templates.tiro.health/templates/3640e41dba1e4318934e411a054cd721';
@@ -21,6 +22,7 @@ function generatePatientId(specimen: Specimen): string {
 export function SpecimenDetailsPage() {
   const { specimenId } = useParams({ from: '/lis/specimen/$specimenId' });
   const specimen = useSpecimenById(specimenId);
+  const { clinicianName } = useClinician();
 
   const initialParams = useMemo((): Record<string, string> => {
     if (!specimen) return {};
@@ -30,12 +32,12 @@ export function SpecimenDetailsPage() {
       accessionNumber: specimen.accessionNumber,
       specimenType: specimen.specimenType,
       testOrdered: specimen.testOrdered,
-      clinicianName: 'dr. Peeters',
+      clinicianName,
       templatePreset: 'thyroid',
       theme: 'light',
       demoType: 'lis',
     };
-  }, [specimen]);
+  }, [specimen, clinicianName]);
 
   if (!specimen) {
     return (
