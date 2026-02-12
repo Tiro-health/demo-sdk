@@ -10,6 +10,8 @@ import type { Study } from '@/types/study';
 
 const DEFAULT_QUESTIONNAIRE =
   "http://templates.tiro.health/templates/aa87c115c40149e98faba070cacb15c9";
+const PACS_TEMPLATE_URL =
+  "http://templates.tiro.health/templates/8d7ab478ce8b4dc3a84b7b33ab34b335";
 
 function generatePatientId(study: Study): string {
   const dob = study.patient.dateOfBirth.replace(/-/g, "");
@@ -25,6 +27,7 @@ export function StudyDetailsPage() {
     if (!study) return {};
     return {
       questionnaire: DEFAULT_QUESTIONNAIRE,
+      templatePreset: 'radiology',
       patientId: generatePatientId(study),
       accessionNumber: study.accessionNumber,
       '0008,1030': 'T1 flare',
@@ -53,7 +56,15 @@ export function StudyDetailsPage() {
         </Panel>
         <Separator className="resize-handle mx-2" />
         <Panel defaultSize={50} minSize={30}>
-          <ParameterForm initialParams={initialParams} panelTone="dark" />
+          <ParameterForm
+            initialParams={initialParams}
+            panelTone="dark"
+            showTemplatePicker
+            templateOptions={[
+              { id: 'radiology', label: 'Radiology reporting', questionnaire: DEFAULT_QUESTIONNAIRE },
+              { id: 'basic', label: 'Basic template', questionnaire: PACS_TEMPLATE_URL },
+            ]}
+          />
         </Panel>
       </Group>
     </div>

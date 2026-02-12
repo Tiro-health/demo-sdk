@@ -3,25 +3,36 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Settings, Trash2, RefreshCw, Plus, Copy } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
+interface TemplateOption {
+  id: string;
+  label: string;
+  questionnaire: string;
+}
+
 interface ParameterFormProps {
   initialParams: Record<string, string>;
   panelTone?: 'light' | 'dark';
   showTemplatePicker?: boolean;
+  templateOptions?: TemplateOption[];
 }
-
-type TemplatePreset = 'thyroid' | 'basic';
-const BASIC_TEMPLATE_URL = 'http://templates.tiro.health/templates/3640e41dba1e4318934e411a054cd721';
 
 export function ParameterForm({
   initialParams,
   panelTone = 'light',
   showTemplatePicker = false,
+  templateOptions = [],
 }: ParameterFormProps) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [params, setParams] = useState<Record<string, string>>(initialParams);
-  const defaultQuestionnaire = initialParams.questionnaire || "";
-  const [templatePreset, setTemplatePreset] = useState<TemplatePreset>(
-    initialParams.inlineQuestionnaire === "basic" ? "basic" : "thyroid"
+  const effectiveTemplateOptions = templateOptions.length > 0
+    ? templateOptions
+    : [{
+        id: "default",
+        label: "Default template",
+        questionnaire: initialParams.questionnaire || "",
+      }];
+  const [templatePreset, setTemplatePreset] = useState<string>(
+    initialParams.templatePreset || effectiveTemplateOptions[0].id
   );
 
   const launchUrl = useMemo(() => {
@@ -29,18 +40,14 @@ export function ParameterForm({
     return `/launch.html?${searchParams.toString()}`;
   }, [params]);
 
-  const applyTemplatePreset = (preset: TemplatePreset) => {
+  const applyTemplatePreset = (preset: string) => {
+    const selectedTemplate = effectiveTemplateOptions.find((item) => item.id === preset);
+    if (!selectedTemplate) return;
+
     setParams((prev) => {
       const next: Record<string, string> = { ...prev, templatePreset: preset };
-      if (preset === "basic") {
-        next.questionnaire = BASIC_TEMPLATE_URL;
-        delete next.inlineQuestionnaire;
-      } else {
-        if (defaultQuestionnaire) {
-          next.questionnaire = defaultQuestionnaire;
-        }
-        delete next.inlineQuestionnaire;
-      }
+      next.questionnaire = selectedTemplate.questionnaire;
+      delete next.inlineQuestionnaire;
       return next;
     });
   };
@@ -69,34 +76,54 @@ export function ParameterForm({
   return (
     <Card className={`h-full flex flex-col ${panelTone === 'dark' ? 'bg-[#050A18]' : 'bg-[#FAFAFA]'}`}>
       <CardHeader className="pb-2">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
+        <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
+          <div className="justify-self-start">
             <CardTitle className="text-lg">Reporting</CardTitle>
+          </div>
+          <div className="justify-self-center">
             {showTemplatePicker && (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center justify-center gap-2">
                 <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
                   Template
                 </span>
                 <Select
                   value={templatePreset}
                   onValueChange={(value) => {
-                    const nextPreset = value as TemplatePreset;
-                    setTemplatePreset(nextPreset);
-                    applyTemplatePreset(nextPreset);
+                    setTemplatePreset(value);
+                    applyTemplatePreset(value);
                   }}
                 >
-                  <SelectTrigger className="h-8 w-[190px] bg-background/80">
+                  <SelectTrigger
+                    className={`h-8 w-[220px] shadow-none ${
+                      panelTone === 'dark'
+                        ? 'bg-white/5 border-white/12 text-slate-100 focus:ring-0 focus-visible:ring-0'
+                        : 'bg-white/70 border-black/10 text-slate-800 focus:ring-0 focus-visible:ring-0'
+                    }`}
+                  >
                     <SelectValue placeholder="Select template" />
                   </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="thyroid">Thyroid reporting</SelectItem>
-                    <SelectItem value="basic">Basic template</SelectItem>
+                  <SelectContent
+                    className={`shadow-xl ${
+                      panelTone === 'dark'
+                        ? 'bg-[#0E1630] border-white/12 text-slate-100'
+                        : 'bg-white border-black/10 text-slate-800'
+                    }`}
+                  >
+                    {effectiveTemplateOptions.map((templateOption) => (
+                      <SelectItem
+                        key={templateOption.id}
+                        value={templateOption.id}
+                        className={panelTone === 'dark' ? 'focus:bg-white/10 focus:text-slate-100' : 'focus:bg-slate-100'}
+                      >
+                        {templateOption.label}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
             )}
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 justify-self-end">
             <button
               onClick={() => {
                 const fullUrl = window.location.origin + launchUrl;
