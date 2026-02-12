@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { Group, Panel, Separator } from 'react-resizable-panels';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ParameterForm } from '@/components/shared/ParameterForm';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
 
 const EHR_TEMPLATE_URL = 'http://templates.tiro.health/templates/11bc9b87d0744edb843ca6250ce24494';
 const ADVANCED_TEMPLATE_URL = 'http://templates.tiro.health/templates/b18e0a6605bb437e90d54f8ec65eeb1d';
@@ -11,6 +11,7 @@ type EhrPatient = {
   id: string;
   given: string;
   family: string;
+  avatarUrl: string;
   birthDate: string;
   ageLabel: string;
   weightKg: number;
@@ -32,6 +33,7 @@ const EHR_PATIENTS: EhrPatient[] = [
     id: '19581201-PEE',
     given: 'Marc',
     family: 'Peeters',
+    avatarUrl: 'https://randomuser.me/api/portraits/men/75.jpg',
     birthDate: '1958-12-01',
     ageLabel: '67 years',
     weightKg: 82,
@@ -55,6 +57,7 @@ const EHR_PATIENTS: EhrPatient[] = [
     id: '19600419-VDB',
     given: 'Luc',
     family: 'Van den Broeck',
+    avatarUrl: 'https://randomuser.me/api/portraits/men/67.jpg',
     birthDate: '1960-04-19',
     ageLabel: '65 years',
     weightKg: 86,
@@ -77,6 +80,7 @@ const EHR_PATIENTS: EhrPatient[] = [
     id: '19590523-DSM',
     given: 'Jan',
     family: 'De Smet',
+    avatarUrl: 'https://randomuser.me/api/portraits/men/61.jpg',
     birthDate: '1959-05-23',
     ageLabel: '66 years',
     weightKg: 79,
@@ -99,6 +103,7 @@ const EHR_PATIENTS: EhrPatient[] = [
     id: '19620315-MVR',
     given: 'Peter',
     family: 'Maes',
+    avatarUrl: 'https://randomuser.me/api/portraits/men/68.jpg',
     birthDate: '1962-03-15',
     ageLabel: '63 years',
     weightKg: 91,
@@ -121,6 +126,7 @@ const EHR_PATIENTS: EhrPatient[] = [
     id: '19570708-LHC',
     given: 'Koen',
     family: 'Lemmens',
+    avatarUrl: 'https://randomuser.me/api/portraits/men/71.jpg',
     birthDate: '1957-07-08',
     ageLabel: '68 years',
     weightKg: 77,
@@ -143,6 +149,7 @@ const EHR_PATIENTS: EhrPatient[] = [
     id: '19610511-RDM',
     given: 'Tom',
     family: 'Raes',
+    avatarUrl: 'https://randomuser.me/api/portraits/men/73.jpg',
     birthDate: '1961-05-11',
     ageLabel: '64 years',
     weightKg: 88,
@@ -165,6 +172,7 @@ const EHR_PATIENTS: EhrPatient[] = [
     id: '19560430-VDW',
     given: 'Dirk',
     family: 'Verhoeven',
+    avatarUrl: 'https://randomuser.me/api/portraits/men/79.jpg',
     birthDate: '1956-04-30',
     ageLabel: '69 years',
     weightKg: 74,
@@ -220,12 +228,28 @@ export function EhrPage() {
                 <div className="mt-2">
                   <Select value={selectedPatient.id} onValueChange={setSelectedPatientId}>
                     <SelectTrigger className="h-9 w-full border-black/10 bg-white/70 text-slate-800 shadow-none focus:ring-0 focus-visible:ring-0">
-                      <SelectValue placeholder="Select patient" />
+                      <div className="flex items-center gap-2">
+                        <img
+                          src={selectedPatient.avatarUrl}
+                          alt={`${selectedPatient.given} ${selectedPatient.family}`}
+                          className="h-5 w-5 rounded-full border border-slate-200 object-cover"
+                        />
+                        <span className="truncate">
+                          {selectedPatient.family}, {selectedPatient.given}
+                        </span>
+                      </div>
                     </SelectTrigger>
                     <SelectContent className="border-black/10 bg-white text-slate-800 shadow-xl">
                       {EHR_PATIENTS.map((patient) => (
                         <SelectItem key={patient.id} value={patient.id} className="focus:bg-slate-100">
-                          {patient.family}, {patient.given}
+                          <div className="flex items-center gap-2">
+                            <img
+                              src={patient.avatarUrl}
+                              alt={`${patient.given} ${patient.family}`}
+                              className="h-5 w-5 rounded-full border border-slate-200 object-cover"
+                            />
+                            <span>{patient.family}, {patient.given}</span>
+                          </div>
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -234,7 +258,14 @@ export function EhrPage() {
               </section>
               <section className="rounded-xl border border-border/50 bg-white p-4">
                 <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Patient</div>
-                <div className="mt-2 text-base font-semibold">{selectedPatient.family}, {selectedPatient.given}</div>
+                <div className="mt-2 flex items-center gap-3">
+                  <img
+                    src={selectedPatient.avatarUrl}
+                    alt={`${selectedPatient.given} ${selectedPatient.family}`}
+                    className="h-10 w-10 rounded-full border border-slate-200 object-cover"
+                  />
+                  <div className="text-base font-semibold">{selectedPatient.family}, {selectedPatient.given}</div>
+                </div>
                 <div className="text-muted-foreground">DOB {selectedPatient.birthDate} • Male • {selectedPatient.ageLabel}</div>
               </section>
               <section className="rounded-xl border border-border/50 bg-white p-4">
