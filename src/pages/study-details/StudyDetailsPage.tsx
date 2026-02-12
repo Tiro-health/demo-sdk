@@ -53,7 +53,7 @@ export function StudyDetailsPage() {
         </Panel>
         <Separator className="resize-handle mx-2" />
         <Panel defaultSize={50} minSize={30}>
-          <ParameterForm initialParams={initialParams} />
+          <ParameterForm initialParams={initialParams} panelTone="dark" />
         </Panel>
       </Group>
     </div>

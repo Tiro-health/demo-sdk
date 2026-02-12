@@ -268,8 +268,49 @@
       const params = new URLSearchParams(window.location.search);
       const DEFAULT_QUESTIONNAIRE =
         "http://templates.tiro.health/templates/aa87c115c40149e98faba070cacb15c9";
+      const inlineQuestionnaire = params.get("inlineQuestionnaire");
       const questionnaire =
-        params.get("questionnaire") || DEFAULT_QUESTIONNAIRE;
+        !inlineQuestionnaire
+          ? (params.get("questionnaire") || DEFAULT_QUESTIONNAIRE)
+          : null;
+
+      function createBasicQuestionnaire() {
+        const largeMultiline = {
+          maxLength: 4000,
+          extension: [
+            {
+              url: "http://hl7.org/fhir/StructureDefinition/maxLength",
+              valueInteger: 4000,
+            },
+          ],
+        };
+
+        return {
+          resourceType: "Questionnaire",
+          status: "draft",
+          title: "Basic template",
+          item: [
+            {
+              linkId: "macroscopy",
+              text: "Macroscopy",
+              type: "text",
+              ...largeMultiline,
+            },
+            {
+              linkId: "microscopy",
+              text: "Microscopy",
+              type: "text",
+              ...largeMultiline,
+            },
+            {
+              linkId: "conclusion",
+              text: "Conclusion",
+              type: "text",
+              ...largeMultiline,
+            },
+          ],
+        };
+      }
 
       // ============================================
       // Demo-type header
@@ -292,15 +333,17 @@
         resourceType: "Parameters",
         parameter: [
           ...Array.from(params.entries())
-            .filter(([name]) => name !== "questionnaire")
+            .filter(([name]) => name !== "questionnaire" && name !== "inlineQuestionnaire")
             .map(([name, value]) => ({
               name,
               valueString: value,
             })),
-          {
-            name: "questionnaire",
-            valueString: questionnaire,
-          },
+          ...(questionnaire
+            ? [{
+                name: "questionnaire",
+                valueString: questionnaire,
+              }]
+            : []),
         ],
       };
 
@@ -330,10 +373,16 @@
         params.get("accessionNumber") || "example-accession-number";
       form.setAttribute("launch-context", JSON.stringify(launchContext));
 
-      // Set questionnaire on form
-      form.setAttribute("questionnaire", questionnaire);
-
-      console.log("Questionnaire:", form.questionnaire);
+      // Set questionnaire on form (URL template or inline basic template)
+      if (inlineQuestionnaire === "basic") {
+        const inlineScript = document.createElement("script");
+        inlineScript.type = "application/fhir+json";
+        inlineScript.slot = "questionnaire";
+        inlineScript.textContent = JSON.stringify(createBasicQuestionnaire());
+        form.appendChild(inlineScript);
+      } else if (questionnaire) {
+        form.setAttribute("questionnaire", questionnaire);
+      }
 
       function showLoading() {
         loadingOverlay.classList.remove("hidden");

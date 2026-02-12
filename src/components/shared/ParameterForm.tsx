@@ -1,19 +1,49 @@
 import { useState, useMemo, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Settings, Trash2, RefreshCw, Plus, Copy } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface ParameterFormProps {
   initialParams: Record<string, string>;
+  panelTone?: 'light' | 'dark';
+  showTemplatePicker?: boolean;
 }
 
-export function ParameterForm({ initialParams }: ParameterFormProps) {
+type TemplatePreset = 'thyroid' | 'basic';
+const BASIC_TEMPLATE_URL = 'http://templates.tiro.health/templates/3640e41dba1e4318934e411a054cd721';
+
+export function ParameterForm({
+  initialParams,
+  panelTone = 'light',
+  showTemplatePicker = false,
+}: ParameterFormProps) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [params, setParams] = useState<Record<string, string>>(initialParams);
+  const defaultQuestionnaire = initialParams.questionnaire || "";
+  const [templatePreset, setTemplatePreset] = useState<TemplatePreset>(
+    initialParams.inlineQuestionnaire === "basic" ? "basic" : "thyroid"
+  );
 
   const launchUrl = useMemo(() => {
     const searchParams = new URLSearchParams(params);
     return `/launch.html?${searchParams.toString()}`;
   }, [params]);
+
+  const applyTemplatePreset = (preset: TemplatePreset) => {
+    setParams((prev) => {
+      const next: Record<string, string> = { ...prev, templatePreset: preset };
+      if (preset === "basic") {
+        next.questionnaire = BASIC_TEMPLATE_URL;
+        delete next.inlineQuestionnaire;
+      } else {
+        if (defaultQuestionnaire) {
+          next.questionnaire = defaultQuestionnaire;
+        }
+        delete next.inlineQuestionnaire;
+      }
+      return next;
+    });
+  };
 
   const deleteParam = (key: string) => {
     setParams((prev) => {
@@ -37,10 +67,35 @@ export function ParameterForm({ initialParams }: ParameterFormProps) {
   };
 
   return (
-    <Card className="h-full flex flex-col bg-[#FAFAFA]">
+    <Card className={`h-full flex flex-col ${panelTone === 'dark' ? 'bg-[#050A18]' : 'bg-[#FAFAFA]'}`}>
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-lg">Reporting</CardTitle>
+          <div className="flex items-center gap-4">
+            <CardTitle className="text-lg">Reporting</CardTitle>
+            {showTemplatePicker && (
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                  Template
+                </span>
+                <Select
+                  value={templatePreset}
+                  onValueChange={(value) => {
+                    const nextPreset = value as TemplatePreset;
+                    setTemplatePreset(nextPreset);
+                    applyTemplatePreset(nextPreset);
+                  }}
+                >
+                  <SelectTrigger className="h-8 w-[190px] bg-background/80">
+                    <SelectValue placeholder="Select template" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="thyroid">Thyroid reporting</SelectItem>
+                    <SelectItem value="basic">Basic template</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+          </div>
           <div className="flex items-center gap-2">
             <button
               onClick={() => {

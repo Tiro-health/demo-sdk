@@ -80,44 +80,44 @@
 }
 
 .dark {
-  /* Base palette from provided scheme (PACS dark) */
-  --blue-50: 218 21% 28%;
-  --blue-100: 218 45% 42%;
-  --blue-200: 217 60% 57%;
-  --blue-300: 217 63% 65%;
-  --blue-400: 217 66% 72%;
-  --blue-500: 217 72% 79%;
-  --blue-600: 218 77% 83%;
-  --blue-700: 218 83% 86%;
+  /* PACS dark palette anchored on #050A18 */
+  --blue-50: 224 52% 10%;
+  --blue-100: 223 50% 15%;
+  --blue-200: 220 48% 24%;
+  --blue-300: 218 58% 38%;
+  --blue-400: 217 63% 52%;
+  --blue-500: 216 70% 65%;
+  --blue-600: 214 75% 75%;
+  --blue-700: 212 80% 85%;
 
-  --grey-50: 210 2% 18%;
-  --grey-100: 225 3% 29%;
-  --grey-200: 225 2% 35%;
-  --grey-300: 180 2% 41%;
-  --grey-400: 218 11% 65%;
-  --grey-500: 216 2% 47%;
-  --grey-600: 210 4% 69%;
-  --grey-700: 207 11% 84%;
+  --grey-50: 225 67% 6%;
+  --grey-100: 225 48% 9%;
+  --grey-200: 224 37% 12%;
+  --grey-300: 223 27% 17%;
+  --grey-400: 220 18% 30%;
+  --grey-500: 217 14% 45%;
+  --grey-600: 215 16% 64%;
+  --grey-700: 213 24% 84%;
 
-  /* 12-step neutral grayscale with subtle blue undertone */
+  /* 12-step neutral grayscale with dark blue undertone */
   --neutral-1: var(--grey-50);
-  --neutral-2: 220 6% 22%;
-  --neutral-3: var(--grey-100);
-  --neutral-4: var(--grey-200);
-  --neutral-5: var(--grey-300);
-  --neutral-6: 214 4% 50%;
-  --neutral-7: var(--grey-400);
-  --neutral-8: var(--grey-500);
-  --neutral-9: var(--grey-600);
-  --neutral-10: 212 7% 76%;
-  --neutral-11: var(--grey-700);
-  --neutral-12: 210 23% 92%;
+  --neutral-2: var(--grey-100);
+  --neutral-3: var(--grey-200);
+  --neutral-4: var(--grey-300);
+  --neutral-5: var(--grey-400);
+  --neutral-6: var(--grey-500);
+  --neutral-7: 216 15% 56%;
+  --neutral-8: var(--grey-600);
+  --neutral-9: 214 22% 74%;
+  --neutral-10: var(--grey-700);
+  --neutral-11: 212 34% 90%;
+  --neutral-12: 210 44% 96%;
 
-  --primary: var(--blue-200);
-  --primary-foreground: 218 21% 20%;
-  --focus-ring: var(--blue-300);
+  --primary: var(--blue-500);
+  --primary-foreground: 226 50% 10%;
+  --focus-ring: var(--blue-400);
   --destructive: 0 76% 62%;
-  --destructive-foreground: 220 35% 12%;
+  --destructive-foreground: 225 46% 10%;
 
   --badge-info-bg: hsl(var(--blue-50) / 0.9);
   --badge-info-fg: hsl(var(--blue-700));
@@ -153,8 +153,9 @@ samp {
 
 .worklist-page-shell-pacs {
   background:
-    radial-gradient(1200px 480px at 5% -5%, hsl(var(--blue-50) / 0.5), transparent 70%),
-    radial-gradient(900px 420px at 100% -10%, hsl(var(--blue-100) / 0.28), transparent 70%);
+    radial-gradient(1200px 540px at 5% -5%, hsl(var(--blue-200) / 0.34), transparent 70%),
+    radial-gradient(900px 460px at 100% -10%, hsl(var(--blue-100) / 0.38), transparent 70%),
+    linear-gradient(180deg, hsl(var(--neutral-1)), hsl(var(--neutral-2)));
 }
 
 .worklist-page-shell-lis {
@@ -177,7 +178,7 @@ samp {
 }
 
 .worklist-filter-bar-pacs {
-  background: linear-gradient(120deg, hsl(var(--neutral-2) / 0.96), hsl(var(--blue-50) / 0.2));
+  background: linear-gradient(120deg, hsl(var(--neutral-2) / 0.98), hsl(var(--blue-100) / 0.42));
 }
 
 .worklist-filter-bar-lis {
@@ -190,7 +191,7 @@ samp {
 }
 
 .worklist-table-shell-pacs {
-  background: linear-gradient(180deg, hsl(var(--neutral-2) / 0.95), hsl(var(--blue-50) / 0.15));
+  background: linear-gradient(180deg, hsl(var(--neutral-2) / 0.98), hsl(var(--blue-50) / 0.28));
 }
 
 .worklist-table-shell-lis {
@@ -200,9 +201,9 @@ samp {
 /* PACS study row styles (dark theme) */
 .study-row {
   background-color: hsl(var(--neutral-2));
-  border-color: hsl(var(--neutral-5) / 0.65);
+  border-color: hsl(var(--neutral-5) / 0.5);
   @apply border rounded-lg;
-  @apply hover:shadow-[0_8px_24px_rgba(0,0,0,0.22)];
+  @apply hover:shadow-[0_12px_26px_rgba(0,0,0,0.34)];
   @apply transition-all duration-200 ease-out;
   @apply focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none;
   @apply cursor-pointer;
@@ -211,7 +212,7 @@ samp {
 
 .study-row:hover {
   background-color: hsl(var(--neutral-3));
-  border-color: hsl(var(--blue-300) / 0.55);
+  border-color: hsl(var(--blue-400) / 0.58);
   transform: translate3d(0, -1px, 0);
 }
 
@@ -297,11 +298,13 @@ samp {
 }
 
 .dark .worklist-panel {
-  border-color: hsl(var(--neutral-5) / 0.2);
+  border-color: hsl(var(--neutral-5) / 0.28);
+  box-shadow: 0 20px 38px rgba(2, 6, 18, 0.45);
 }
 
 .dark .worklist-table-shell {
-  border-color: hsl(var(--neutral-5) / 0.18);
+  border-color: hsl(var(--neutral-5) / 0.24);
+  box-shadow: 0 24px 44px rgba(2, 6, 18, 0.5);
 }
 
 /* Header blur effect */

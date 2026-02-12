@@ -28,6 +28,7 @@ export function SpecimenDetailsPage() {
       specimenType: specimen.specimenType,
       testOrdered: specimen.testOrdered,
       clinicianName: 'dr. Peeters',
+      templatePreset: 'thyroid',
       theme: 'light',
       demoType: 'lis',
     };
@@ -54,7 +55,7 @@ export function SpecimenDetailsPage() {
         </Panel>
         <Separator className="resize-handle mx-2" />
         <Panel defaultSize={60} minSize={30}>
-          <ParameterForm initialParams={initialParams} />
+          <ParameterForm initialParams={initialParams} showTemplatePicker />
         </Panel>
       </Group>
     </div>
