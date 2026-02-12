@@ -1,6 +1,6 @@
-import { Activity, FlaskConical, type LucideIcon } from 'lucide-react';
+import { Activity, FlaskConical, Stethoscope, type LucideIcon } from 'lucide-react';
 
-export type DemoType = 'pacs' | 'lis';
+export type DemoType = 'pacs' | 'lis' | 'ehr';
 
 export interface DemoConfig {
   id: DemoType;
@@ -36,6 +36,17 @@ export const DEMO_CONFIGS: Record<DemoType, DemoConfig> = {
     basePath: '/lis',
     defaultTemplateUrl: 'http://templates.tiro.health/templates/02d4f566b5204b2ba743128bcd0e2715',
     tiroLabel: 'Tiro.health Pathology Demo',
+  },
+  ehr: {
+    id: 'ehr',
+    title: 'EHR Workspace',
+    shortTitle: 'EHR',
+    description: 'Electronic health record workflow with operative reporting and longitudinal patient context.',
+    icon: Stethoscope,
+    theme: 'light',
+    basePath: '/ehr',
+    defaultTemplateUrl: 'http://templates.tiro.health/templates/11bc9b87d0744edb843ca6250ce24494',
+    tiroLabel: 'Tiro.health EHR Demo',
   },
 };
 

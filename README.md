@@ -1,240 +1,163 @@
-# Mock PACS Radiology Worklist
+# Tiro.health Demo Platform (PACS + LIS)
 
-A dark-themed mock PACS/RIS radiology worklist application for customer demonstrations, showcasing how Tiro.health SDK can be embedded into existing medical imaging systems.
+Mock clinical demo application showing two workflows:
 
-![Demo Screenshot](/Users/axelvanraes/dev/atticus/demo-pacs/.playwright-mcp/worklist-dark-mode.png)
+- PACS radiology worklist (dark mode)
+- LIS pathology worklist (light mode)
 
-## Features
+The app demonstrates how the Tiro Form SDK can be embedded in existing imaging/lab systems, with realistic mock worklists, details pages, and launch parameters.
 
-- **Dark Mode UI** - Professional dark theme optimized for clinical environments
-- **40 Mock Studies** - Realistic radiology study data with variety across modalities
-- **Real-time Search** - Debounced search across patient names, study descriptions, and research questions
-- **Advanced Filtering** - Filter by modality (XA, DX, PT, NM, MG, CR, MR, CT) and urgency level
-- **Sortable Columns** - Sort by date/time, patient name, or modality
-- **Interactive Study Selection** - Click to select studies with visual feedback
-- **SDK Integration Panel** - Demonstrates embedded Tiro.health SDK concept
-- **Responsive Layout** - Desktop-optimized two-column layout
+## Current Highlights
+
+- Home launcher with demo selection (`/`)
+- PACS worklist and study details with DICOM viewer panel
+- LIS pathology worklist and specimen details
+- URL-driven filtering/sorting in both worklists
+- Embedded reporting panel using `/launch.html`
+- Template picker in both PACS and LIS reporting panels
+- App switcher in the top header (PACS <-> LIS)
+
+## Routes
+
+- `/` -> Home page
+- `/pacs` -> Radiology worklist
+- `/pacs/study/:studyId` -> Study details + reporting panel
+- `/lis` -> Pathology worklist
+- `/lis/specimen/:specimenId` -> Specimen details + reporting panel
+
+## Template Pickers
+
+Template selection is available in the reporting panel header on both details pages.
+
+### LIS Templates
+
+- Thyroid reporting (default LIS template URL from `src/lib/demoRegistry.ts`)
+- Basic template: `http://templates.tiro.health/templates/3640e41dba1e4318934e411a054cd721`
+- Advanced template: `http://templates.tiro.health/templates/b18e0a6605bb437e90d54f8ec65eeb1d`
+
+### PACS Templates
+
+- Radiology reporting (default PACS template URL)
+- Basic template: `http://templates.tiro.health/templates/8d7ab478ce8b4dc3a84b7b33ab34b335`
+- CT Coronarography: `http://templates.tiro.health/templates/04cd8b41a7dc491f8fb006f66c60c958`
+- Advanced template: `http://templates.tiro.health/templates/b18e0a6605bb437e90d54f8ec65eeb1d`
 
 ## Tech Stack
 
-- **React 18.3.1** + **TypeScript 5.6.2**
-- **Vite 6.0.3** - Fast build tool and dev server
-- **Tailwind CSS 4.1.18** - Utility-first styling
-- **shadcn/ui** - Accessible component library
-- **lucide-react** - Icon library
-- **Playwright** - E2E testing
+- React 18 + TypeScript
+- Vite + TanStack Router
+- Tailwind CSS v4
+- Radix Select + shadcn-style UI primitives
+- lucide-react icons
+- Playwright (scripts present)
 
-## Getting Started
+## Development
 
-### Prerequisites
+Prerequisites:
 
 - Node.js 18+
-- npm or yarn
+- npm
 
-### Installation
+Install:
 
 ```bash
 npm install
 ```
 
-### Development
-
-The dev server runs on **port 5174** (configured for Playwright testing):
+Run dev server (strict port 5174):
 
 ```bash
 npm run dev
 ```
 
-Open http://localhost:5174 in your browser.
-
-### Build
+Build:
 
 ```bash
 npm run build
 ```
 
-### Preview Production Build
+Preview build (port 5175):
 
 ```bash
 npm run preview
 ```
 
-## Project Structure
-
-```
-src/
-├── types/
-│   └── study.ts                    # TypeScript interfaces
-├── lib/
-│   ├── mockData.ts                 # Mock data generator (40 studies)
-│   └── utils.ts                    # Utility functions
-├── hooks/
-│   └── useDebounce.ts              # Debounce hook (300ms)
-├── components/
-│   ├── ui/                         # shadcn/ui components
-│   ├── Header.tsx                  # App header
-│   ├── SearchFilterBar.tsx         # Search and filters
-│   ├── TableHeader.tsx             # Sortable column headers
-│   ├── StudyRow.tsx                # Individual study row
-│   ├── StudyList.tsx               # Study list container
-│   ├── ModalityBadge.tsx           # Colored modality badges
-│   ├── SDKPanel.tsx                # Tiro.health SDK panel
-│   └── WorklistLayout.tsx          # Main layout
-├── App.tsx                         # Main application
-├── main.tsx                        # Entry point
-└── index.css                       # Global styles
-```
-
-## Mock Data
-
-The application generates 40 realistic radiology studies with:
-
-- **Date Range:** Last 7 days (2025-12-16 to 2025-12-22)
-- **Time Range:** 08:00-19:00 (working hours)
-- **Patient Ages:** 15-85 years old
-- **Modalities:** XA, DX, PT, NM, MG, CR, MR, CT
-- **Urgency Levels:** Routine (60%), Urgent (25%), STAT (10%), Emergency (5%)
-- **Diverse Patient Demographics:** Realistic names, genders, and dates of birth
-
-## Features in Detail
-
-### Search Functionality
-
-- **Debounced Input:** 300ms delay to prevent excessive re-renders
-- **Multi-field Search:** Searches across:
-  - Patient names (first and last)
-  - Study descriptions
-  - Research questions
-  - Accession numbers
-- **Case-insensitive:** Works with any capitalization
-- **Real-time Results:** Study count updates automatically
-
-### Filtering
-
-**Modality Filter:**
-- All Modalities (default)
-- XA - Angiography
-- DX - Digital X-Ray
-- PT - PET/CT
-- NM - Nuclear Medicine
-- MG - Mammogram
-- CR - Computed Radiography
-- MR - MRI
-- CT - CT Scan
-
-**Urgency Filter:**
-- All Urgency (default)
-- Routine
-- Urgent
-- STAT
-- Emergency
-
-### Sorting
-
-Sortable columns with toggle between ascending/descending:
-- **Date/Time** (default: descending - most recent first)
-- **Patient Name** (alphabetical by last name)
-- **Modality** (alphabetical)
-
-### Study Row Interaction
-
-- **Click to Select:** Visual highlight with primary ring
-- **Keyboard Navigation:** Tab through rows, Enter to select
-- **Console Logging:** Selected study details logged for demo purposes
-
-## Styling & Design
-
-### Color Palette (Dark Mode)
-
-- **Background:** `oklch(0.145 0 0)` - Very dark gray
-- **Foreground:** `oklch(0.985 0 0)` - Near white
-- **Study Row:** `oklch(0.18 0 0)` - Slightly lighter
-- **Hover:** `oklch(0.22 0 0)` - Interactive feedback
-- **Border:** Subtle gray borders for separation
-
-### Modality Badge Colors
-
-Each modality has a distinct color for quick identification:
-- **XA:** Blue
-- **DX:** Green
-- **PT:** Purple
-- **NM:** Amber
-- **MG:** Pink
-- **CR:** Cyan
-- **MR:** Indigo
-- **CT:** Red
-
-## SDK Integration
-
-The right panel demonstrates how the Tiro.health SDK can be embedded into existing PACS/RIS systems. Currently shows an iframe (Google blocks it, which is expected) as a placeholder for actual SDK integration.
-
-**For Production Integration:**
-- Replace iframe source with actual Tiro.health SDK URL
-- Implement proper authentication
-- Pass study context to SDK when row is clicked
-- Handle SDK callbacks and events
-
-## Testing with Playwright
-
-The application is configured for Playwright E2E testing on port 5174:
+Lint:
 
 ```bash
-npm install -D @playwright/test
-npx playwright install
+npm run lint
+```
+
+Test scripts:
+
+```bash
 npm run test
+npm run test:ui
+npm run test:headed
 ```
 
-### Test Coverage
+## Project Layout
 
-- Smoke tests (app loads, components render)
-- Search functionality
-- Filter functionality (modality and urgency)
-- Sort functionality
-- Row interaction and selection
+```text
+src/
+  components/
+    shared/
+      DemoHeader.tsx
+      DicomViewer.tsx
+      ParameterForm.tsx
+      StudyRow.tsx
+      SpecimenRow.tsx
+      TableHeader.tsx
+      LisTableHeader.tsx
+      ModalityBadge.tsx
+      SpecimenTypeBadge.tsx
+      StatusBadge.tsx
+      PriorityBadge.tsx
+    ui/
+      badge.tsx
+      button.tsx
+      card.tsx
+      input.tsx
+      select.tsx
+  hooks/
+    useStudies.ts
+    useSpecimens.ts
+    useTheme.ts
+    useDebounce.ts
+  lib/
+    demoRegistry.ts
+    mockData.ts
+    mockSpecimenData.ts
+    dataUtils.ts
+  pages/
+    home/
+    worklist/            (PACS)
+    study-details/       (PACS details)
+    lis-worklist/        (LIS)
+    specimen-details/    (LIS details)
+  routes/
+    index.tsx
+    pacs.tsx
+    pacs.index.tsx
+    pacs.study.$studyId.tsx
+    lis.tsx
+    lis.index.tsx
+    lis.specimen.$specimenId.tsx
+    __root.tsx
+  types/
+    study.ts
+    specimen.ts
+    search-params.ts
+    lis-search-params.ts
 
-## Configuration
-
-### Vite Config
-
-```typescript
-server: {
-  port: 5174,
-  strictPort: true,
-}
+public/
+  launch.html
+  callback.html
 ```
 
-### Dark Mode
+## Notes
 
-Dark mode is forced via `document.documentElement.classList.add('dark')` in `main.tsx`.
-
-## Browser Compatibility
-
-- Chrome/Edge 90+
-- Firefox 88+
-- Safari 14+
-
-## Performance
-
-- **Initial Load:** <1 second
-- **Search Response:** <300ms (debounced)
-- **Filter/Sort:** Instant (client-side)
-- **No Virtualization:** 40 rows perform well without virtual scrolling
-
-## Future Enhancements
-
-- Real Tiro.health SDK integration
-- DICOM image viewer integration
-- Study details modal
-- Pagination for larger datasets
-- User preferences/settings
-- Export functionality (CSV/PDF)
-- Real-time updates via WebSocket
-- Mobile responsive design
-
-## License
-
-Private - For Tiro.health customer demonstrations only.
-
-## Support
-
-For questions or issues, contact the Tiro.health development team.
+- PACS theme is dark and tuned around deep navy tones.
+- LIS theme is light and pathology-focused (biopsy/resection workflows).
+- Worklist data is generated locally and cached in hooks for demo stability.
+- `src/routeTree.gen.ts` is auto-generated by TanStack Router plugin.

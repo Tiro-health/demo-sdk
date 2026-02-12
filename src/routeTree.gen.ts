@@ -11,9 +11,11 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as PacsRouteImport } from './routes/pacs'
 import { Route as LisRouteImport } from './routes/lis'
+import { Route as EhrRouteImport } from './routes/ehr'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PacsIndexRouteImport } from './routes/pacs.index'
 import { Route as LisIndexRouteImport } from './routes/lis.index'
+import { Route as EhrIndexRouteImport } from './routes/ehr.index'
 import { Route as PacsStudyStudyIdRouteImport } from './routes/pacs.study.$studyId'
 import { Route as LisSpecimenSpecimenIdRouteImport } from './routes/lis.specimen.$specimenId'
 
@@ -25,6 +27,11 @@ const PacsRoute = PacsRouteImport.update({
 const LisRoute = LisRouteImport.update({
   id: '/lis',
   path: '/lis',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EhrRoute = EhrRouteImport.update({
+  id: '/ehr',
+  path: '/ehr',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -42,6 +49,11 @@ const LisIndexRoute = LisIndexRouteImport.update({
   path: '/',
   getParentRoute: () => LisRoute,
 } as any)
+const EhrIndexRoute = EhrIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => EhrRoute,
+} as any)
 const PacsStudyStudyIdRoute = PacsStudyStudyIdRouteImport.update({
   id: '/study/$studyId',
   path: '/study/$studyId',
@@ -55,8 +67,10 @@ const LisSpecimenSpecimenIdRoute = LisSpecimenSpecimenIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/ehr': typeof EhrRouteWithChildren
   '/lis': typeof LisRouteWithChildren
   '/pacs': typeof PacsRouteWithChildren
+  '/ehr/': typeof EhrIndexRoute
   '/lis/': typeof LisIndexRoute
   '/pacs/': typeof PacsIndexRoute
   '/lis/specimen/$specimenId': typeof LisSpecimenSpecimenIdRoute
@@ -64,6 +78,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/ehr': typeof EhrIndexRoute
   '/lis': typeof LisIndexRoute
   '/pacs': typeof PacsIndexRoute
   '/lis/specimen/$specimenId': typeof LisSpecimenSpecimenIdRoute
@@ -72,8 +87,10 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/ehr': typeof EhrRouteWithChildren
   '/lis': typeof LisRouteWithChildren
   '/pacs': typeof PacsRouteWithChildren
+  '/ehr/': typeof EhrIndexRoute
   '/lis/': typeof LisIndexRoute
   '/pacs/': typeof PacsIndexRoute
   '/lis/specimen/$specimenId': typeof LisSpecimenSpecimenIdRoute
@@ -83,8 +100,10 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/ehr'
     | '/lis'
     | '/pacs'
+    | '/ehr/'
     | '/lis/'
     | '/pacs/'
     | '/lis/specimen/$specimenId'
@@ -92,6 +111,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/ehr'
     | '/lis'
     | '/pacs'
     | '/lis/specimen/$specimenId'
@@ -99,8 +119,10 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/ehr'
     | '/lis'
     | '/pacs'
+    | '/ehr/'
     | '/lis/'
     | '/pacs/'
     | '/lis/specimen/$specimenId'
@@ -109,6 +131,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  EhrRoute: typeof EhrRouteWithChildren
   LisRoute: typeof LisRouteWithChildren
   PacsRoute: typeof PacsRouteWithChildren
 }
@@ -127,6 +150,13 @@ declare module '@tanstack/react-router' {
       path: '/lis'
       fullPath: '/lis'
       preLoaderRoute: typeof LisRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ehr': {
+      id: '/ehr'
+      path: '/ehr'
+      fullPath: '/ehr'
+      preLoaderRoute: typeof EhrRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -150,6 +180,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LisIndexRouteImport
       parentRoute: typeof LisRoute
     }
+    '/ehr/': {
+      id: '/ehr/'
+      path: '/'
+      fullPath: '/ehr/'
+      preLoaderRoute: typeof EhrIndexRouteImport
+      parentRoute: typeof EhrRoute
+    }
     '/pacs/study/$studyId': {
       id: '/pacs/study/$studyId'
       path: '/study/$studyId'
@@ -166,6 +203,16 @@ declare module '@tanstack/react-router' {
     }
   }
 }
+
+interface EhrRouteChildren {
+  EhrIndexRoute: typeof EhrIndexRoute
+}
+
+const EhrRouteChildren: EhrRouteChildren = {
+  EhrIndexRoute: EhrIndexRoute,
+}
+
+const EhrRouteWithChildren = EhrRoute._addFileChildren(EhrRouteChildren)
 
 interface LisRouteChildren {
   LisIndexRoute: typeof LisIndexRoute
@@ -193,6 +240,7 @@ const PacsRouteWithChildren = PacsRoute._addFileChildren(PacsRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  EhrRoute: EhrRouteWithChildren,
   LisRoute: LisRouteWithChildren,
   PacsRoute: PacsRouteWithChildren,
 }
