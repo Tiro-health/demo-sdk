@@ -10,7 +10,7 @@ interface StudyListProps {
 export function StudyList({ studies, selectedStudyId, onStudyClick }: StudyListProps) {
   if (studies.length === 0) {
     return (
-      <div className="flex items-center justify-center py-12">
+      <div className="flex items-center justify-center py-16 rounded-lg border border-dashed border-border/70 bg-muted/20">
         <p className="text-muted-foreground">No studies found</p>
       </div>
     );

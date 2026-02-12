@@ -22,13 +22,15 @@ export function WorklistTable({ studies, searchParams, onStudyClick, onSortChang
   };
 
   return (
-    <>
+    <div className="worklist-table-shell worklist-table-shell-pacs">
       <TableHeader sortConfig={sortConfig} onSort={handleSort} />
-      <StudyList
-        studies={studies}
-        selectedStudyId={null}
-        onStudyClick={(study) => onStudyClick(study.id)}
-      />
-    </>
+      <div className="p-2 md:p-3">
+        <StudyList
+          studies={studies}
+          selectedStudyId={null}
+          onStudyClick={(study) => onStudyClick(study.id)}
+        />
+      </div>
+    </div>
   );
 }

@@ -1,13 +1,10 @@
+import type { Patient } from './common';
+
+export type { Patient };
+
 export type Modality = 'XA' | 'DX' | 'PT' | 'NM' | 'MG' | 'CR' | 'MR' | 'CT';
 
 export type UrgencyLevel = 'Routine' | 'Urgent' | 'STAT' | 'Emergency';
-
-export interface Patient {
-  firstName: string;
-  lastName: string;
-  gender: 'M' | 'F';
-  dateOfBirth: string; // "1999-02-19"
-}
 
 export interface Study {
   id: string;

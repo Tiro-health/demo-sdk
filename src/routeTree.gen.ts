@@ -9,48 +9,126 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as PacsRouteImport } from './routes/pacs'
+import { Route as LisRouteImport } from './routes/lis'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as StudyStudyIdRouteImport } from './routes/study.$studyId'
+import { Route as PacsIndexRouteImport } from './routes/pacs.index'
+import { Route as LisIndexRouteImport } from './routes/lis.index'
+import { Route as PacsStudyStudyIdRouteImport } from './routes/pacs.study.$studyId'
+import { Route as LisSpecimenSpecimenIdRouteImport } from './routes/lis.specimen.$specimenId'
 
+const PacsRoute = PacsRouteImport.update({
+  id: '/pacs',
+  path: '/pacs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LisRoute = LisRouteImport.update({
+  id: '/lis',
+  path: '/lis',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const StudyStudyIdRoute = StudyStudyIdRouteImport.update({
+const PacsIndexRoute = PacsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => PacsRoute,
+} as any)
+const LisIndexRoute = LisIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => LisRoute,
+} as any)
+const PacsStudyStudyIdRoute = PacsStudyStudyIdRouteImport.update({
   id: '/study/$studyId',
   path: '/study/$studyId',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => PacsRoute,
+} as any)
+const LisSpecimenSpecimenIdRoute = LisSpecimenSpecimenIdRouteImport.update({
+  id: '/specimen/$specimenId',
+  path: '/specimen/$specimenId',
+  getParentRoute: () => LisRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/study/$studyId': typeof StudyStudyIdRoute
+  '/lis': typeof LisRouteWithChildren
+  '/pacs': typeof PacsRouteWithChildren
+  '/lis/': typeof LisIndexRoute
+  '/pacs/': typeof PacsIndexRoute
+  '/lis/specimen/$specimenId': typeof LisSpecimenSpecimenIdRoute
+  '/pacs/study/$studyId': typeof PacsStudyStudyIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/study/$studyId': typeof StudyStudyIdRoute
+  '/lis': typeof LisIndexRoute
+  '/pacs': typeof PacsIndexRoute
+  '/lis/specimen/$specimenId': typeof LisSpecimenSpecimenIdRoute
+  '/pacs/study/$studyId': typeof PacsStudyStudyIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/study/$studyId': typeof StudyStudyIdRoute
+  '/lis': typeof LisRouteWithChildren
+  '/pacs': typeof PacsRouteWithChildren
+  '/lis/': typeof LisIndexRoute
+  '/pacs/': typeof PacsIndexRoute
+  '/lis/specimen/$specimenId': typeof LisSpecimenSpecimenIdRoute
+  '/pacs/study/$studyId': typeof PacsStudyStudyIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/study/$studyId'
+  fullPaths:
+    | '/'
+    | '/lis'
+    | '/pacs'
+    | '/lis/'
+    | '/pacs/'
+    | '/lis/specimen/$specimenId'
+    | '/pacs/study/$studyId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/study/$studyId'
-  id: '__root__' | '/' | '/study/$studyId'
+  to:
+    | '/'
+    | '/lis'
+    | '/pacs'
+    | '/lis/specimen/$specimenId'
+    | '/pacs/study/$studyId'
+  id:
+    | '__root__'
+    | '/'
+    | '/lis'
+    | '/pacs'
+    | '/lis/'
+    | '/pacs/'
+    | '/lis/specimen/$specimenId'
+    | '/pacs/study/$studyId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  StudyStudyIdRoute: typeof StudyStudyIdRoute
+  LisRoute: typeof LisRouteWithChildren
+  PacsRoute: typeof PacsRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/pacs': {
+      id: '/pacs'
+      path: '/pacs'
+      fullPath: '/pacs'
+      preLoaderRoute: typeof PacsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lis': {
+      id: '/lis'
+      path: '/lis'
+      fullPath: '/lis'
+      preLoaderRoute: typeof LisRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -58,19 +136,65 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/study/$studyId': {
-      id: '/study/$studyId'
+    '/pacs/': {
+      id: '/pacs/'
+      path: '/'
+      fullPath: '/pacs/'
+      preLoaderRoute: typeof PacsIndexRouteImport
+      parentRoute: typeof PacsRoute
+    }
+    '/lis/': {
+      id: '/lis/'
+      path: '/'
+      fullPath: '/lis/'
+      preLoaderRoute: typeof LisIndexRouteImport
+      parentRoute: typeof LisRoute
+    }
+    '/pacs/study/$studyId': {
+      id: '/pacs/study/$studyId'
       path: '/study/$studyId'
-      fullPath: '/study/$studyId'
-      preLoaderRoute: typeof StudyStudyIdRouteImport
-      parentRoute: typeof rootRouteImport
+      fullPath: '/pacs/study/$studyId'
+      preLoaderRoute: typeof PacsStudyStudyIdRouteImport
+      parentRoute: typeof PacsRoute
+    }
+    '/lis/specimen/$specimenId': {
+      id: '/lis/specimen/$specimenId'
+      path: '/specimen/$specimenId'
+      fullPath: '/lis/specimen/$specimenId'
+      preLoaderRoute: typeof LisSpecimenSpecimenIdRouteImport
+      parentRoute: typeof LisRoute
     }
   }
 }
 
+interface LisRouteChildren {
+  LisIndexRoute: typeof LisIndexRoute
+  LisSpecimenSpecimenIdRoute: typeof LisSpecimenSpecimenIdRoute
+}
+
+const LisRouteChildren: LisRouteChildren = {
+  LisIndexRoute: LisIndexRoute,
+  LisSpecimenSpecimenIdRoute: LisSpecimenSpecimenIdRoute,
+}
+
+const LisRouteWithChildren = LisRoute._addFileChildren(LisRouteChildren)
+
+interface PacsRouteChildren {
+  PacsIndexRoute: typeof PacsIndexRoute
+  PacsStudyStudyIdRoute: typeof PacsStudyStudyIdRoute
+}
+
+const PacsRouteChildren: PacsRouteChildren = {
+  PacsIndexRoute: PacsIndexRoute,
+  PacsStudyStudyIdRoute: PacsStudyStudyIdRoute,
+}
+
+const PacsRouteWithChildren = PacsRoute._addFileChildren(PacsRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  StudyStudyIdRoute: StudyStudyIdRoute,
+  LisRoute: LisRouteWithChildren,
+  PacsRoute: PacsRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

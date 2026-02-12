@@ -6,8 +6,8 @@ import { filterAndSortStudies } from "./utils";
 
 export function WorklistPage() {
   const studies = useStudies();
-  const rawSearchParams = useSearch({ from: "/" });
-  const navigate = useNavigate({ from: "/" });
+  const rawSearchParams = useSearch({ from: "/pacs/" });
+  const navigate = useNavigate({ from: "/pacs/" });
 
   // Provide defaults for search params
   const searchParams = {
@@ -40,22 +40,28 @@ export function WorklistPage() {
   };
 
   const handleStudyClick = (studyId: string) => {
-    navigate({ to: "/study/$studyId", params: { studyId } });
+    navigate({ to: "/pacs/study/$studyId", params: { studyId } });
   };
 
   return (
-    <div className="space-y-4">
-      <WorklistFilters
-        searchParams={searchParams}
-        onFilterChange={handleFilterChange}
-        studyCount={filteredStudies.length}
-      />
-      <WorklistTable
-        studies={filteredStudies}
-        searchParams={searchParams}
-        onStudyClick={handleStudyClick}
-        onSortChange={handleFilterChange}
-      />
+    <div className="worklist-page-shell worklist-page-shell-pacs">
+      <div className="worklist-content max-w-[1320px] mx-auto p-4 md:p-6 space-y-5">
+        <section className="worklist-panel">
+          <WorklistFilters
+            searchParams={searchParams}
+            onFilterChange={handleFilterChange}
+            studyCount={filteredStudies.length}
+          />
+        </section>
+        <section className="worklist-panel">
+          <WorklistTable
+            studies={filteredStudies}
+            searchParams={searchParams}
+            onStudyClick={handleStudyClick}
+            onSortChange={handleFilterChange}
+          />
+        </section>
+      </div>
     </div>
   );
 }

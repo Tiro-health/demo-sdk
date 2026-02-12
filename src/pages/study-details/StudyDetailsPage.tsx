@@ -18,7 +18,7 @@ function generatePatientId(study: Study): string {
 }
 
 export function StudyDetailsPage() {
-  const { studyId } = useParams({ from: '/study/$studyId' });
+  const { studyId } = useParams({ from: '/pacs/study/$studyId' });
   const study = useStudyById(studyId);
 
   const initialParams = useMemo((): Record<string, string> => {
@@ -27,6 +27,8 @@ export function StudyDetailsPage() {
       questionnaire: DEFAULT_QUESTIONNAIRE,
       patientId: generatePatientId(study),
       accessionNumber: study.accessionNumber,
+      '0008,1030': 'T1 flare',
+      theme: 'dark',
     };
   }, [study]);
 
@@ -35,7 +37,7 @@ export function StudyDetailsPage() {
       <div className="container mx-auto px-4 py-6">
         <h1 className="text-2xl font-bold mb-4">Study not found</h1>
         <Button asChild>
-          <Link to="/">
+          <Link to="/pacs">
             <ArrowLeft className="mr-2 h-4 w-4" /> Back to Worklist
           </Link>
         </Button>

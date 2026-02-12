@@ -30,7 +30,7 @@ export function SearchFilterBar({
   studyCount,
 }: SearchFilterBarProps) {
   return (
-    <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
+    <div className="worklist-filter-bar worklist-filter-bar-pacs">
       <div className="relative flex-1 min-w-[300px]">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
@@ -38,7 +38,7 @@ export function SearchFilterBar({
           placeholder="Search patient name, study, or research question..."
           value={searchTerm}
           onChange={(e) => onSearchChange(e.target.value)}
-          className="pl-9"
+          className="pl-9 h-10 bg-background/70 border-border/70"
         />
       </div>
 
@@ -47,7 +47,7 @@ export function SearchFilterBar({
           value={modalityFilter}
           onValueChange={(value) => onModalityChange(value as Modality | 'all')}
         >
-          <SelectTrigger className="w-[180px]">
+          <SelectTrigger className="w-[180px] h-10 bg-background/70 border-border/70">
             <SelectValue placeholder="All Modalities" />
           </SelectTrigger>
           <SelectContent>
@@ -67,7 +67,7 @@ export function SearchFilterBar({
           value={urgencyFilter}
           onValueChange={(value) => onUrgencyChange(value as UrgencyLevel | 'all')}
         >
-          <SelectTrigger className="w-[150px]">
+          <SelectTrigger className="w-[150px] h-10 bg-background/70 border-border/70">
             <SelectValue placeholder="All Urgency" />
           </SelectTrigger>
           <SelectContent>
@@ -79,7 +79,7 @@ export function SearchFilterBar({
           </SelectContent>
         </Select>
 
-        <Badge variant="secondary" className="px-3 py-1.5">
+        <Badge variant="secondary" className="px-3 py-1.5 text-xs font-semibold">
           {studyCount} {studyCount === 1 ? 'study' : 'studies'}
         </Badge>
       </div>

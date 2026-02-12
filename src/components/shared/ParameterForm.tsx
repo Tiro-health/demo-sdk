@@ -37,7 +37,7 @@ export function ParameterForm({ initialParams }: ParameterFormProps) {
   };
 
   return (
-    <Card className="h-full flex flex-col">
+    <Card className="h-full flex flex-col bg-[#FAFAFA]">
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg">Reporting</CardTitle>
@@ -106,7 +106,7 @@ export function ParameterForm({ initialParams }: ParameterFormProps) {
                     />
                     <button
                       type="submit"
-                      className="text-muted-foreground hover:text-gray-300 transition-colors"
+                      className="text-muted-foreground hover:text-foreground transition-colors"
                     >
                       <Plus className="h-3.5 w-3.5" />
                     </button>

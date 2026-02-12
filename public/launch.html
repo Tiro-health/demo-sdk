@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Radiology Report</title>
+    <title>Report</title>
 
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -146,7 +146,8 @@
     >
       <div class="text-center">
         <div
-          class="animate-spin rounded-full h-12 w-12 border-4 border-neutral-300 dark:border-neutral-600 border-t-blue-500 mb-4 mx-auto"
+          class="animate-spin rounded-full h-12 w-12 border-4 border-neutral-300 dark:border-neutral-600 mb-4 mx-auto"
+          style="border-top-color: #006cd9"
         ></div>
         <p class="text-neutral-800 dark:text-neutral-200 text-lg">
           Generating report...
@@ -156,6 +157,18 @@
     </div>
 
     <div class="h-full flex flex-col p-4 font-sans">
+      <!-- Demo-type header (shown conditionally via JS) -->
+      <div
+        id="demo-header"
+        class="hidden items-center gap-3 mb-4 pb-3 border-b border-neutral-200 dark:border-neutral-700"
+      >
+        <div id="demo-header-icon"></div>
+        <div>
+          <div id="demo-header-title" class="text-sm font-semibold text-neutral-800 dark:text-neutral-100"></div>
+          <div id="demo-header-subtitle" class="text-xs text-neutral-500 dark:text-neutral-400"></div>
+        </div>
+      </div>
+
       <!-- Toolbar -->
       <div class="flex justify-end mb-3 gap-2">
         <button
@@ -257,6 +270,22 @@
         "http://templates.tiro.health/templates/aa87c115c40149e98faba070cacb15c9";
       const questionnaire =
         params.get("questionnaire") || DEFAULT_QUESTIONNAIRE;
+
+      // ============================================
+      // Demo-type header
+      // ============================================
+      const demoType = params.get("demoType");
+      if (demoType === "lis") {
+        const demoHeader = document.getElementById("demo-header");
+        const demoIcon = document.getElementById("demo-header-icon");
+        const demoTitle = document.getElementById("demo-header-title");
+        const demoSubtitle = document.getElementById("demo-header-subtitle");
+        demoHeader.classList.remove("hidden");
+        demoHeader.classList.add("flex");
+        demoTitle.textContent = "Pathology Report";
+        demoSubtitle.textContent = "Tiro.health Pathology Demo";
+        demoIcon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="text-blue-600 dark:text-blue-400"><path d="M10 2v7.527a2 2 0 0 1-.211.896L4.72 20.55a1 1 0 0 0 .9 1.45h12.76a1 1 0 0 0 .9-1.45l-5.069-10.127A2 2 0 0 1 14 9.527V2"/><path d="M8.5 2h7"/><path d="M7 16h10"/></svg>`;
+      }
 
       // Build Parameters resource, always including questionnaire
       const paramResource = {

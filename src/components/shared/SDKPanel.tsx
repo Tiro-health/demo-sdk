@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 
 export function SDKPanel() {
   return (
-    <Card className="h-full flex flex-col">
+    <Card className="h-full flex flex-col bg-[#F6F6F7]">
       <CardHeader>
         <CardTitle>Tiro.health SDK</CardTitle>
         <CardDescription>AI Documentation Assistant</CardDescription>

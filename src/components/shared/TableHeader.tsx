@@ -20,15 +20,15 @@ export function TableHeader({ sortConfig, onSort }: TableHeaderProps) {
   };
 
   return (
-    <div className="grid grid-cols-12 gap-4 px-3 py-2 border-b">
+    <div className="grid grid-cols-12 gap-4 px-4 py-3 border-b border-border/35 bg-muted/25 rounded-t-xl">
       {/* Date/Time - cols 1-2 */}
       <div className="col-span-2">
         <Button
           variant="ghost"
           size="sm"
           onClick={() => onSort('dateTime')}
-          className={`h-8 px-2 text-xs font-medium ${
-            sortConfig.key === 'dateTime' ? 'text-foreground' : 'text-muted-foreground'
+          className={`h-8 px-2 text-xs font-semibold ${
+            sortConfig.key === 'dateTime' ? 'text-foreground bg-accent/60' : 'text-muted-foreground'
           }`}
         >
           Date/Time
@@ -42,8 +42,8 @@ export function TableHeader({ sortConfig, onSort }: TableHeaderProps) {
           variant="ghost"
           size="sm"
           onClick={() => onSort('patientName')}
-          className={`h-8 px-2 text-xs font-medium ${
-            sortConfig.key === 'patientName' ? 'text-foreground' : 'text-muted-foreground'
+          className={`h-8 px-2 text-xs font-semibold ${
+            sortConfig.key === 'patientName' ? 'text-foreground bg-accent/60' : 'text-muted-foreground'
           }`}
         >
           Patient
@@ -57,8 +57,8 @@ export function TableHeader({ sortConfig, onSort }: TableHeaderProps) {
           variant="ghost"
           size="sm"
           onClick={() => onSort('modality')}
-          className={`h-8 px-2 text-xs font-medium ${
-            sortConfig.key === 'modality' ? 'text-foreground' : 'text-muted-foreground'
+          className={`h-8 px-2 text-xs font-semibold ${
+            sortConfig.key === 'modality' ? 'text-foreground bg-accent/60' : 'text-muted-foreground'
           }`}
         >
           Mod
@@ -68,12 +68,12 @@ export function TableHeader({ sortConfig, onSort }: TableHeaderProps) {
 
       {/* Study - cols 6-7 */}
       <div className="col-span-2">
-        <span className="text-xs font-medium text-muted-foreground px-2">Study</span>
+        <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground px-2">Study</span>
       </div>
 
       {/* Research Question - cols 8-12 */}
       <div className="col-span-5">
-        <span className="text-xs font-medium text-muted-foreground px-2">Research Question</span>
+        <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground px-2">Research Question</span>
       </div>
     </div>
   );
