@@ -49,7 +49,7 @@ export function DemoHeader({ demoType, contextInfo, showBackButton, backTo }: De
 
   return (
     <header className="header-blur sticky top-0 z-50 border-b border-border/25 bg-background/88 backdrop-blur supports-[backdrop-filter]:bg-background/74">
-      <div className="container grid h-14 grid-cols-[auto_1fr_auto] items-center gap-4 px-4">
+      <div className="grid h-14 grid-cols-[auto_1fr_auto] items-center gap-4 px-4">
         <div className="flex items-center gap-3">
           {showBackButton && (
             <Button variant="ghost" size="sm" asChild>

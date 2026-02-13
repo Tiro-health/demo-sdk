@@ -217,7 +217,7 @@ export function EhrPage() {
   }), [selectedPatient, clinicianName]);
 
   return (
-    <div className="h-[calc(100vh-3.5rem)] p-4 bg-[radial-gradient(1200px_520px_at_10%_-10%,rgba(59,130,246,0.10),transparent_65%),radial-gradient(900px_420px_at_100%_-5%,rgba(16,185,129,0.08),transparent_62%),#ffffff]">
+    <div className="h-[calc(100vh-3.5rem)] p-4 bg-slate-200">
       <Group orientation="horizontal" className="h-full">
         <Panel defaultSize={42} minSize={28}>
           <Card className="flex h-full min-h-0 flex-col border border-border/50 bg-[#FAFAFA] shadow-sm">
