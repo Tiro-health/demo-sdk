@@ -13,6 +13,8 @@ import type { Specimen } from '@/types/specimen';
 const LIS_BASIC_TEMPLATE_URL = 'http://templates.tiro.health/templates/3640e41dba1e4318934e411a054cd721';
 const ADVANCED_TEMPLATE_URL = 'http://templates.tiro.health/templates/b18e0a6605bb437e90d54f8ec65eeb1d';
 const OVARIO_TEMPLATE_URL = 'http://templates.tiro.health/templates/7aaacc5c2d5a48a38d40b3d2bb5afb64';
+const ER_PR_HER2_TEMPLATE_URL = 'http://templates.tiro.health/templates/2ff90405d2bf4bbba8941b61d4881d78';
+const MONDHOLTE_TEMPLATE_URL = 'http://templates.tiro.health/templates/049555af4ddf4a74b7d2572f7000b12c';
 
 function generatePatientId(specimen: Specimen): string {
   const dob = specimen.patient.dateOfBirth.replace(/-/g, '');
@@ -69,6 +71,8 @@ export function SpecimenDetailsPage() {
               { id: 'basic', label: 'Basic template', questionnaire: LIS_BASIC_TEMPLATE_URL },
               { id: 'advanced', label: 'Advanced template', questionnaire: ADVANCED_TEMPLATE_URL },
               { id: 'ovario', label: 'Cuestionario de Ovario', questionnaire: OVARIO_TEMPLATE_URL },
+              { id: 'er-pr-her2', label: 'ER/PR/HER2 rapportering', questionnaire: ER_PR_HER2_TEMPLATE_URL },
+              { id: 'mondholte', label: 'Mondholte tumoren', questionnaire: MONDHOLTE_TEMPLATE_URL },
             ]}
           />
         </Panel>
