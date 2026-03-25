@@ -24,7 +24,7 @@ export function ParameterForm({
   templateOptions = [],
 }: ParameterFormProps) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const [params, setParams] = useState<Record<string, string>>(initialParams);
   const effectiveTemplateOptions = useMemo(
     () =>
@@ -47,9 +47,9 @@ export function ParameterForm({
   }, [initialParams, effectiveTemplateOptions]);
 
   const launchUrl = useMemo(() => {
-    const searchParams = new URLSearchParams(params);
+    const searchParams = new URLSearchParams({ ...params, language });
     return `/launch.html?${searchParams.toString()}`;
-  }, [params]);
+  }, [params, language]);
 
   const applyTemplatePreset = (preset: string) => {
     const selectedTemplate = effectiveTemplateOptions.find((item) => item.id === preset);
