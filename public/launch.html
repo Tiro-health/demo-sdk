@@ -166,19 +166,15 @@
       <!-- Toolbar -->
       <div class="flex justify-end mb-3 gap-2">
         <button
-          type="submit"
-          form="questionnaire-form"
-          name="status"
-          value="in-progress"
+          type="button"
+          id="save-progress-btn"
           class="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-md border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-muted hover:bg-neutral-100 dark:hover:bg-accent text-neutral-700 dark:text-neutral-200 transition-colors"
         >
           Save Progress
         </button>
         <button
-          type="submit"
-          form="questionnaire-form"
-          name="status"
-          value="completed"
+          type="button"
+          id="validate-btn"
           class="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-md bg-blue-600 hover:bg-blue-700 text-white transition-colors"
         >
           Validate
@@ -246,7 +242,7 @@
             <option value="Endpoint/corti">Corti</option>
             <option value="Endpoint/dmsk">Dragon Medical</option>
           </select>
-          <tiro-magic-clipboard for="report-form" dictation-language="nl">
+          <tiro-magic-clipboard for="report-form" dictation-language="nl" hide-toolbar>
             <button
               type="submit"
               class="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-md bg-blue-600 hover:bg-blue-700 text-white transition-colors mt-2"
@@ -468,33 +464,25 @@
           const questionnaire = scriptTag
             ? JSON.parse(scriptTag.textContent)
             : null;
-          console.log(form.sdcClient);
+
           // Call $extract via SDCClient
-          const { pdfData, title } = await form.sdcClient.extract({
+          const { composition } = await form.sdcClient.extract({
             questionnaireResponse: response,
             questionnaire: questionnaire,
           });
 
-          if (!pdfData) {
-            throw new Error("No PDF data in extract response");
-          }
-
-          console.log(
-            "PDF extracted successfully, size:",
-            pdfData.length,
-            "chars",
-          );
+          console.log("Extract completed:", { composition });
 
           // Generate unique key for localStorage
           const id = crypto.randomUUID();
           const key = `Report/${id}`;
 
-          // Store PDF data with context
+          // Store extract results with context
           localStorage.setItem(
             key,
             JSON.stringify({
-              pdfData,
-              title: title || "Report",
+              composition: composition || null,
+              questionnaireResponse: response,
               context: {
                 patientId,
                 accessionNumber,
@@ -502,12 +490,12 @@
               },
             }),
           );
-          console.log("PDF stored in localStorage:", key);
+          console.log("Report stored in localStorage:", key);
 
           // Navigate to callback page
           window.location.href = `/callback.html?report=${encodeURIComponent(key)}`;
         } catch (error) {
-          showError(error.message || "Failed to generate report", error);
+          showError(error.message || "Failed to extract report", error);
         }
       });
 
@@ -525,6 +513,14 @@
       // ============================================
       const clipboard = document.querySelector("tiro-magic-clipboard");
       const accordion = document.getElementById("autofill-accordion");
+
+      // Toolbar buttons
+      document.getElementById("validate-btn").addEventListener("click", () => {
+        form.requestSubmit();
+      });
+      document.getElementById("save-progress-btn").addEventListener("click", () => {
+        form.requestSubmit();
+      });
 
       // Sync dictation provider dropdown with magic clipboard
       const dictationSelect =

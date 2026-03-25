@@ -13,19 +13,131 @@
       html,
       body {
         height: 100%;
-        background: #171717;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          sans-serif;
+        background: #f5f5f5;
+        color: #171717;
+      }
+      .container {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+      }
+      .tabs {
+        display: flex;
+        gap: 0;
+        background: #fff;
+        border-bottom: 1px solid #e5e5e5;
+        padding: 0 16px;
+      }
+      .tab {
+        padding: 12px 20px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        color: #737373;
+        border-bottom: 2px solid transparent;
+        background: none;
+        border-top: none;
+        border-left: none;
+        border-right: none;
+        transition: color 0.15s, border-color 0.15s;
+      }
+      .tab:hover {
+        color: #171717;
+      }
+      .tab.active {
+        color: #2563eb;
+        border-bottom-color: #2563eb;
+      }
+      .tab-content {
+        flex: 1;
+        display: none;
+        min-height: 0;
+      }
+      .tab-content.active {
+        display: flex;
+      }
+      .pdf-placeholder {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #a3a3a3;
+        font-size: 14px;
       }
       iframe {
         width: 100%;
         height: 100%;
         border: none;
       }
+      .json-view {
+        flex: 1;
+        overflow: auto;
+        padding: 16px;
+      }
+      .json-view pre {
+        font-family: "SF Mono", "Fira Code", "Fira Mono", Menlo, monospace;
+        font-size: 13px;
+        line-height: 1.5;
+        background: #fff;
+        border: 1px solid #e5e5e5;
+        border-radius: 8px;
+        padding: 16px;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+      }
     </style>
   </head>
   <body>
-    <iframe id="pdf-viewer"></iframe>
+    <div class="container">
+      <div class="tabs">
+        <button class="tab active" data-tab="pdf">PDF</button>
+        <button class="tab" data-tab="qr">QuestionnaireResponse</button>
+      </div>
+
+      <div id="tab-pdf" class="tab-content active">
+        <div class="pdf-placeholder">
+          <iframe id="pdf-viewer" style="display: none"></iframe>
+          <span id="pdf-placeholder-text">PDF rendering not yet available</span>
+        </div>
+      </div>
+
+      <div id="tab-qr" class="tab-content">
+        <div class="json-view">
+          <pre id="qr-json"></pre>
+        </div>
+      </div>
+    </div>
 
     <script>
+      function highlightJson(json) {
+        return json.replace(
+          /("(?:\\.|[^"\\])*")\s*(:)?|(\btrue\b|\bfalse\b|\bnull\b)|(-?\d+\.?\d*)/g,
+          (match, str, colon, bool, num) => {
+            if (str) {
+              return colon
+                ? `<span style="color:#2563eb">${str}</span>:`
+                : `<span style="color:#16a34a">${str}</span>`;
+            }
+            if (bool) return `<span style="color:#d97706">${bool}</span>`;
+            if (num) return `<span style="color:#dc2626">${num}</span>`;
+            return match;
+          }
+        );
+      }
+
+      // Tab switching
+      document.querySelectorAll(".tab").forEach((tab) => {
+        tab.addEventListener("click", () => {
+          document.querySelectorAll(".tab").forEach((t) => t.classList.remove("active"));
+          document.querySelectorAll(".tab-content").forEach((c) => c.classList.remove("active"));
+          tab.classList.add("active");
+          document.getElementById(`tab-${tab.dataset.tab}`).classList.add("active");
+        });
+      });
+
+      // Load data
       const urlParams = new URLSearchParams(window.location.search);
       const reportKey = urlParams.get("report");
 
@@ -34,18 +146,19 @@
         if (storageData) {
           try {
             const data = JSON.parse(storageData);
-            if (data.pdfData) {
-              const binaryString = atob(data.pdfData);
-              const bytes = new Uint8Array(binaryString.length);
-              for (let i = 0; i < binaryString.length; i++) {
-                bytes[i] = binaryString.charCodeAt(i);
-              }
-              const blob = new Blob([bytes], { type: "application/pdf" });
-              document.getElementById("pdf-viewer").src =
-                URL.createObjectURL(blob);
+
+            // PDF tab — placeholder for now, will use composition to render later
+            if (data.composition) {
+              console.log("Composition available:", data.composition);
+            }
+
+            // QuestionnaireResponse tab
+            if (data.questionnaireResponse) {
+              document.getElementById("qr-json").innerHTML =
+                highlightJson(JSON.stringify(data.questionnaireResponse, null, 2));
             }
           } catch (e) {
-            console.error("Failed to load PDF:", e);
+            console.error("Failed to load report:", e);
           }
         }
       }
