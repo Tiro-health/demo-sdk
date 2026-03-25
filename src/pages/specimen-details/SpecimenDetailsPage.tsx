@@ -75,6 +75,7 @@ export function SpecimenDetailsPage() {
               { id: 'ovario', label: 'Cuestionario de Ovario', questionnaire: OVARIO_TEMPLATE_URL },
               { id: 'er-pr-her2', label: 'ER/PR/HER2 rapportering', questionnaire: ER_PR_HER2_TEMPLATE_URL },
               { id: 'mondholte', label: 'Mondholte tumoren', questionnaire: MONDHOLTE_TEMPLATE_URL },
+              { id: 'inline-basic', label: 'Inline basic template', inlineQuestionnaire: 'basic' },
             ]}
           />
         </Panel>

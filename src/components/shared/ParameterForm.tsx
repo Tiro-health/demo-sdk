@@ -7,7 +7,8 @@ import { useTranslation } from "@/hooks/useTranslation";
 interface TemplateOption {
   id: string;
   label: string;
-  questionnaire: string;
+  questionnaire?: string;
+  inlineQuestionnaire?: string;
 }
 
 interface ParameterFormProps {
@@ -42,9 +43,17 @@ export function ParameterForm({
   );
 
   useEffect(() => {
-    setParams(initialParams);
-    setTemplatePreset(initialParams.templatePreset || effectiveTemplateOptions[0].id);
-  }, [initialParams, effectiveTemplateOptions]);
+    setParams((prev) => {
+      const next = { ...initialParams };
+      if (prev.templatePreset) next.templatePreset = prev.templatePreset;
+      if (prev.questionnaire) next.questionnaire = prev.questionnaire;
+      if (prev.inlineQuestionnaire) {
+        next.inlineQuestionnaire = prev.inlineQuestionnaire;
+        delete next.questionnaire;
+      }
+      return next;
+    });
+  }, [initialParams]);
 
   const launchUrl = useMemo(() => {
     const searchParams = new URLSearchParams({ ...params, language });
@@ -57,8 +66,13 @@ export function ParameterForm({
 
     setParams((prev) => {
       const next: Record<string, string> = { ...prev, templatePreset: preset };
-      next.questionnaire = selectedTemplate.questionnaire;
-      delete next.inlineQuestionnaire;
+      if (selectedTemplate.inlineQuestionnaire) {
+        next.inlineQuestionnaire = selectedTemplate.inlineQuestionnaire;
+        delete next.questionnaire;
+      } else if (selectedTemplate.questionnaire) {
+        next.questionnaire = selectedTemplate.questionnaire;
+        delete next.inlineQuestionnaire;
+      }
       return next;
     });
   };
