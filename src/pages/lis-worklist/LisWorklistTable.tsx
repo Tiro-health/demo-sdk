@@ -1,5 +1,6 @@
 import { LisTableHeader } from '@/components/shared/LisTableHeader';
 import { SpecimenRow } from '@/components/shared/SpecimenRow';
+import { useTranslation } from '@/hooks/useTranslation';
 import type { Specimen } from '@/types/specimen';
 import type { LisSearchParams } from '@/types/lis-search-params';
 
@@ -13,6 +14,7 @@ interface Props {
 }
 
 export function LisWorklistTable({ specimens, searchParams, onSpecimenClick, onSortChange }: Props) {
+  const { t } = useTranslation();
   const sortConfig = {
     key: (searchParams.sortBy || 'collectionDateTime') as SortKey,
     direction: (searchParams.sortDir || 'desc') as 'asc' | 'desc',
@@ -28,7 +30,7 @@ export function LisWorklistTable({ specimens, searchParams, onSpecimenClick, onS
       <LisTableHeader sortConfig={sortConfig} onSort={handleSort} />
       {specimens.length === 0 ? (
         <div className="flex items-center justify-center py-12">
-          <p className="text-muted-foreground">No specimens found</p>
+          <p className="text-muted-foreground">{t('noSpecimensFound')}</p>
         </div>
       ) : (
         <div className="p-2 md:p-3 space-y-2">

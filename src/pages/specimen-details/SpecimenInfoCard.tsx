@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { SpecimenTypeBadge } from '@/components/shared/SpecimenTypeBadge';
 import { StatusBadge } from '@/components/shared/StatusBadge';
 import { PriorityBadge } from '@/components/shared/PriorityBadge';
+import { useTranslation } from '@/hooks/useTranslation';
 import type { Specimen } from '@/types/specimen';
 
 interface SpecimenInfoCardProps {
@@ -9,10 +10,12 @@ interface SpecimenInfoCardProps {
 }
 
 export function SpecimenInfoCard({ specimen }: SpecimenInfoCardProps) {
+  const { t } = useTranslation();
+
   return (
     <Card className="h-full flex flex-col bg-[#FAFAFA]">
       <CardHeader className="pb-2">
-        <CardTitle className="text-lg">Specimen Details</CardTitle>
+        <CardTitle className="text-lg">{t('specimenDetails')}</CardTitle>
       </CardHeader>
       <CardContent className="flex-1 overflow-auto space-y-6">
         {/* Status & Priority */}
@@ -23,43 +26,43 @@ export function SpecimenInfoCard({ specimen }: SpecimenInfoCardProps) {
 
         {/* Patient Info */}
         <section className="space-y-2">
-          <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Patient</h3>
+          <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">{t('patient')}</h3>
           <div className="grid grid-cols-2 gap-y-2 text-sm">
-            <span className="text-muted-foreground">Name</span>
+            <span className="text-muted-foreground">{t('name')}</span>
             <span className="font-medium">{specimen.patient.lastName}, {specimen.patient.firstName}</span>
-            <span className="text-muted-foreground">Gender</span>
-            <span>{specimen.patient.gender === 'M' ? 'Male' : 'Female'}</span>
-            <span className="text-muted-foreground">Date of Birth</span>
+            <span className="text-muted-foreground">{t('gender')}</span>
+            <span>{specimen.patient.gender === 'M' ? t('male') : t('female')}</span>
+            <span className="text-muted-foreground">{t('dateOfBirth')}</span>
             <span>{specimen.patient.dateOfBirth}</span>
           </div>
         </section>
 
         {/* Collection Info */}
         <section className="space-y-2">
-          <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Collection</h3>
+          <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">{t('collection')}</h3>
           <div className="grid grid-cols-2 gap-y-2 text-sm">
-            <span className="text-muted-foreground">Date & Time</span>
+            <span className="text-muted-foreground">{t('dateAndTime')}</span>
             <span>{specimen.collectionDate} {specimen.collectionTime}</span>
-            <span className="text-muted-foreground">Collection Site</span>
+            <span className="text-muted-foreground">{t('collectionSite')}</span>
             <span>{specimen.collectionSite}</span>
-            <span className="text-muted-foreground">Ordering Physician</span>
+            <span className="text-muted-foreground">{t('orderingPhysician')}</span>
             <span>{specimen.orderingPhysician}</span>
           </div>
         </section>
 
         {/* Specimen Info */}
         <section className="space-y-2">
-          <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Specimen</h3>
+          <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">{t('specimenSection')}</h3>
           <div className="grid grid-cols-2 gap-y-2 text-sm">
-            <span className="text-muted-foreground">Type</span>
+            <span className="text-muted-foreground">{t('type')}</span>
             <span><SpecimenTypeBadge specimenType={specimen.specimenType} /></span>
-            <span className="text-muted-foreground">Test Ordered</span>
+            <span className="text-muted-foreground">{t('testOrdered')}</span>
             <span className="font-medium">{specimen.testOrdered}</span>
-            <span className="text-muted-foreground">Container</span>
+            <span className="text-muted-foreground">{t('container')}</span>
             <span>{specimen.containerType}</span>
-            <span className="text-muted-foreground">Transport</span>
+            <span className="text-muted-foreground">{t('transport')}</span>
             <span>{specimen.transportCondition}</span>
-            <span className="text-muted-foreground">Accession #</span>
+            <span className="text-muted-foreground">{t('accessionNumber')}</span>
             <span className="font-mono">{specimen.accessionNumber}</span>
           </div>
         </section>
@@ -67,7 +70,7 @@ export function SpecimenInfoCard({ specimen }: SpecimenInfoCardProps) {
         {/* Lab Notes */}
         {specimen.labNotes && (
           <section className="space-y-2">
-            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Lab Notes</h3>
+            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">{t('labNotes')}</h3>
             <p className="text-sm bg-muted/50 rounded-md p-3">{specimen.labNotes}</p>
           </section>
         )}

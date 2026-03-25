@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ParameterForm } from '@/components/shared/ParameterForm';
 import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
 import { useClinician } from '@/hooks/useClinician';
+import { useTranslation } from '@/hooks/useTranslation';
 
 const EHR_TEMPLATE_URL = 'http://templates.tiro.health/templates/11bc9b87d0744edb843ca6250ce24494';
 const ADVANCED_TEMPLATE_URL = 'http://templates.tiro.health/templates/b18e0a6605bb437e90d54f8ec65eeb1d';
@@ -198,6 +199,7 @@ const EHR_PATIENTS: EhrPatient[] = [
 export function EhrPage() {
   const [selectedPatientId, setSelectedPatientId] = useState<string>(EHR_PATIENTS[0].id);
   const { clinicianName } = useClinician();
+  const { t } = useTranslation();
   const selectedPatient = useMemo(
     () => EHR_PATIENTS.find((patient) => patient.id === selectedPatientId) ?? EHR_PATIENTS[0],
     [selectedPatientId]
@@ -222,11 +224,11 @@ export function EhrPage() {
         <Panel defaultSize={42} minSize={28}>
           <Card className="flex h-full min-h-0 flex-col border border-border/50 bg-[#FAFAFA] shadow-sm">
             <CardHeader className="px-6 pb-2 pt-5">
-              <CardTitle className="text-lg">Patient Context</CardTitle>
+              <CardTitle className="text-lg">{t('patientContext')}</CardTitle>
             </CardHeader>
             <CardContent className="flex-1 min-h-0 space-y-4 overflow-y-auto px-6 pb-6 pt-2 text-sm">
               <section className="rounded-xl border border-border/50 bg-white p-4">
-                <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Active patient</div>
+                <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t('activePatient')}</div>
                 <div className="mt-2">
                   <Select value={selectedPatient.id} onValueChange={setSelectedPatientId}>
                     <SelectTrigger className="h-9 w-full border-black/10 bg-white/70 text-slate-800 shadow-none focus:ring-0 focus-visible:ring-0">
@@ -259,7 +261,7 @@ export function EhrPage() {
                 </div>
               </section>
               <section className="rounded-xl border border-border/50 bg-white p-4">
-                <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Patient</div>
+                <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t('patient')}</div>
                 <div className="mt-2 flex items-center gap-3">
                   <img
                     src={selectedPatient.avatarUrl}
@@ -271,7 +273,7 @@ export function EhrPage() {
                 <div className="text-muted-foreground">DOB {selectedPatient.birthDate} • Male • {selectedPatient.ageLabel}</div>
               </section>
               <section className="rounded-xl border border-border/50 bg-white p-4">
-                <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Allergies</div>
+                <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t('allergies')}</div>
                 <div className="mt-2 flex flex-wrap gap-2">
                   {selectedPatient.allergies.map((allergy) => (
                     <span
@@ -284,12 +286,12 @@ export function EhrPage() {
                 </div>
               </section>
               <section className="rounded-xl border border-border/50 bg-white p-4">
-                <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Current Encounter</div>
+                <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t('currentEncounter')}</div>
                 <div className="mt-2">{selectedPatient.encounterLabel}</div>
                 <div className="text-muted-foreground">{selectedPatient.encounterMeta}</div>
               </section>
               <section className="rounded-xl border border-border/50 bg-white p-4">
-                <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Active Problems</div>
+                <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t('activeProblems')}</div>
                 <ul className="mt-2 space-y-2">
                   {selectedPatient.activeProblems.map((problem) => (
                     <li key={`${problem.since}-${problem.label}`} className="rounded-md border border-border/60 bg-[#FAFAFA] p-3">
@@ -303,7 +305,7 @@ export function EhrPage() {
                 </ul>
               </section>
               <section className="rounded-xl border border-border/50 bg-white p-4">
-                <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Clinical Notes</div>
+                <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t('clinicalNotes')}</div>
                 <ul className="mt-2 space-y-1 text-muted-foreground">
                   {selectedPatient.notes.map((note) => (
                     <li key={note}>{note}</li>
@@ -311,14 +313,14 @@ export function EhrPage() {
                 </ul>
               </section>
               <section className="rounded-xl border border-border/50 bg-white p-4">
-                <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Biometrics</div>
+                <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t('biometrics')}</div>
                 <div className="mt-2 grid grid-cols-2 gap-3 text-sm text-muted-foreground">
                   <div>
-                    <span className="text-xs uppercase tracking-wide">Weight</span>
+                    <span className="text-xs uppercase tracking-wide">{t('weight')}</span>
                     <div className="mt-0.5 font-medium text-slate-700">{selectedPatient.weightKg} kg</div>
                   </div>
                   <div>
-                    <span className="text-xs uppercase tracking-wide">Height</span>
+                    <span className="text-xs uppercase tracking-wide">{t('height')}</span>
                     <div className="mt-0.5 font-medium text-slate-700">{selectedPatient.heightCm} cm</div>
                   </div>
                 </div>
