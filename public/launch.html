@@ -68,6 +68,74 @@
         display: block;
       }
 
+      /* ============================================================
+         Autofill button
+      ============================================================ */
+      tiro-magic-clipboard-button {
+        display: block;
+        width: 100%;
+        margin-top: 0.875rem;
+        padding: 0.55rem 1rem;
+        font-family: "Open Sans", sans-serif;
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: #ffffff;
+        background: #2563eb;
+        border: none;
+        border-radius: 0.4rem;
+        cursor: pointer;
+        transition: background 0.2s, color 0.2s, transform 0.1s;
+        letter-spacing: 0.01em;
+        text-align: center;
+      }
+
+      tiro-magic-clipboard-button:hover {
+        background: #1d4ed8;
+      }
+
+      tiro-magic-clipboard-button:active {
+        transform: scale(0.98);
+      }
+
+      tiro-magic-clipboard-button[data-state="pending"] {
+        background: #2563eb;
+        cursor: wait;
+        opacity: 0.75;
+      }
+
+      tiro-magic-clipboard-button[data-state="pending"]::before {
+        content: "";
+        display: inline-block;
+        width: 0.85em;
+        height: 0.85em;
+        margin-right: 0.5em;
+        border: 2px solid rgba(255, 255, 255, 0.35);
+        border-top-color: #fff;
+        border-radius: 50%;
+        vertical-align: -0.1em;
+        animation: mc-spin 0.6s linear infinite;
+      }
+
+      @keyframes mc-spin {
+        to { transform: rotate(360deg); }
+      }
+
+      tiro-magic-clipboard-button[data-state="success"] {
+        background: #7dd3fc;
+        color: #0d2137;
+        cursor: default;
+      }
+
+      tiro-magic-clipboard-button[data-state="success"]::before {
+        content: "\2713";
+        margin-right: 0.4em;
+      }
+
+      tiro-magic-clipboard-button[data-state="error"] {
+        background: #dc2626;
+        cursor: default;
+      }
+
       details summary::-webkit-details-marker {
         display: none;
       }
@@ -243,12 +311,9 @@
             <option value="Endpoint/dmsk">Dragon Medical</option>
           </select>
           <tiro-magic-clipboard for="report-form" dictation-language="nl">
-            <button
-              type="submit"
-              class="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-md bg-blue-600 hover:bg-blue-700 text-white transition-colors mt-2"
-            >
+            <tiro-magic-clipboard-button>
               Autofill Template
-            </button>
+            </tiro-magic-clipboard-button>
           </tiro-magic-clipboard>
         </div>
       </details>
