@@ -245,7 +245,7 @@
           console.log("Loaded resources for render:", body);
 
           fetch(
-            `${SDC_BASE}/fhir/r5/Composition/$render-composition?format=pdf`,
+            `${SDC_BASE}/fhir/r5/Composition/$render?format=pdf`,
             {
               method: "POST",
               headers: {

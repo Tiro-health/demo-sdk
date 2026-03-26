@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as PacsRouteImport } from './routes/pacs'
 import { Route as LisRouteImport } from './routes/lis'
 import { Route as EhrRouteImport } from './routes/ehr'
@@ -19,6 +20,11 @@ import { Route as EhrIndexRouteImport } from './routes/ehr.index'
 import { Route as PacsStudyStudyIdRouteImport } from './routes/pacs.study.$studyId'
 import { Route as LisSpecimenSpecimenIdRouteImport } from './routes/lis.specimen.$specimenId'
 
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PacsRoute = PacsRouteImport.update({
   id: '/pacs',
   path: '/pacs',
@@ -70,6 +76,7 @@ export interface FileRoutesByFullPath {
   '/ehr': typeof EhrRouteWithChildren
   '/lis': typeof LisRouteWithChildren
   '/pacs': typeof PacsRouteWithChildren
+  '/settings': typeof SettingsRoute
   '/ehr/': typeof EhrIndexRoute
   '/lis/': typeof LisIndexRoute
   '/pacs/': typeof PacsIndexRoute
@@ -78,6 +85,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/settings': typeof SettingsRoute
   '/ehr': typeof EhrIndexRoute
   '/lis': typeof LisIndexRoute
   '/pacs': typeof PacsIndexRoute
@@ -90,6 +98,7 @@ export interface FileRoutesById {
   '/ehr': typeof EhrRouteWithChildren
   '/lis': typeof LisRouteWithChildren
   '/pacs': typeof PacsRouteWithChildren
+  '/settings': typeof SettingsRoute
   '/ehr/': typeof EhrIndexRoute
   '/lis/': typeof LisIndexRoute
   '/pacs/': typeof PacsIndexRoute
@@ -103,6 +112,7 @@ export interface FileRouteTypes {
     | '/ehr'
     | '/lis'
     | '/pacs'
+    | '/settings'
     | '/ehr/'
     | '/lis/'
     | '/pacs/'
@@ -111,6 +121,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/settings'
     | '/ehr'
     | '/lis'
     | '/pacs'
@@ -122,6 +133,7 @@ export interface FileRouteTypes {
     | '/ehr'
     | '/lis'
     | '/pacs'
+    | '/settings'
     | '/ehr/'
     | '/lis/'
     | '/pacs/'
@@ -134,10 +146,18 @@ export interface RootRouteChildren {
   EhrRoute: typeof EhrRouteWithChildren
   LisRoute: typeof LisRouteWithChildren
   PacsRoute: typeof PacsRouteWithChildren
+  SettingsRoute: typeof SettingsRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/pacs': {
       id: '/pacs'
       path: '/pacs'
@@ -243,6 +263,7 @@ const rootRouteChildren: RootRouteChildren = {
   EhrRoute: EhrRouteWithChildren,
   LisRoute: LisRouteWithChildren,
   PacsRoute: PacsRouteWithChildren,
+  SettingsRoute: SettingsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

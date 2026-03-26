@@ -265,6 +265,9 @@
     <!-- Tiro Web SDK IIFE Bundle -->
     <script src="https://cdn.tiro.health/sdk/next/tiro-web-sdk.iife.js"></script>
 
+    <!-- Composition blueprints for template extraction -->
+    <script src="/composition-blueprints.js"></script>
+
     <script>
       // ============================================
       // URL Parameters
@@ -525,11 +528,55 @@
             ? JSON.parse(scriptTag.textContent)
             : null;
 
-          // Call $extract via SDCClient
-          const { composition } = await form.sdcClient.extract({
-            questionnaireResponse: response,
-            questionnaire: questionnaire,
+          // Get questionnaire URL from response or form attribute
+          const questionnaireUrl = response.questionnaire || form.getAttribute("questionnaire");
+
+          // Look up Composition blueprint and build templateExtractBundle
+          const compositionBlueprint = getCompositionBlueprint(questionnaireUrl);
+          const templateExtractBundle = buildTemplateExtractBundle(compositionBlueprint);
+          console.log("Template extract bundle:", templateExtractBundle);
+
+          // Build Parameters for $extract
+          const extractParams = {
+            resourceType: "Parameters",
+            parameter: [
+              { name: "questionnaire-response", resource: response },
+            ],
+          };
+          if (templateExtractBundle) {
+            extractParams.parameter.push({ name: "templateExtractBundle", resource: templateExtractBundle });
+          }
+          if (questionnaire) {
+            extractParams.parameter.push({ name: "questionnaire", resource: questionnaire });
+          }
+
+          // Call $extract endpoint
+          const sdcEndpoint = form.getAttribute("sdc-endpoint-address");
+          const extractResponse = await fetch(`${sdcEndpoint}/QuestionnaireResponse/$extract`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/fhir+json",
+              "Accept": "application/fhir+json",
+            },
+            body: JSON.stringify(extractParams),
           });
+
+          if (!extractResponse.ok) {
+            const errorText = await extractResponse.text();
+            throw new Error(`Extract failed: ${extractResponse.status} - ${errorText}`);
+          }
+
+          const extractResult = await extractResponse.json();
+          console.log("Extract result:", extractResult);
+
+          // Find Composition in the returned Bundle
+          let composition = null;
+          for (const entry of extractResult.entry || []) {
+            if (entry.resource?.resourceType === "Composition") {
+              composition = entry.resource;
+              break;
+            }
+          }
           console.log("Extract completed:", { composition });
 
           // Generate unique keys for localStorage
