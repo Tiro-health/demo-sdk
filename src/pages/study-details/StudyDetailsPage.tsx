@@ -8,16 +8,8 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { useClinician } from '@/hooks/useClinician';
 import { useTranslation } from '@/hooks/useTranslation';
+import { useTemplateSettings } from '@/hooks/useTemplateSettings';
 import type { Study } from '@/types/study';
-
-const DEFAULT_QUESTIONNAIRE =
-  "http://templates.tiro.health/templates/aa87c115c40149e98faba070cacb15c9";
-const PACS_TEMPLATE_URL =
-  "http://templates.tiro.health/templates/8d7ab478ce8b4dc3a84b7b33ab34b335";
-const PACS_CT_CORONAROGRAPHY_TEMPLATE_URL =
-  "http://templates.tiro.health/templates/04cd8b41a7dc491f8fb006f66c60c958";
-const ADVANCED_TEMPLATE_URL =
-  "http://templates.tiro.health/templates/b18e0a6605bb437e90d54f8ec65eeb1d";
 
 function generatePatientId(study: Study): string {
   const dob = study.patient.dateOfBirth.replace(/-/g, "");
@@ -30,19 +22,20 @@ export function StudyDetailsPage() {
   const study = useStudyById(studyId);
   const { clinicianName } = useClinician();
   const { t } = useTranslation();
+  const { enabledTemplates, defaultTemplateId, defaultTemplate } = useTemplateSettings('pacs');
 
   const initialParams = useMemo((): Record<string, string> => {
     if (!study) return {};
     return {
-      questionnaire: DEFAULT_QUESTIONNAIRE,
-      templatePreset: 'radiology',
+      questionnaire: defaultTemplate?.questionnaire ?? '',
+      templatePreset: defaultTemplateId,
       patientId: generatePatientId(study),
       accessionNumber: study.accessionNumber,
       '0008,1030': 'T1 flare',
       clinicianName,
       theme: 'dark',
     };
-  }, [study, clinicianName]);
+  }, [study, clinicianName, defaultTemplate, defaultTemplateId]);
 
   if (!study) {
     return (
@@ -69,12 +62,7 @@ export function StudyDetailsPage() {
             initialParams={initialParams}
             panelTone="dark"
             showTemplatePicker
-            templateOptions={[
-              { id: 'radiology', label: 'Radiology reporting', questionnaire: DEFAULT_QUESTIONNAIRE },
-              { id: 'basic', label: 'Basic template', questionnaire: PACS_TEMPLATE_URL },
-              { id: 'ct-coronarography', label: 'CT Coronarography', questionnaire: PACS_CT_CORONAROGRAPHY_TEMPLATE_URL },
-              { id: 'advanced', label: 'Advanced template', questionnaire: ADVANCED_TEMPLATE_URL },
-            ]}
+            templateOptions={enabledTemplates}
           />
         </Panel>
       </Group>

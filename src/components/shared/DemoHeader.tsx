@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { ArrowLeft, Check, ChevronDown, Globe } from 'lucide-react';
+import { ArrowLeft, Check, ChevronDown, Globe, Settings } from 'lucide-react';
 import { Link } from '@tanstack/react-router';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -155,6 +155,9 @@ export function DemoHeader({ demoType, contextInfo, showBackButton, backTo }: De
               </SelectContent>
             </Select>
           </div>
+          <Link to="/settings" className="ml-1 inline-flex items-center align-middle opacity-25 hover:opacity-60 transition-opacity">
+            <Settings className="h-4 w-4 text-muted-foreground" />
+          </Link>
         </div>
       </div>
     </header>

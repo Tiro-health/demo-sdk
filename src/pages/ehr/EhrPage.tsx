@@ -5,9 +5,7 @@ import { ParameterForm } from '@/components/shared/ParameterForm';
 import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
 import { useClinician } from '@/hooks/useClinician';
 import { useTranslation } from '@/hooks/useTranslation';
-
-const EHR_TEMPLATE_URL = 'http://templates.tiro.health/templates/11bc9b87d0744edb843ca6250ce24494';
-const ADVANCED_TEMPLATE_URL = 'http://templates.tiro.health/templates/b18e0a6605bb437e90d54f8ec65eeb1d';
+import { useTemplateSettings } from '@/hooks/useTemplateSettings';
 
 type EhrPatient = {
   id: string;
@@ -200,14 +198,15 @@ export function EhrPage() {
   const [selectedPatientId, setSelectedPatientId] = useState<string>(EHR_PATIENTS[0].id);
   const { clinicianName } = useClinician();
   const { t } = useTranslation();
+  const { enabledTemplates, defaultTemplateId, defaultTemplate } = useTemplateSettings('ehr');
   const selectedPatient = useMemo(
     () => EHR_PATIENTS.find((patient) => patient.id === selectedPatientId) ?? EHR_PATIENTS[0],
     [selectedPatientId]
   );
 
   const initialParams: Record<string, string> = useMemo(() => ({
-    questionnaire: EHR_TEMPLATE_URL,
-    templatePreset: 'rarp',
+    questionnaire: defaultTemplate?.questionnaire ?? '',
+    templatePreset: defaultTemplateId,
     patientId: selectedPatient.id,
     patientGiven: selectedPatient.given,
     patientFamily: selectedPatient.family,
@@ -216,7 +215,7 @@ export function EhrPage() {
     clinicianName,
     theme: 'light',
     demoType: 'ehr',
-  }), [selectedPatient, clinicianName]);
+  }), [selectedPatient, clinicianName, defaultTemplate, defaultTemplateId]);
 
   return (
     <div className="h-[calc(100vh-3.5rem)] p-4 bg-slate-200">
@@ -334,10 +333,7 @@ export function EhrPage() {
             key={`ehr-${selectedPatient.id}`}
             initialParams={initialParams}
             showTemplatePicker
-            templateOptions={[
-              { id: 'rarp', label: 'Operatieverslag RARP', questionnaire: EHR_TEMPLATE_URL },
-              { id: 'advanced', label: 'Advanced template', questionnaire: ADVANCED_TEMPLATE_URL },
-            ]}
+            templateOptions={enabledTemplates}
           />
         </Panel>
       </Group>
