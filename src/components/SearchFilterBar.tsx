@@ -8,6 +8,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
+import { useTranslation } from '@/hooks/useTranslation';
 import type { Modality, UrgencyLevel } from '@/types/study';
 
 interface SearchFilterBarProps {
@@ -29,13 +30,15 @@ export function SearchFilterBar({
   onUrgencyChange,
   studyCount,
 }: SearchFilterBarProps) {
+  const { t } = useTranslation();
+
   return (
     <div className="worklist-filter-bar worklist-filter-bar-pacs">
       <div className="relative flex-1 min-w-[300px]">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
           type="text"
-          placeholder="Search patient name, study, or research question..."
+          placeholder={t('searchStudyPlaceholder')}
           value={searchTerm}
           onChange={(e) => onSearchChange(e.target.value)}
           className="pl-9 h-10 bg-background/70 border-border/70"
@@ -48,10 +51,10 @@ export function SearchFilterBar({
           onValueChange={(value) => onModalityChange(value as Modality | 'all')}
         >
           <SelectTrigger className="w-[180px] h-10 bg-background/70 border-border/70">
-            <SelectValue placeholder="All Modalities" />
+            <SelectValue placeholder={t('allModalities')} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Modalities</SelectItem>
+            <SelectItem value="all">{t('allModalities')}</SelectItem>
             <SelectItem value="XA">XA - Angiography</SelectItem>
             <SelectItem value="DX">DX - Digital X-Ray</SelectItem>
             <SelectItem value="PT">PT - PET/CT</SelectItem>
@@ -68,10 +71,10 @@ export function SearchFilterBar({
           onValueChange={(value) => onUrgencyChange(value as UrgencyLevel | 'all')}
         >
           <SelectTrigger className="w-[150px] h-10 bg-background/70 border-border/70">
-            <SelectValue placeholder="All Urgency" />
+            <SelectValue placeholder={t('allUrgency')} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Urgency</SelectItem>
+            <SelectItem value="all">{t('allUrgency')}</SelectItem>
             <SelectItem value="Routine">Routine</SelectItem>
             <SelectItem value="Urgent">Urgent</SelectItem>
             <SelectItem value="STAT">STAT</SelectItem>
@@ -80,7 +83,7 @@ export function SearchFilterBar({
         </Select>
 
         <Badge variant="secondary" className="px-3 py-1.5 text-xs font-semibold">
-          {studyCount} {studyCount === 1 ? 'study' : 'studies'}
+          {studyCount} {studyCount === 1 ? t('study') : t('studies')}
         </Badge>
       </div>
     </div>

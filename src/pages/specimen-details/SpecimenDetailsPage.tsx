@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { DEMO_CONFIGS } from '@/lib/demoRegistry';
 import { useClinician } from '@/hooks/useClinician';
+import { useTranslation } from '@/hooks/useTranslation';
 import type { Specimen } from '@/types/specimen';
 
 const LIS_BASIC_TEMPLATE_URL = 'http://templates.tiro.health/templates/3640e41dba1e4318934e411a054cd721';
@@ -26,6 +27,7 @@ export function SpecimenDetailsPage() {
   const { specimenId } = useParams({ from: '/lis/specimen/$specimenId' });
   const specimen = useSpecimenById(specimenId);
   const { clinicianName } = useClinician();
+  const { t } = useTranslation();
 
   const initialParams = useMemo((): Record<string, string> => {
     if (!specimen) return {};
@@ -45,10 +47,10 @@ export function SpecimenDetailsPage() {
   if (!specimen) {
     return (
       <div className="container mx-auto px-4 py-6">
-        <h1 className="text-2xl font-bold mb-4">Specimen not found</h1>
+        <h1 className="text-2xl font-bold mb-4">{t('specimenNotFound')}</h1>
         <Button asChild>
           <Link to="/lis">
-            <ArrowLeft className="mr-2 h-4 w-4" /> Back to Worklist
+            <ArrowLeft className="mr-2 h-4 w-4" /> {t('backToWorklist')}
           </Link>
         </Button>
       </div>
@@ -73,6 +75,7 @@ export function SpecimenDetailsPage() {
               { id: 'ovario', label: 'Cuestionario de Ovario', questionnaire: OVARIO_TEMPLATE_URL },
               { id: 'er-pr-her2', label: 'ER/PR/HER2 rapportering', questionnaire: ER_PR_HER2_TEMPLATE_URL },
               { id: 'mondholte', label: 'Mondholte tumoren', questionnaire: MONDHOLTE_TEMPLATE_URL },
+              { id: 'inline-basic', label: 'Inline basic template', inlineQuestionnaire: 'basic' },
             ]}
           />
         </Panel>

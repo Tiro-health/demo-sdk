@@ -2,11 +2,13 @@ import { useState, useMemo, useRef, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Settings, Trash2, RefreshCw, Plus, Copy } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface TemplateOption {
   id: string;
   label: string;
-  questionnaire: string;
+  questionnaire?: string;
+  inlineQuestionnaire?: string;
 }
 
 interface ParameterFormProps {
@@ -23,6 +25,7 @@ export function ParameterForm({
   templateOptions = [],
 }: ParameterFormProps) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
+  const { t, language } = useTranslation();
   const [params, setParams] = useState<Record<string, string>>(initialParams);
   const effectiveTemplateOptions = useMemo(
     () =>
@@ -40,14 +43,22 @@ export function ParameterForm({
   );
 
   useEffect(() => {
-    setParams(initialParams);
-    setTemplatePreset(initialParams.templatePreset || effectiveTemplateOptions[0].id);
-  }, [initialParams, effectiveTemplateOptions]);
+    setParams((prev) => {
+      const next = { ...initialParams };
+      if (prev.templatePreset) next.templatePreset = prev.templatePreset;
+      if (prev.questionnaire) next.questionnaire = prev.questionnaire;
+      if (prev.inlineQuestionnaire) {
+        next.inlineQuestionnaire = prev.inlineQuestionnaire;
+        delete next.questionnaire;
+      }
+      return next;
+    });
+  }, [initialParams]);
 
   const launchUrl = useMemo(() => {
-    const searchParams = new URLSearchParams(params);
+    const searchParams = new URLSearchParams({ ...params, language });
     return `/launch.html?${searchParams.toString()}`;
-  }, [params]);
+  }, [params, language]);
 
   const applyTemplatePreset = (preset: string) => {
     const selectedTemplate = effectiveTemplateOptions.find((item) => item.id === preset);
@@ -55,8 +66,13 @@ export function ParameterForm({
 
     setParams((prev) => {
       const next: Record<string, string> = { ...prev, templatePreset: preset };
-      next.questionnaire = selectedTemplate.questionnaire;
-      delete next.inlineQuestionnaire;
+      if (selectedTemplate.inlineQuestionnaire) {
+        next.inlineQuestionnaire = selectedTemplate.inlineQuestionnaire;
+        delete next.questionnaire;
+      } else if (selectedTemplate.questionnaire) {
+        next.questionnaire = selectedTemplate.questionnaire;
+        delete next.inlineQuestionnaire;
+      }
       return next;
     });
   };
@@ -87,13 +103,13 @@ export function ParameterForm({
       <CardHeader className="pb-2">
         <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
           <div className="justify-self-start">
-            <CardTitle className="text-lg">Reporting</CardTitle>
+            <CardTitle className="text-lg">{t('reporting')}</CardTitle>
           </div>
           <div className="justify-self-center">
             {showTemplatePicker && (
               <div className="flex items-center justify-center gap-2">
                 <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                  Template
+                  {t('template')}
                 </span>
                 <Select
                   value={templatePreset}
@@ -109,7 +125,7 @@ export function ParameterForm({
                         : 'bg-white/70 border-black/10 text-slate-800 focus:ring-0 focus-visible:ring-0'
                     }`}
                   >
-                    <SelectValue placeholder="Select template" />
+                    <SelectValue placeholder={t('selectTemplate')} />
                   </SelectTrigger>
                   <SelectContent
                     className={`shadow-xl ${
@@ -139,7 +155,7 @@ export function ParameterForm({
                 navigator.clipboard.writeText(fullUrl);
               }}
               className="cursor-pointer"
-              title="Copy URL"
+              title={t('copyUrl')}
             >
               <Copy className="h-4 w-4 text-muted-foreground hover:text-foreground transition-colors" />
             </button>
@@ -148,7 +164,7 @@ export function ParameterForm({
                 iframeRef.current?.contentWindow?.location.reload()
               }
               className="cursor-pointer"
-              title="Refresh iframe"
+              title={t('refreshIframe')}
             >
               <RefreshCw className="h-4 w-4 text-muted-foreground hover:text-foreground transition-colors" />
             </button>
@@ -158,7 +174,7 @@ export function ParameterForm({
               </summary>
               <div className="absolute right-0 mt-2 p-3 bg-card border rounded-md shadow-lg z-10 min-w-70">
                 <p className="text-xs font-medium text-muted-foreground mb-2">
-                  URL Parameters
+                  {t('urlParameters')}
                 </p>
                 <div className="space-y-1.5">
                   {Object.entries(params).map(([key, value]) => (

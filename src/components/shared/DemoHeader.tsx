@@ -1,10 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
-import { ArrowLeft, Check, ChevronDown } from 'lucide-react';
+import { ArrowLeft, Check, ChevronDown, Globe } from 'lucide-react';
 import { Link } from '@tanstack/react-router';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DEMO_CONFIGS, type DemoType } from '@/lib/demoRegistry';
+import { getDemoTitle, getDemoTiroLabel } from '@/lib/i18n';
 import { useClinician } from '@/hooks/useClinician';
+import { useTranslation } from '@/hooks/useTranslation';
+import type { Language } from '@/hooks/useLanguage';
 import type { ReactNode } from 'react';
 
 interface DemoHeaderProps {
@@ -21,6 +24,7 @@ export function DemoHeader({ demoType, contextInfo, showBackButton, backTo }: De
   const Icon = config.icon;
   const demoEntries = Object.values(DEMO_CONFIGS);
   const { clinicianName, setClinicianName, options } = useClinician();
+  const { t, language, setLanguage, languageOptions } = useTranslation();
   const clinicianInitials = clinicianName
     .replace(/^dr\.\s*/i, '')
     .split(/\s+/)
@@ -86,7 +90,7 @@ export function DemoHeader({ demoType, contextInfo, showBackButton, backTo }: De
                     >
                       <span className="flex items-center gap-2">
                         <EntryIcon className="h-4 w-4" />
-                        {entry.title}
+                        {getDemoTitle(entry.id, language)}
                       </span>
                       <Check className="h-4 w-4" />
                     </div>
@@ -99,7 +103,7 @@ export function DemoHeader({ demoType, contextInfo, showBackButton, backTo }: De
                       onClick={() => setIsMenuOpen(false)}
                     >
                       <EntryIcon className="h-4 w-4 text-primary" />
-                      {entry.title}
+                      {getDemoTitle(entry.id, language)}
                     </Link>
                   );
                 })}
@@ -107,8 +111,8 @@ export function DemoHeader({ demoType, contextInfo, showBackButton, backTo }: De
             )}
           </div>
           <div>
-            <h1 className="text-lg font-semibold">{config.title}</h1>
-            <p className="text-xs text-muted-foreground">{config.tiroLabel}</p>
+            <h1 className="text-lg font-semibold">{getDemoTitle(config.id, language)}</h1>
+            <p className="text-xs text-muted-foreground">{getDemoTiroLabel(config.id, language)}</p>
           </div>
         </div>
         <div className="justify-self-end">
@@ -121,7 +125,7 @@ export function DemoHeader({ demoType, contextInfo, showBackButton, backTo }: De
               <span className="absolute -bottom-0.5 -right-0.5 h-2 w-2 rounded-full border border-background bg-emerald-500/90" />
             </div>
             <div className="hidden md:block leading-tight">
-              <p className="text-[9px] uppercase tracking-wide text-muted-foreground/80">Logged in</p>
+              <p className="text-[9px] uppercase tracking-wide text-muted-foreground/80">{t('loggedIn')}</p>
             </div>
             <Select value={clinicianName} onValueChange={setClinicianName}>
               <SelectTrigger className="h-8 w-[165px] border-0 bg-transparent px-1.5 text-sm font-medium text-foreground/90 shadow-none focus:ring-0 focus-visible:ring-0">
@@ -131,6 +135,21 @@ export function DemoHeader({ demoType, contextInfo, showBackButton, backTo }: De
                 {options.map((name) => (
                   <SelectItem key={name} value={name} className="focus:bg-accent">
                     {name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="inline-flex items-center gap-1.5 rounded-full border border-border/20 bg-background/55 px-2 py-0.5 align-middle">
+            <Globe className="h-3.5 w-3.5 text-muted-foreground" />
+            <Select value={language} onValueChange={(value) => setLanguage(value as Language)}>
+              <SelectTrigger className="h-8 w-[60px] border-0 bg-transparent px-1 text-sm font-medium text-foreground/90 shadow-none focus:ring-0 focus-visible:ring-0">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="border-border/35 bg-card/98 shadow-lg min-w-[60px]">
+                {languageOptions.map((opt) => (
+                  <SelectItem key={opt.value} value={opt.value} className="focus:bg-accent">
+                    {opt.label}
                   </SelectItem>
                 ))}
               </SelectContent>

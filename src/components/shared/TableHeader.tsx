@@ -1,5 +1,6 @@
 import { ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useTranslation } from '@/hooks/useTranslation';
 import type { SortConfig } from '@/types/study';
 
 interface TableHeaderProps {
@@ -8,6 +9,7 @@ interface TableHeaderProps {
 }
 
 export function TableHeader({ sortConfig, onSort }: TableHeaderProps) {
+  const { t } = useTranslation();
   const getSortIcon = (key: SortConfig['key']) => {
     if (sortConfig.key !== key) {
       return <ArrowUpDown className="h-4 w-4" />;
@@ -31,7 +33,7 @@ export function TableHeader({ sortConfig, onSort }: TableHeaderProps) {
             sortConfig.key === 'dateTime' ? 'text-foreground bg-accent/60' : 'text-muted-foreground'
           }`}
         >
-          Date/Time
+          {t('dateTime')}
           <span className="ml-1">{getSortIcon('dateTime')}</span>
         </Button>
       </div>
@@ -46,7 +48,7 @@ export function TableHeader({ sortConfig, onSort }: TableHeaderProps) {
             sortConfig.key === 'patientName' ? 'text-foreground bg-accent/60' : 'text-muted-foreground'
           }`}
         >
-          Patient
+          {t('patient')}
           <span className="ml-1">{getSortIcon('patientName')}</span>
         </Button>
       </div>
@@ -61,19 +63,19 @@ export function TableHeader({ sortConfig, onSort }: TableHeaderProps) {
             sortConfig.key === 'modality' ? 'text-foreground bg-accent/60' : 'text-muted-foreground'
           }`}
         >
-          Mod
+          {t('mod')}
           <span className="ml-1">{getSortIcon('modality')}</span>
         </Button>
       </div>
 
       {/* Study - cols 6-7 */}
       <div className="col-span-2">
-        <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground px-2">Study</span>
+        <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground px-2">{t('studyHeader')}</span>
       </div>
 
       {/* Research Question - cols 8-12 */}
       <div className="col-span-5">
-        <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground px-2">Research Question</span>
+        <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground px-2">{t('researchQuestion')}</span>
       </div>
     </div>
   );

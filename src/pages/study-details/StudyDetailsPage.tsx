@@ -7,6 +7,7 @@ import { ParameterForm } from '@/components/shared/ParameterForm';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { useClinician } from '@/hooks/useClinician';
+import { useTranslation } from '@/hooks/useTranslation';
 import type { Study } from '@/types/study';
 
 const DEFAULT_QUESTIONNAIRE =
@@ -28,6 +29,7 @@ export function StudyDetailsPage() {
   const { studyId } = useParams({ from: '/pacs/study/$studyId' });
   const study = useStudyById(studyId);
   const { clinicianName } = useClinician();
+  const { t } = useTranslation();
 
   const initialParams = useMemo((): Record<string, string> => {
     if (!study) return {};
@@ -45,10 +47,10 @@ export function StudyDetailsPage() {
   if (!study) {
     return (
       <div className="container mx-auto px-4 py-6">
-        <h1 className="text-2xl font-bold mb-4">Study not found</h1>
+        <h1 className="text-2xl font-bold mb-4">{t('studyNotFound')}</h1>
         <Button asChild>
           <Link to="/pacs">
-            <ArrowLeft className="mr-2 h-4 w-4" /> Back to Worklist
+            <ArrowLeft className="mr-2 h-4 w-4" /> {t('backToWorklist')}
           </Link>
         </Button>
       </div>
