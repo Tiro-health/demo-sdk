@@ -530,30 +530,67 @@
             questionnaireResponse: response,
             questionnaire: questionnaire,
           });
-
           console.log("Extract completed:", { composition });
 
-          // Generate unique key for localStorage
-          const id = crypto.randomUUID();
-          const key = `Report/${id}`;
+          // Generate unique keys for localStorage
+          const qrId = crypto.randomUUID();
+          const compositionId = crypto.randomUUID();
+          const qrRef = `QuestionnaireResponse/${qrId}`;
+          const compositionRef = `Composition/${compositionId}`;
+          const patientRef = `Patient/${patientId}`;
 
-          // Store extract results with context
-          localStorage.setItem(
-            key,
-            JSON.stringify({
-              composition: composition || null,
-              questionnaireResponse: response,
-              context: {
-                patientId,
-                accessionNumber,
-                submittedAt: new Date().toISOString(),
+          // Store QuestionnaireResponse
+          localStorage.setItem(qrRef, JSON.stringify(response));
+
+          // Store Composition (dummy placeholder until extract returns one)
+          const compositionResource = composition || {
+            resourceType: "Composition",
+            id: compositionId,
+            status: "final",
+            type: {
+              coding: [
+                {
+                  system: "http://loinc.org",
+                  code: "18748-4",
+                  display: "Diagnostic imaging study",
+                },
+              ],
+            },
+            date: new Date().toISOString(),
+            title: "Radiology Report",
+            subject: { reference: patientRef },
+            author: [{ display: "Demo Radiologist" }],
+            section: [
+              {
+                title: "Findings",
+                text: {
+                  status: "generated",
+                  div: '<div xmlns="http://www.w3.org/1999/xhtml"><p>No acute findings. The examination is within normal limits.</p></div>',
+                },
               },
-            }),
-          );
-          console.log("Report stored in localStorage:", key);
+              {
+                title: "Impression",
+                text: {
+                  status: "generated",
+                  div: '<div xmlns="http://www.w3.org/1999/xhtml"><p>Normal study. No follow-up required.</p></div>',
+                },
+              },
+            ],
+          };
+          localStorage.setItem(compositionRef, JSON.stringify(compositionResource));
 
-          // Navigate to callback page
-          window.location.href = `/callback.html?report=${encodeURIComponent(key)}`;
+          // Store Patient
+          localStorage.setItem(patientRef, JSON.stringify(launchContext.patient));
+
+          console.log("Stored resources:", { qrRef, compositionRef, patientRef });
+
+          // Navigate to callback page with FHIR references
+          const callbackParams = new URLSearchParams({
+            subject: patientRef,
+            response: qrRef,
+            composition: compositionRef,
+          });
+          window.location.href = `/callback.html?${callbackParams}`;
         } catch (error) {
           showError(error.message || "Failed to extract report", error);
         }
