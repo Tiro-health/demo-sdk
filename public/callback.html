@@ -87,6 +87,48 @@
         white-space: pre-wrap;
         word-wrap: break-word;
       }
+      #loading {
+        display: none;
+        flex: 1;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        gap: 12px;
+        color: #737373;
+      }
+      #loading.active {
+        display: flex;
+      }
+      .spinner {
+        width: 40px;
+        height: 40px;
+        border: 3px solid #e5e5e5;
+        border-top-color: #2563eb;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+      }
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+      #error {
+        display: none;
+        flex: 1;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        gap: 8px;
+      }
+      #error.active {
+        display: flex;
+      }
+      #error p { color: #dc2626; font-weight: 500; }
+      #error pre {
+        color: #737373;
+        font-size: 12px;
+        max-width: 600px;
+        white-space: pre-wrap;
+        text-align: center;
+      }
     </style>
   </head>
   <body>
@@ -97,9 +139,17 @@
       </div>
 
       <div id="tab-pdf" class="tab-content active">
+        <div id="loading">
+          <div class="spinner"></div>
+          <span>Generating PDF…</span>
+        </div>
+        <div id="error">
+          <p>Failed to render PDF</p>
+          <pre id="error-detail"></pre>
+        </div>
         <div class="pdf-placeholder">
           <iframe id="pdf-viewer" style="display: none"></iframe>
-          <span id="pdf-placeholder-text">PDF rendering not yet available</span>
+          <span id="pdf-placeholder-text"></span>
         </div>
       </div>
 
@@ -137,29 +187,90 @@
         });
       });
 
-      // Load data
+      // Read FHIR references from URL params
+      const SDC_BASE = "https://sdc.tiro.health";
       const urlParams = new URLSearchParams(window.location.search);
-      const reportKey = urlParams.get("report");
+      const compositionRef = urlParams.get("composition");
+      const responseRef = urlParams.get("response");
+      const subjectRef = urlParams.get("subject");
 
-      if (reportKey) {
-        const storageData = localStorage.getItem(reportKey);
-        if (storageData) {
-          try {
-            const data = JSON.parse(storageData);
+      const loadingEl = document.getElementById("loading");
+      const errorEl = document.getElementById("error");
+      const errorDetail = document.getElementById("error-detail");
+      const viewer = document.getElementById("pdf-viewer");
+      const placeholderText = document.getElementById("pdf-placeholder-text");
 
-            // PDF tab — placeholder for now, will use composition to render later
-            if (data.composition) {
-              console.log("Composition available:", data.composition);
+      function showError(message) {
+        loadingEl.classList.remove("active");
+        errorEl.classList.add("active");
+        errorDetail.textContent = message;
+        console.error("Callback error:", message);
+      }
+
+      function loadResource(ref) {
+        const raw = localStorage.getItem(ref);
+        if (!raw) throw new Error(`Resource not found in localStorage: ${ref}`);
+        return JSON.parse(raw);
+      }
+
+      // Populate QR tab if response is available
+      if (responseRef) {
+        try {
+          const qr = loadResource(responseRef);
+          document.getElementById("qr-json").innerHTML =
+            highlightJson(JSON.stringify(qr, null, 2));
+        } catch (e) {
+          console.error("Failed to load QuestionnaireResponse:", e);
+        }
+      }
+
+      // PDF tab: render composition
+      if (!compositionRef) {
+        placeholderText.textContent = "No composition provided";
+      } else {
+        loadingEl.classList.add("active");
+
+        try {
+          const composition = loadResource(compositionRef);
+          const body = { composition };
+
+          if (responseRef) {
+            try {
+              body.response = loadResource(responseRef);
+            } catch (_) {
+              // response is optional for rendering
             }
-
-            // QuestionnaireResponse tab
-            if (data.questionnaireResponse) {
-              document.getElementById("qr-json").innerHTML =
-                highlightJson(JSON.stringify(data.questionnaireResponse, null, 2));
-            }
-          } catch (e) {
-            console.error("Failed to load report:", e);
           }
+
+          console.log("Loaded resources for render:", body);
+
+          fetch(
+            `${SDC_BASE}/fhir/r5/Composition/$render?format=pdf`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Accept: "application/pdf",
+              },
+              body: JSON.stringify(body),
+            },
+          )
+            .then((res) => {
+              if (!res.ok) {
+                return res.text().then((text) => {
+                  throw new Error(`${res.status}: ${text}`);
+                });
+              }
+              return res.blob();
+            })
+            .then((blob) => {
+              loadingEl.classList.remove("active");
+              viewer.style.display = "";
+              viewer.src = URL.createObjectURL(blob);
+            })
+            .catch((err) => showError(err.message));
+        } catch (err) {
+          showError(err.message);
         }
       }
     </script>

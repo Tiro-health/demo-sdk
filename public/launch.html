@@ -330,6 +330,9 @@
     <!-- Tiro Web SDK IIFE Bundle -->
     <script src="https://cdn.tiro.health/sdk/next/tiro-web-sdk.iife.js"></script>
 
+    <!-- Composition blueprints for template extraction -->
+    <script src="/composition-blueprints.js"></script>
+
     <script>
       // ============================================
       // URL Parameters
@@ -590,35 +593,116 @@
             ? JSON.parse(scriptTag.textContent)
             : null;
 
-          // Call $extract via SDCClient
-          const { composition } = await form.sdcClient.extract({
-            questionnaireResponse: response,
-            questionnaire: questionnaire,
+          // Get questionnaire URL from response or form attribute
+          const questionnaireUrl = response.questionnaire || form.getAttribute("questionnaire");
+
+          // Look up Composition blueprint and build templateExtractBundle
+          const compositionBlueprint = getCompositionBlueprint(questionnaireUrl);
+          const templateExtractBundle = buildTemplateExtractBundle(compositionBlueprint);
+          console.log("Template extract bundle:", templateExtractBundle);
+
+          // Build Parameters for $extract
+          const extractParams = {
+            resourceType: "Parameters",
+            parameter: [
+              { name: "questionnaire-response", resource: response },
+            ],
+          };
+          if (templateExtractBundle) {
+            extractParams.parameter.push({ name: "templateExtractBundle", resource: templateExtractBundle });
+          }
+          if (questionnaire) {
+            extractParams.parameter.push({ name: "questionnaire", resource: questionnaire });
+          }
+
+          // Call $extract endpoint
+          const sdcEndpoint = form.getAttribute("sdc-endpoint-address");
+          const extractResponse = await fetch(`${sdcEndpoint}/QuestionnaireResponse/$extract`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/fhir+json",
+              "Accept": "application/fhir+json",
+            },
+            body: JSON.stringify(extractParams),
           });
 
+          if (!extractResponse.ok) {
+            const errorText = await extractResponse.text();
+            throw new Error(`Extract failed: ${extractResponse.status} - ${errorText}`);
+          }
+
+          const extractResult = await extractResponse.json();
+          console.log("Extract result:", extractResult);
+
+          // Find Composition in the returned Bundle
+          let composition = null;
+          for (const entry of extractResult.entry || []) {
+            if (entry.resource?.resourceType === "Composition") {
+              composition = entry.resource;
+              break;
+            }
+          }
           console.log("Extract completed:", { composition });
 
-          // Generate unique key for localStorage
-          const id = crypto.randomUUID();
-          const key = `Report/${id}`;
+          // Generate unique keys for localStorage
+          const qrId = crypto.randomUUID();
+          const compositionId = crypto.randomUUID();
+          const qrRef = `QuestionnaireResponse/${qrId}`;
+          const compositionRef = `Composition/${compositionId}`;
+          const patientRef = `Patient/${patientId}`;
 
-          // Store extract results with context
-          localStorage.setItem(
-            key,
-            JSON.stringify({
-              composition: composition || null,
-              questionnaireResponse: response,
-              context: {
-                patientId,
-                accessionNumber,
-                submittedAt: new Date().toISOString(),
+          // Store QuestionnaireResponse
+          localStorage.setItem(qrRef, JSON.stringify(response));
+
+          // Store Composition (dummy placeholder until extract returns one)
+          const compositionResource = composition || {
+            resourceType: "Composition",
+            id: compositionId,
+            status: "final",
+            type: {
+              coding: [
+                {
+                  system: "http://loinc.org",
+                  code: "18748-4",
+                  display: "Diagnostic imaging study",
+                },
+              ],
+            },
+            date: new Date().toISOString(),
+            title: "Radiology Report",
+            subject: { reference: patientRef },
+            author: [{ display: "Demo Radiologist" }],
+            section: [
+              {
+                title: "Findings",
+                text: {
+                  status: "generated",
+                  div: '<div xmlns="http://www.w3.org/1999/xhtml"><p>No acute findings. The examination is within normal limits.</p></div>',
+                },
               },
-            }),
-          );
-          console.log("Report stored in localStorage:", key);
+              {
+                title: "Impression",
+                text: {
+                  status: "generated",
+                  div: '<div xmlns="http://www.w3.org/1999/xhtml"><p>Normal study. No follow-up required.</p></div>',
+                },
+              },
+            ],
+          };
+          localStorage.setItem(compositionRef, JSON.stringify(compositionResource));
 
-          // Navigate to callback page
-          window.location.href = `/callback.html?report=${encodeURIComponent(key)}`;
+          // Store Patient
+          localStorage.setItem(patientRef, JSON.stringify(launchContext.patient));
+
+          console.log("Stored resources:", { qrRef, compositionRef, patientRef });
+
+          // Navigate to callback page with FHIR references
+          const callbackParams = new URLSearchParams({
+            subject: patientRef,
+            response: qrRef,
+            composition: compositionRef,
+          });
+          window.location.href = `/callback.html?${callbackParams}`;
         } catch (error) {
           showError(error.message || "Failed to extract report", error);
         }
