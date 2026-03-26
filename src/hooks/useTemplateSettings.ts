@@ -20,46 +20,55 @@ function getDefaultSettings(): TemplateSettings {
   };
 }
 
-function getStoredSettings(): TemplateSettings {
+// Cached snapshot — useSyncExternalStore requires a stable reference
+// so that Object.is comparisons don't trigger spurious re-renders.
+let cachedSettings: TemplateSettings | null = null;
+
+function readSettings(): TemplateSettings {
+  if (cachedSettings !== null) return cachedSettings;
   if (typeof window === 'undefined') return getDefaultSettings();
   try {
     const stored = window.localStorage.getItem(SETTINGS_STORAGE_KEY);
-    if (!stored) return getDefaultSettings();
-    const parsed = JSON.parse(stored) as Partial<TemplateSettings>;
-    // Merge with defaults to handle newly added templates
-    const defaults = getDefaultSettings();
-    return {
-      pacs: { ...defaults.pacs, ...parsed.pacs },
-      lis:  { ...defaults.lis,  ...parsed.lis },
-      ehr:  { ...defaults.ehr,  ...parsed.ehr },
-    };
+    if (!stored) {
+      cachedSettings = getDefaultSettings();
+    } else {
+      const parsed = JSON.parse(stored) as Partial<TemplateSettings>;
+      const defaults = getDefaultSettings();
+      cachedSettings = {
+        pacs: { ...defaults.pacs, ...parsed.pacs },
+        lis:  { ...defaults.lis,  ...parsed.lis },
+        ehr:  { ...defaults.ehr,  ...parsed.ehr },
+      };
+    }
   } catch {
-    return getDefaultSettings();
+    cachedSettings = getDefaultSettings();
   }
+  return cachedSettings;
 }
 
 function subscribe(onStoreChange: () => void): () => void {
   if (typeof window === 'undefined') return () => undefined;
+  const invalidate = () => { cachedSettings = null; onStoreChange(); };
   const onStorage = (event: StorageEvent) => {
-    if (event.key === SETTINGS_STORAGE_KEY) onStoreChange();
+    if (event.key === SETTINGS_STORAGE_KEY) invalidate();
   };
-  const onCustom = () => onStoreChange();
   window.addEventListener('storage', onStorage);
-  window.addEventListener(SETTINGS_EVENT, onCustom);
+  window.addEventListener(SETTINGS_EVENT, invalidate);
   return () => {
     window.removeEventListener('storage', onStorage);
-    window.removeEventListener(SETTINGS_EVENT, onCustom);
+    window.removeEventListener(SETTINGS_EVENT, invalidate);
   };
 }
 
 function saveSettings(settings: TemplateSettings): void {
   if (typeof window === 'undefined') return;
+  cachedSettings = settings;
   window.localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(settings));
   window.dispatchEvent(new Event(SETTINGS_EVENT));
 }
 
 export function setDemoTemplateDefault(demoType: DemoType, templateId: string): void {
-  const settings = getStoredSettings();
+  const settings = readSettings();
   settings[demoType].defaultId = templateId;
   if (!settings[demoType].enabledIds.includes(templateId)) {
     settings[demoType].enabledIds.push(templateId);
@@ -68,7 +77,7 @@ export function setDemoTemplateDefault(demoType: DemoType, templateId: string): 
 }
 
 export function toggleDemoTemplate(demoType: DemoType, templateId: string, enabled: boolean): void {
-  const settings = getStoredSettings();
+  const settings = readSettings();
   const demo = settings[demoType];
   if (enabled) {
     if (!demo.enabledIds.includes(templateId)) {
@@ -86,7 +95,7 @@ export function toggleDemoTemplate(demoType: DemoType, templateId: string, enabl
 }
 
 export function resetDemoTemplateSettings(demoType: DemoType): void {
-  const settings = getStoredSettings();
+  const settings = readSettings();
   const templates = TEMPLATE_REGISTRY[demoType];
   settings[demoType] = {
     defaultId: templates[0].id,
@@ -96,7 +105,7 @@ export function resetDemoTemplateSettings(demoType: DemoType): void {
 }
 
 export function useTemplateSettings(demoType: DemoType) {
-  const allSettings = useSyncExternalStore(subscribe, getStoredSettings, getDefaultSettings);
+  const allSettings = useSyncExternalStore(subscribe, readSettings, getDefaultSettings);
   const demoSettings = allSettings[demoType];
   const allTemplates = TEMPLATE_REGISTRY[demoType];
 
