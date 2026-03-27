@@ -177,8 +177,8 @@ const COMPOSITION_BLUEPRINTS = {
         },
       },
       {
-        id: "tumor-algemeen",
-        title: "Tumorkenmerken",
+        id: "tumorlokalisatie",
+        title: "Tumorlokalisatie",
         extension: [
           {
             url: "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-templateExtractContext",
@@ -190,24 +190,92 @@ const COMPOSITION_BLUEPRINTS = {
         ],
         text: {
           status: "generated",
-          div: "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p><strong>Neoadjuvante therapie:</strong> {{%context.item.where(linkId='019c9436-abcc-7b62-9dc6-2008753b679b').answer.valueCoding.display}}</p></div>",
+          div: "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p><strong>Neoadjuvante therapie:</strong> {{%context.item.where(linkId='019c9436-abcc-7b62-9dc6-2008753b679b').answer.valueCoding.display}}</p><p><strong>Tumorlokalisatie:</strong> {{%context.item.where(linkId='019c9436-abcc-7b62-9dc6-2020b9139276').answer.valueCoding.display}}</p><p><strong>Lip locatie:</strong> {{%context.item.where(linkId='019c9436-abcc-7b62-9dc6-2020b9139276').answer.item.where(linkId='019c9436-abcc-7b62-9dc6-2032a5a6ea7e').answer.valueCoding.display}}</p><p><strong>Mondholte locatie:</strong> {{%context.item.where(linkId='019c9436-abcc-7b62-9dc6-2020b9139276').answer.item.where(linkId='019d0c0d-d4b2-7449-b281-8481636cf372').answer.valueCoding.display}}</p><p><strong>Lateraliteit:</strong> {{%context.item.where(linkId='019c9436-abcc-7b62-9dc6-2020b9139276').answer.item.where(linkId='019c9436-abcd-74d2-ae73-81af3761b06c').answer.valueCoding.display}}</p></div>",
         },
       },
       {
-        id: "tumorlokalisatie",
-        title: "Tumorlokalisatie #{{%index}}",
+        id: "tumor-eigenschappen",
+        title: "Tumor eigenschappen",
         extension: [
           {
             url: "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-templateExtractContext",
             valueExpression: {
               language: "text/fhirpath",
-              expression: "item.where(linkId='019c9436-ac8c-7dd7-af8b-8c06c3b749b7').item.where(linkId='019c9436-abcc-7b62-9dc6-201bf0cd0d82')",
+              expression: "item.where(linkId='019c9436-ac8c-7dd7-af8b-8c06c3b749b7')",
             },
           },
         ],
         text: {
           status: "generated",
-          div: "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p><strong>Tumorlokalisatie:</strong> {{%context.item.where(linkId='019c9436-abcc-7b62-9dc6-2020b9139276').answer.valueCoding.display}}</p><p><strong>Lip locatie:</strong> {{%context.item.where(linkId='019c9436-abcc-7b62-9dc6-2020b9139276').answer.item.where(linkId='019c9436-abcc-7b62-9dc6-2032a5a6ea7e').answer.valueCoding.display}}</p><p><strong>Mondholte locatie:</strong> {{%context.item.where(linkId='019c9436-abcc-7b62-9dc6-2020b9139276').answer.item.where(linkId='019d0c0d-d4b2-7449-b281-8481636cf372').answer.valueCoding.display}}</p><p><strong>Lateraliteit:</strong> {{%context.item.where(linkId='019c9436-abcd-74d2-ae73-81af3761b06c').answer.valueCoding.display}}</p><p><strong>Focaliteit:</strong> {{%context.item.where(linkId='019d0ac8-b005-7552-854f-535eaa1e6281').item.where(linkId='019c9436-abcd-74d2-ae73-81b19e085363').answer.valueCoding.display}}</p><p><strong>Specificeer focaliteit:</strong> {{%context.item.where(linkId='019d0ac8-b005-7552-854f-535eaa1e6281').item.where(linkId='019c943f-8f73-7dd7-aff2-3ba39480effd').answer.valueString}}</p><p><strong>Tumorafmetingen:</strong> {{%context.item.where(linkId='019c9436-abcd-74d2-ae73-81eca8692fc3').answer.valueCoding.display}}</p><p><strong>Maximale tumordimensie:</strong> {{%context.item.where(linkId='019c9436-abcd-74d2-ae73-81eca8692fc3').answer.item.where(linkId='019c9436-abcd-74d2-ae73-820dcb88663b').answer.valueDecimal}} mm</p><p><strong>Histologisch tumortype:</strong> {{%context.item.where(linkId='019c9436-abcd-74d2-ae73-822d9b46b13d').answer.valueCoding.display}}</p><p><strong>Differentiatiegraad:</strong> {{%context.item.where(linkId='019c9436-abcd-74d2-ae73-82488d577c58').answer.valueCoding.display}}</p><p><strong>WPOI:</strong> {{%context.item.where(linkId='019c9436-abcd-74d2-ae73-82667ae4b927').answer.valueCoding.display}}</p><p><strong>Invasiediepte:</strong> {{%context.item.where(linkId='019c9436-abce-7cd2-b1c6-e670e22ef147').answer.valueCoding.display}}</p><p><strong>Patroon van invasie:</strong> {{%context.item.where(linkId='019c9436-abce-7cd2-b1c6-e6b611952ad7').answer.valueCoding.display}}</p><p><strong>Lokale uitbreiding:</strong> {{%context.item.where(linkId='019c9436-abce-7cd2-b1c6-e6c79d93e8b9').answer.valueCoding.display}}</p><p><strong>Invasie van bot:</strong> {{%context.item.where(linkId='019c9436-abce-7cd2-b1c6-e6c79d93e8b9').answer.item.where(linkId='019c9436-abce-7cd2-b1c6-e6e44e1b4e5d').answer.valueCoding.display}}</p><p><strong>Invasie in huid:</strong> {{%context.item.where(linkId='019c9436-abce-7cd2-b1c6-e6c79d93e8b9').answer.item.where(linkId='019d2045-f9be-7aa9-98a0-5e7cbd48f358').answer.valueCoding.display}}</p><p><strong>Invasie in mondbodem:</strong> {{%context.item.where(linkId='019c9436-abce-7cd2-b1c6-e6c79d93e8b9').answer.item.where(linkId='019d2046-4085-7aa9-98a6-ca3c09d94905').answer.valueCoding.display}}</p><p><strong>Invasie in sinus maxillaris:</strong> {{%context.item.where(linkId='019c9436-abce-7cd2-b1c6-e6c79d93e8b9').answer.item.where(linkId='019d2046-6473-7aa9-98aa-3a625ff1fbd5').answer.valueCoding.display}}</p><p><strong>Lymfovasculaire invasie:</strong> {{%context.item.where(linkId='019c9436-abce-7cd2-b1c6-e73e801e976a').answer.valueCoding.display}}</p><p><strong>Perineurale invasie:</strong> {{%context.item.where(linkId='019c9436-abce-7cd2-b1c6-e76ee4994e18').answer.valueCoding.display}}</p></div>",
+          div: "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p><strong>Focaliteit:</strong> {{%context.item.where(linkId='019d0ac8-b005-7552-854f-535eaa1e6281').item.where(linkId='019c9436-abcd-74d2-ae73-81b19e085363').answer.valueCoding.display}}</p><p><strong>Aantal foci:</strong> {{%context.item.where(linkId='019d0ac8-b005-7552-854f-535eaa1e6281').item.where(linkId='019c943f-2f5e-7dd7-afe5-e444daa0d0c3').answer.valueDecimal}}</p><p><strong>Tumorafmetingen:</strong> {{%context.item.where(linkId='019c9436-abcd-74d2-ae73-81eca8692fc3').answer.valueCoding.display}}</p><p><strong>Maximale tumordimensie:</strong> {{%context.item.where(linkId='019c9436-abcd-74d2-ae73-81eca8692fc3').answer.item.where(linkId='019c9436-abcd-74d2-ae73-820dcb88663b').answer.valueDecimal}} mm</p><p><strong>Histologisch tumortype:</strong> {{%context.item.where(linkId='019c9436-abcd-74d2-ae73-822d9b46b13d').answer.valueCoding.display}}</p><p><strong>Differentiatiegraad:</strong> {{%context.item.where(linkId='019c9436-abcd-74d2-ae73-82488d577c58').answer.valueCoding.display}}</p><p><strong>WPOI:</strong> {{%context.item.where(linkId='019c9436-abcd-74d2-ae73-82667ae4b927').answer.valueCoding.display}}</p></div>",
+        },
+      },
+      {
+        id: "invasie",
+        title: "Invasie",
+        extension: [
+          {
+            url: "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-templateExtractContext",
+            valueExpression: {
+              language: "text/fhirpath",
+              expression: "item.where(linkId='019c9436-ac8c-7dd7-af8b-8c06c3b749b7')",
+            },
+          },
+        ],
+        text: {
+          status: "generated",
+          div: "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p><strong>Invasiediepte:</strong> {{%context.item.where(linkId='019c9436-abce-7cd2-b1c6-e670e22ef147').answer.valueCoding.display}}</p><p><strong>Patroon van invasie:</strong> {{%context.item.where(linkId='019c9436-abce-7cd2-b1c6-e6b611952ad7').answer.valueCoding.display}}</p><p><strong>Lokale uitbreiding:</strong> {{%context.item.where(linkId='019c9436-abce-7cd2-b1c6-e6c79d93e8b9').answer.valueCoding.display}}</p><p><strong>Invasie van bot:</strong> {{%context.item.where(linkId='019c9436-abce-7cd2-b1c6-e6c79d93e8b9').answer.item.where(linkId='019c9436-abce-7cd2-b1c6-e6e44e1b4e5d').answer.valueCoding.display}}</p><p><strong>Invasie in huid:</strong> {{%context.item.where(linkId='019c9436-abce-7cd2-b1c6-e6c79d93e8b9').answer.item.where(linkId='019d2045-f9be-7aa9-98a0-5e7cbd48f358').answer.valueCoding.display}}</p><p><strong>Invasie in mondbodem:</strong> {{%context.item.where(linkId='019c9436-abce-7cd2-b1c6-e6c79d93e8b9').answer.item.where(linkId='019d2046-4085-7aa9-98a6-ca3c09d94905').answer.valueCoding.display}}</p><p><strong>Invasie in sinus maxillaris:</strong> {{%context.item.where(linkId='019c9436-abce-7cd2-b1c6-e6c79d93e8b9').answer.item.where(linkId='019d2046-6473-7aa9-98aa-3a625ff1fbd5').answer.valueCoding.display}}</p></div>",
+        },
+      },
+      {
+        id: "vasculaire-neurale-invasie",
+        title: "Vasculaire/Neurale invasie",
+        extension: [
+          {
+            url: "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-templateExtractContext",
+            valueExpression: {
+              language: "text/fhirpath",
+              expression: "item.where(linkId='019c9436-ac8c-7dd7-af8b-8c06c3b749b7')",
+            },
+          },
+        ],
+        text: {
+          status: "generated",
+          div: "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p><strong>Lymfovasculaire invasie:</strong> {{%context.item.where(linkId='019c9436-abce-7cd2-b1c6-e73e801e976a').answer.valueCoding.display}}</p><p><strong>Specificeer lymfo/bloedvat:</strong> {{%context.item.where(linkId='019c9436-abce-7cd2-b1c6-e73e801e976a').answer.item.where(linkId='019c9436-abce-7cd2-b1c6-e749bc95903e').answer.valueCoding.display}}</p><p><strong>Perineurale invasie:</strong> {{%context.item.where(linkId='019c9436-abce-7cd2-b1c6-e76ee4994e18').answer.valueCoding.display}}</p><p><strong>Diameter grootste zenuwtak:</strong> {{%context.item.where(linkId='019c9436-abce-7cd2-b1c6-e76ee4994e18').answer.item.where(linkId='019c9436-abce-7cd2-b1c6-e77c7598adbc').answer.valueCoding.display}}</p></div>",
+        },
+      },
+      {
+        id: "marges",
+        title: "Marges",
+        extension: [
+          {
+            url: "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-templateExtractContext",
+            valueExpression: {
+              language: "text/fhirpath",
+              expression: "item.where(linkId='019c9436-ac8c-7dd7-af8b-8c06c3b749b7')",
+            },
+          },
+        ],
+        text: {
+          status: "generated",
+          div: "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p><strong>Tumorvrije marge invasief carcinoom:</strong> {{%context.item.where(linkId='019c9436-abce-7cd2-b1c6-e795cc062cb6').answer.valueCoding.display}}</p><p><strong>Minimale tumorvrije marge:</strong> {{%context.item.where(linkId='019c9436-abce-7cd2-b1c6-e795cc062cb6').answer.item.where(linkId='019c9436-abce-7cd2-b1c6-e7b0d13e1bc9').answer.valueDecimal}} mm</p><p><strong>Dichtstbijzijnde snedevlak:</strong> {{%context.item.where(linkId='019c9436-abce-7cd2-b1c6-e795cc062cb6').answer.item.where(linkId='019c9436-abce-7cd2-b1c6-e7c29ec6d649').answer.valueString}}</p><p><strong>Marge dysplasie/in situ:</strong> {{%context.item.where(linkId='019c9453-fb78-7dd7-b12d-e92c5f80b56a').answer.valueCoding.display}}</p><p><strong>Specificeer marge dysplasie:</strong> {{%context.item.where(linkId='019c9453-fb78-7dd7-b12d-e92c5f80b56a').answer.item.where(linkId='019c9453-fb78-7dd7-b12e-1a179216e2e4').answer.valueString}}</p></div>",
+        },
+      },
+      {
+        id: "ptnm",
+        title: "pTNM classificatie",
+        extension: [
+          {
+            url: "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-templateExtractContext",
+            valueExpression: {
+              language: "text/fhirpath",
+              expression: "item.where(linkId='019c9436-ac8c-7dd7-af8b-8c06c3b749b7').item.where(linkId='019c9436-abcf-7ef0-bf4c-3d57a27dfcba')",
+            },
+          },
+        ],
+        text: {
+          status: "generated",
+          div: "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p><strong>Voorvoegsel:</strong> {{%context.item.where(linkId='019c9436-abcf-7ef0-bf4c-3d696d6cd3ac').answer.valueCoding.display}}</p><p><strong>pT-stage:</strong> {{%context.item.where(linkId='019c9436-abcf-7ef0-bf4c-3d696d6cd3ac').answer.item.where(linkId='019d29a7-9827-7332-af34-f41a9f4adc0c').answer.valueCoding.display}}</p><p><strong>mpT-stage:</strong> {{%context.item.where(linkId='019c9436-abcf-7ef0-bf4c-3d696d6cd3ac').answer.item.where(linkId='019d0ad8-f3e1-7cc7-aa11-709034132f02').answer.valueCoding.display}}</p><p><strong>rpT-stage:</strong> {{%context.item.where(linkId='019c9436-abcf-7ef0-bf4c-3d696d6cd3ac').answer.item.where(linkId='019d0ae0-c327-7cc7-aa35-805705a3a488').answer.valueCoding.display}}</p><p><strong>ypT-stage:</strong> {{%context.item.where(linkId='019c9436-abcf-7ef0-bf4c-3d696d6cd3ac').answer.item.where(linkId='019c9436-abcf-7ef0-bf4c-3d4e58a22bd7').answer.valueCoding.display}}</p></div>",
         },
       },
     ],
