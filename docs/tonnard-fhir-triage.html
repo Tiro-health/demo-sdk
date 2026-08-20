@@ -48,164 +48,74 @@ body{
 button{font:inherit; color:inherit}
 
 /* ---------- masthead ---------- */
-.masthead{
-  position:sticky; top:0; z-index:20;
-  background:var(--surface); border-bottom:1px solid var(--line);
-}
-.masthead-inner{max-width:1400px; margin:0 auto; padding:14px 24px 0}
+.masthead{position:sticky; top:0; z-index:20; background:var(--surface); border-bottom:1px solid var(--line)}
+.masthead-inner{max-width:1040px; margin:0 auto; padding:14px 24px 0}
 .brand{display:flex; align-items:baseline; gap:14px; flex-wrap:wrap}
-.brand h1{
-  font-family:var(--serif); font-weight:600; font-size:20px;
-  margin:0; letter-spacing:-.01em; text-wrap:balance;
-}
+.brand h1{font-family:var(--serif); font-weight:600; font-size:20px; margin:0; letter-spacing:-.01em; text-wrap:balance}
 .brand .sub{color:var(--muted); font-size:13px}
+.brand .sub code{font-family:var(--mono); font-size:12px}
 
 .tally{display:flex; align-items:center; gap:22px; flex-wrap:wrap; margin-top:12px}
 .bar{
-  flex:1 1 260px; min-width:200px; height:8px; border-radius:99px;
-  background:var(--surface-2); border:1px solid var(--line);
-  display:flex; overflow:hidden;
+  flex:1 1 220px; min-width:180px; height:8px; border-radius:99px;
+  background:var(--surface-2); border:1px solid var(--line); display:flex; overflow:hidden;
 }
 .bar span{display:block; height:100%; transition:width .18s ease}
-.bar .s-must{background:var(--must)}
-.bar .s-useful{background:var(--useful)}
-.bar .s-skip{background:var(--skip)}
+.bar .s-must{background:var(--must)} .bar .s-useful{background:var(--useful)} .bar .s-skip{background:var(--skip)}
 .counts{display:flex; gap:16px; flex-wrap:wrap; font-size:13px; font-variant-numeric:tabular-nums}
 .counts b{font-weight:600}
-.dot{width:9px; height:9px; border-radius:2px; display:inline-block; margin-right:6px; vertical-align:baseline}
-.d-must{background:var(--must)} .d-useful{background:var(--useful)} .d-skip{background:var(--skip)}
-.d-open{background:var(--line-strong)}
+.dot{width:9px; height:9px; border-radius:2px; display:inline-block; margin-right:6px}
+.d-must{background:var(--must)} .d-useful{background:var(--useful)} .d-skip{background:var(--skip)} .d-open{background:var(--line-strong)}
 
-.toolbar{
-  display:flex; gap:10px; align-items:center; flex-wrap:wrap;
-  padding:12px 0 14px;
-}
-.field{
-  display:flex; align-items:center; gap:8px;
-  background:var(--surface-2); border:1px solid var(--line);
-  border-radius:var(--radius); padding:0 10px; height:34px;
-}
-.field input,.field select{
-  border:0; background:transparent; color:inherit; font:inherit; height:100%;
-  min-width:60px; outline:none;
-}
-.field input{width:230px}
+.toolbar{display:flex; gap:10px; align-items:center; flex-wrap:wrap; padding:12px 0 14px}
+.field{display:flex; align-items:center; gap:8px; background:var(--surface-2); border:1px solid var(--line); border-radius:var(--radius); padding:0 10px; height:34px}
+.field input,.field select{border:0; background:transparent; color:inherit; font:inherit; height:100%; min-width:60px; outline:none}
+.field input{width:200px}
 .field label{font-size:11px; letter-spacing:.07em; text-transform:uppercase; color:var(--muted)}
-.btn{
-  height:34px; padding:0 14px; border-radius:var(--radius);
-  border:1px solid var(--line-strong); background:var(--surface-2);
-  cursor:pointer; font-size:14px;
-}
+.btn{height:34px; padding:0 14px; border-radius:var(--radius); border:1px solid var(--line-strong); background:var(--surface-2); cursor:pointer; font-size:14px}
 .btn:hover{border-color:var(--ink-2)}
 .btn-primary{background:var(--ink); color:var(--surface); border-color:var(--ink)}
 .btn-primary:hover{opacity:.88}
 .spacer{flex:1 1 auto}
 
-/* ---------- layout ---------- */
-.wrap{
-  max-width:1400px; margin:0 auto; padding:22px 24px 90px;
-  display:grid; grid-template-columns:232px minmax(0,1fr); gap:26px; align-items:start;
+/* ---------- list ---------- */
+.wrap{max-width:1040px; margin:0 auto; padding:22px 24px 90px}
+.grouphead{
+  display:flex; align-items:baseline; gap:10px; margin:22px 2px 10px;
+  font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); font-weight:600;
 }
-@media (max-width:960px){ .wrap{grid-template-columns:1fr} .rail{display:none} }
+.grouphead:first-child{margin-top:0}
+.grouphead .rule{flex:1; height:1px; background:var(--line)}
+.list{display:flex; flex-direction:column; gap:10px}
 
-.rail{position:sticky; top:150px; max-height:calc(100vh - 175px); overflow:auto}
-.rail h2{
-  font-size:11px; letter-spacing:.1em; text-transform:uppercase;
-  color:var(--muted); margin:0 0 10px; font-weight:600; font-family:var(--sans);
+.row{
+  background:var(--surface); border:1px solid var(--line); border-radius:8px;
+  display:grid; grid-template-columns:3px minmax(0,1fr) auto; align-items:stretch; overflow:hidden;
 }
-.rail ol{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:1px}
-.rail a{
-  display:grid; grid-template-columns:1fr auto; gap:8px; align-items:center;
-  padding:5px 8px; border-radius:4px; text-decoration:none; color:var(--ink-2);
-  font-size:13px; border-left:2px solid transparent;
-}
-.rail a:hover{background:var(--surface); color:var(--ink)}
-.rail a.done{border-left-color:var(--must)}
-.rail .rest{font-variant-numeric:tabular-nums; font-size:11px; color:var(--faint); font-family:var(--mono)}
-.rail a.done .rest{color:var(--must)}
+.row .stripe{background:transparent}
+.row[data-v="must"] .stripe{background:var(--must)}
+.row[data-v="useful"] .stripe{background:var(--useful)}
+.row[data-v="skip"] .stripe{background:var(--skip-line)}
+.row[data-v="skip"] .body h3{color:var(--muted)}
+.row[data-v="skip"]{background:var(--surface-2)}
 
-/* ---------- profile card ---------- */
-.stack{display:flex; flex-direction:column; gap:18px}
-.card{
-  background:var(--surface); border:1px solid var(--line);
-  border-radius:8px; overflow:hidden;
-}
-.card-head{padding:16px 18px; display:flex; flex-direction:column; gap:8px}
-.card-title{display:flex; align-items:baseline; gap:10px; flex-wrap:wrap}
-.card-title h3{
-  margin:0; font-family:var(--serif); font-size:17px; font-weight:600; letter-spacing:-.01em;
-}
-.tag{
-  font-family:var(--mono); font-size:11px; padding:2px 6px; border-radius:3px;
-  border:1px solid var(--line-strong); color:var(--muted); background:var(--surface-2);
-}
+.body{padding:14px 4px 14px 16px; min-width:0; display:flex; flex-direction:column; gap:6px}
+.line1{display:flex; align-items:baseline; gap:9px; flex-wrap:wrap}
+.line1 h3{margin:0; font-family:var(--serif); font-size:17px; font-weight:600; letter-spacing:-.01em}
+.tag{font-family:var(--mono); font-size:11px; padding:2px 6px; border-radius:3px; border:1px solid var(--line-strong); color:var(--muted); background:var(--surface-2); white-space:nowrap}
 .tag-r5{border-color:var(--useful-line); color:var(--useful); background:var(--useful-bg)}
 .meta{font-family:var(--mono); font-size:12px; color:var(--muted)}
 .meta b{color:var(--ink-2); font-weight:500}
-.desc{
-  font-size:13.5px; color:var(--ink-2); max-width:74ch; margin:0;
-}
+.desc{margin:0; font-size:13.5px; color:var(--ink-2); max-width:72ch}
 .desc.clamped{display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden}
-.more{
-  align-self:flex-start; background:none; border:0; padding:0; cursor:pointer;
-  font-size:12px; color:var(--focus); text-decoration:underline; text-underline-offset:2px;
-}
-.bulk{display:flex; gap:6px; align-items:center; flex-wrap:wrap; font-size:12px; color:var(--muted)}
-.bulk button{
-  border:1px solid var(--line); background:var(--surface-2); border-radius:4px;
-  padding:2px 8px; font-size:12px; cursor:pointer;
-}
-.bulk button:hover{border-color:var(--line-strong)}
+.links{display:flex; gap:14px; flex-wrap:wrap; margin-top:2px}
+.more{background:none; border:0; padding:0; cursor:pointer; font-size:12px; color:var(--focus); text-decoration:underline; text-underline-offset:2px}
 
-/* ---------- items ---------- */
-.items{border-top:1px solid var(--line)}
-.colhead{
-  display:grid; grid-template-columns:3px minmax(180px,1.1fr) minmax(160px,1.2fr) 232px;
-  gap:0; padding:7px 18px 7px 0; background:var(--surface-2);
-  border-bottom:1px solid var(--line);
-  font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--faint);
-}
-.colhead div{padding-left:14px}
-.colhead .c-ctl{text-align:right; padding-right:0}
-
-.item{
-  display:grid; grid-template-columns:3px minmax(180px,1.1fr) minmax(160px,1.2fr) 232px;
-  align-items:center; border-bottom:1px solid var(--line);
-  background:var(--surface);
-}
-.item:last-child{border-bottom:0}
-.item:hover{background:var(--surface-2)}
-.item .stripe{align-self:stretch; background:transparent}
-.item[data-v="must"] .stripe{background:var(--must)}
-.item[data-v="useful"] .stripe{background:var(--useful)}
-.item[data-v="skip"] .stripe{background:var(--skip-line)}
-.item[data-v="skip"] .path code{text-decoration:line-through; text-decoration-color:var(--skip-line)}
-.item[data-v="skip"]{color:var(--muted)}
-
-.cell{padding:9px 14px; min-width:0}
-.path code{font-family:var(--mono); font-size:13px; color:var(--ink); word-break:break-word}
-.item[data-v="skip"] .path code{color:var(--muted)}
-.chips{display:flex; gap:5px; flex-wrap:wrap; margin-top:4px}
-.chip{
-  font-family:var(--mono); font-size:10.5px; padding:1px 5px; border-radius:3px;
-  border:1px solid var(--line-strong); color:var(--muted); white-space:nowrap;
-}
-.chip-card{border-color:var(--must-line); color:var(--must)}
-.sql code{font-family:var(--mono); font-size:12.5px; color:var(--muted); word-break:break-word}
-.sql .none{font-family:var(--sans); font-size:12px; color:var(--faint); font-style:italic}
-.note{
-  margin-top:5px; font-size:12px; color:var(--muted); max-width:70ch;
-  border-left:2px solid var(--line-strong); padding-left:8px;
-}
-
-.seg{display:flex; justify-content:flex-end; padding:8px 18px 8px 14px; gap:0}
-.seg button{
-  border:1px solid var(--line-strong); background:var(--surface);
-  padding:4px 9px; font-size:12px; cursor:pointer; white-space:nowrap;
-  color:var(--muted);
-}
-.seg button:first-child{border-radius:4px 0 0 4px}
-.seg button:last-child{border-radius:0 4px 4px 0}
+.control{display:flex; flex-direction:column; justify-content:center; gap:6px; padding:14px 16px}
+.seg{display:flex}
+.seg button{border:1px solid var(--line-strong); background:var(--surface); padding:6px 11px; font-size:13px; cursor:pointer; white-space:nowrap; color:var(--muted)}
+.seg button:first-child{border-radius:5px 0 0 5px}
+.seg button:last-child{border-radius:0 5px 5px 0}
 .seg button + button{border-left:0}
 .seg button:hover{color:var(--ink); background:var(--surface-2)}
 .seg button[aria-pressed="true"]{font-weight:600}
@@ -213,30 +123,45 @@ button{font:inherit; color:inherit}
 .seg .v-useful[aria-pressed="true"]{background:var(--useful-bg); color:var(--useful); border-color:var(--useful-line)}
 .seg .v-skip[aria-pressed="true"]{background:var(--skip-bg); color:var(--skip); border-color:var(--skip-line)}
 
-@media (max-width:820px){
-  .colhead{display:none}
-  .item{grid-template-columns:3px 1fr}
-  .item .cell{padding:8px 14px 0}
-  .item .cell.sql{padding-top:2px}
-  .seg{grid-column:2; justify-content:flex-start; padding:8px 14px 10px}
+/* ---------- element detail (read-only) ---------- */
+.detail{grid-column:1 / -1; border-top:1px solid var(--line); display:none}
+.row.open .detail{display:block}
+.elhead,.el{display:grid; grid-template-columns:minmax(170px,1fr) minmax(170px,1.2fr); gap:0}
+.elhead{background:var(--surface-2); border-bottom:1px solid var(--line); font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--faint)}
+.elhead div{padding:6px 16px}
+.el{border-bottom:1px solid var(--line)}
+.el:last-child{border-bottom:0}
+.el div{padding:7px 16px; min-width:0}
+.el code{font-family:var(--mono); font-size:12.5px; word-break:break-word}
+.el .p code{color:var(--ink)}
+.el .s code{color:var(--muted)}
+.el .s .none{font-size:12px; color:var(--faint); font-style:italic}
+.chips{display:flex; gap:5px; flex-wrap:wrap; margin-top:3px}
+.chip{font-family:var(--mono); font-size:10.5px; padding:1px 5px; border-radius:3px; border:1px solid var(--line-strong); color:var(--muted); white-space:nowrap}
+.chip-card{border-color:var(--must-line); color:var(--must)}
+
+@media (max-width:760px){
+  .row{grid-template-columns:3px minmax(0,1fr)}
+  .control{grid-column:2; padding:0 16px 14px; align-items:flex-start}
+  .el,.elhead{grid-template-columns:1fr}
+  .elhead{display:none}
+  .el div{padding:5px 16px}
+  .el .p{padding-top:8px}
 }
 
-.empty{padding:30px; text-align:center; color:var(--muted); font-size:14px}
+.empty{padding:34px; text-align:center; color:var(--muted); font-size:14px}
 
-/* ---------- export dialog ---------- */
-dialog{
-  border:1px solid var(--line-strong); border-radius:8px; padding:0;
-  background:var(--surface); color:var(--ink); max-width:760px; width:92vw;
-}
+/* ---------- export ---------- */
+dialog{border:1px solid var(--line-strong); border-radius:8px; padding:0; background:var(--surface); color:var(--ink); max-width:760px; width:92vw}
 dialog::backdrop{background:rgba(10,14,18,.55)}
-.dlg-head{padding:16px 18px 10px; display:flex; align-items:baseline; gap:12px}
+.dlg-head{padding:16px 18px 10px; display:flex; align-items:baseline; gap:12px; flex-wrap:wrap}
 .dlg-head h3{margin:0; font-family:var(--serif); font-size:17px; font-weight:600}
 .dlg-head p{margin:0; font-size:13px; color:var(--muted)}
 dialog textarea{
   width:calc(100% - 36px); margin:0 18px; height:44vh; resize:vertical;
   font-family:var(--mono); font-size:12px; line-height:1.55;
-  background:var(--surface-2); color:var(--ink);
-  border:1px solid var(--line); border-radius:var(--radius); padding:12px;
+  background:var(--surface-2); color:var(--ink); border:1px solid var(--line);
+  border-radius:var(--radius); padding:12px;
 }
 .dlg-foot{display:flex; gap:8px; justify-content:flex-end; padding:14px 18px 16px}
 
@@ -247,7 +172,7 @@ dialog textarea{
   <div class="masthead-inner">
     <div class="brand">
       <h1>Tonnard &amp; Verpaele FHIR Triage</h1>
-      <span class="sub">26 profielen &middot; <span id="total-items">0</span> elementen &middot; R4 + R5 &middot; bron: <code style="font-family:var(--mono);font-size:12px">fhir/*/input/fsh</code></span>
+      <span class="sub">26 profielen &middot; R4 + R5 &middot; bron <code>fhir/*/input/fsh</code></span>
     </div>
 
     <div class="tally">
@@ -267,7 +192,7 @@ dialog textarea{
     <div class="toolbar">
       <div class="field">
         <label for="q">Zoek</label>
-        <input id="q" type="search" placeholder="element, kolom of resource" autocomplete="off">
+        <input id="q" type="search" placeholder="resource of tabel" autocomplete="off">
       </div>
       <div class="field">
         <label for="rel">Release</label>
@@ -290,13 +215,7 @@ dialog textarea{
   </div>
 </header>
 
-<div class="wrap">
-  <nav class="rail" aria-label="Profielen">
-    <h2>Profielen</h2>
-    <ol id="rail"></ol>
-  </nav>
-  <main class="stack" id="main"></main>
-</div>
+<main class="wrap" id="main"></main>
 
 <dialog id="dlg">
   <div class="dlg-head">
@@ -315,127 +234,97 @@ dialog textarea{
 (function () {
   "use strict";
   var PROFILES = JSON.parse(document.getElementById("profiles").textContent);
-  var KEY = "tv-fhir-triage-v1";
+  var KEY = "tv-fhir-triage-profiles-v1";
   var LABEL = { must: "noodzakelijk", useful: "nuttig", skip: "niet noodzakelijk" };
   var ORDER = ["must", "useful", "skip"];
+  var TOTAL = PROFILES.length;
 
   var state = {};
   try { state = JSON.parse(localStorage.getItem(KEY) || "{}"); } catch (e) { state = {}; }
   function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
 
-  var TOTAL = 0;
-  PROFILES.forEach(function (p) { TOTAL += p.items.length; });
-  document.getElementById("total-items").textContent = TOTAL;
-
-  function key(p, it) { return p.release + ":" + p.id + ":" + it.path; }
-
-  /* ---------- render ---------- */
   var main = document.getElementById("main");
-  var rail = document.getElementById("rail");
+  var rows = {};
 
-  PROFILES.forEach(function (p) {
-    var a = document.createElement("a");
-    a.href = "#" + p.release.toLowerCase() + "-" + p.id;
-    a.dataset.pid = p.release + ":" + p.id;
-    a.innerHTML = '<span>' + esc(p.title.replace(/^EHR /, "")) + '</span><span class="rest"></span>';
-    var li = document.createElement("li");
-    li.appendChild(a);
-    rail.appendChild(li);
-
-    var card = document.createElement("section");
-    card.className = "card";
-    card.id = p.release.toLowerCase() + "-" + p.id;
-    card.dataset.pid = p.release + ":" + p.id;
-    card.dataset.release = p.release;
+  ["R4", "R5"].forEach(function (release) {
+    var group = PROFILES.filter(function (p) { return p.release === release; });
+    if (!group.length) return;
 
     var head = document.createElement("div");
-    head.className = "card-head";
-    head.innerHTML =
-      '<div class="card-title">' +
-        '<h3>' + esc(p.title) + '</h3>' +
-        '<span class="tag' + (p.release === "R5" ? " tag-r5" : "") + '">' + p.release + " " + esc(p.parent) + '</span>' +
-        '<span class="tag">' + esc(p.id) + '</span>' +
-      '</div>' +
-      '<div class="meta">tabel <b>' + esc(p.table || "—") + '</b> &middot; ' + p.items.length + ' elementen</div>';
+    head.className = "grouphead";
+    head.dataset.release = release;
+    head.innerHTML = "<span>" + release + " &middot; " + group.length + " profielen</span><span class=\"rule\"></span>";
+    main.appendChild(head);
 
-    if (p.description) {
-      var d = document.createElement("p");
-      d.className = "desc clamped";
-      d.textContent = p.description;
-      head.appendChild(d);
-      if (p.description.length > 190) {
-        var more = document.createElement("button");
-        more.className = "more";
-        more.type = "button";
-        more.textContent = "Toon volledige toelichting";
-        more.addEventListener("click", function () {
-          var open = d.classList.toggle("clamped");
-          more.textContent = open ? "Toon volledige toelichting" : "Verberg toelichting";
-        });
-        head.appendChild(more);
-      }
-    }
+    var list = document.createElement("div");
+    list.className = "list";
+    list.dataset.release = release;
+    main.appendChild(list);
 
-    var bulk = document.createElement("div");
-    bulk.className = "bulk";
-    bulk.innerHTML = "<span>Heel dit profiel:</span>";
-    ORDER.forEach(function (v) {
-      var b = document.createElement("button");
-      b.type = "button";
-      b.textContent = LABEL[v];
-      b.addEventListener("click", function () {
-        p.items.forEach(function (it) { state[key(p, it)] = v; });
-        save(); paint();
-      });
-      bulk.appendChild(b);
-    });
-    var clr = document.createElement("button");
-    clr.type = "button";
-    clr.textContent = "wissen";
-    clr.addEventListener("click", function () {
-      p.items.forEach(function (it) { delete state[key(p, it)]; });
-      save(); paint();
-    });
-    bulk.appendChild(clr);
-    head.appendChild(bulk);
-    card.appendChild(head);
-
-    var items = document.createElement("div");
-    items.className = "items";
-    items.innerHTML =
-      '<div class="colhead"><div></div><div>FHIR-element</div><div>SQL-kolom</div><div class="c-ctl">Beoordeling</div></div>';
-
-    p.items.forEach(function (it) {
-      var k = key(p, it);
-      var row = document.createElement("div");
-      row.className = "item";
+    group.forEach(function (p) {
+      var k = p.release + ":" + p.id;
+      var row = document.createElement("section");
+      row.className = "row";
       row.dataset.k = k;
-      row.dataset.search = (p.title + " " + p.id + " " + p.table + " " + it.path + " " + (it.sql || "")).toLowerCase();
+      row.dataset.release = p.release;
+      row.dataset.search = (p.title + " " + p.id + " " + p.parent + " " + (p.table || "") + " " +
+        p.items.map(function (i) { return i.path + " " + (i.sql || ""); }).join(" ")).toLowerCase();
 
-      var chips = it.rules.map(function (r) {
-        var card2 = /^\d+\.\.[\d*]+/.test(r);
-        return '<span class="chip' + (card2 ? " chip-card" : "") + '">' + esc(r) + "</span>";
-      }).join("");
+      var stripe = document.createElement("div");
+      stripe.className = "stripe";
+      row.appendChild(stripe);
 
-      row.innerHTML =
-        '<div class="stripe"></div>' +
-        '<div class="cell path"><code>' + esc(it.path) + "</code>" +
-          (chips ? '<div class="chips">' + chips + "</div>" : "") +
-          (it.note ? '<div class="note">' + esc(it.note) + "</div>" : "") +
+      var body = document.createElement("div");
+      body.className = "body";
+      body.innerHTML =
+        '<div class="line1">' +
+          "<h3>" + esc(p.title) + "</h3>" +
+          '<span class="tag' + (p.release === "R5" ? " tag-r5" : "") + '">' + p.release + " " + esc(p.parent) + "</span>" +
+          '<span class="tag">' + esc(p.id) + "</span>" +
         "</div>" +
-        '<div class="cell sql">' +
-          (it.sql ? "<code>" + esc(it.sql) + "</code>" : '<span class="none">geen kolom — enkel profielregel</span>') +
-        "</div>";
+        '<div class="meta">tabel <b>' + esc(p.table || "—") + "</b> &middot; " + p.items.length + " elementen</div>";
 
+      if (p.description) {
+        var d = document.createElement("p");
+        d.className = "desc clamped";
+        d.textContent = p.description;
+        body.appendChild(d);
+      }
+
+      var links = document.createElement("div");
+      links.className = "links";
+      if (p.description && p.description.length > 190) {
+        var more = document.createElement("button");
+        more.className = "more"; more.type = "button";
+        more.textContent = "Volledige toelichting";
+        more.addEventListener("click", function () {
+          var clamped = body.querySelector(".desc").classList.toggle("clamped");
+          more.textContent = clamped ? "Volledige toelichting" : "Toelichting inklappen";
+        });
+        links.appendChild(more);
+      }
+      var toggle = document.createElement("button");
+      toggle.className = "more"; toggle.type = "button";
+      toggle.setAttribute("aria-expanded", "false");
+      toggle.textContent = "Toon de " + p.items.length + " elementen";
+      toggle.addEventListener("click", function () {
+        var open = row.classList.toggle("open");
+        toggle.setAttribute("aria-expanded", String(open));
+        toggle.textContent = (open ? "Verberg de " : "Toon de ") + p.items.length + " elementen";
+      });
+      links.appendChild(toggle);
+      body.appendChild(links);
+      row.appendChild(body);
+
+      var control = document.createElement("div");
+      control.className = "control";
       var seg = document.createElement("div");
       seg.className = "seg";
       ORDER.forEach(function (v) {
         var b = document.createElement("button");
-        b.type = "button";
-        b.className = "v-" + v;
-        b.dataset.v = v;
+        b.type = "button"; b.className = "v-" + v; b.dataset.v = v;
         b.setAttribute("aria-pressed", "false");
-        b.setAttribute("aria-label", LABEL[v] + " — " + p.title + " " + it.path);
+        b.setAttribute("aria-label", LABEL[v] + " — " + p.title);
         b.textContent = LABEL[v];
         b.addEventListener("click", function () {
           if (state[k] === v) { delete state[k]; } else { state[k] = v; }
@@ -443,12 +332,28 @@ dialog textarea{
         });
         seg.appendChild(b);
       });
-      row.appendChild(seg);
-      items.appendChild(row);
-    });
+      control.appendChild(seg);
+      row.appendChild(control);
 
-    card.appendChild(items);
-    main.appendChild(card);
+      var detail = document.createElement("div");
+      detail.className = "detail";
+      detail.innerHTML =
+        '<div class="elhead"><div>FHIR-element</div><div>SQL-kolom</div></div>' +
+        p.items.map(function (it) {
+          var chips = it.rules.map(function (r) {
+            var isCard = /^\d+\.\.[\d*]+/.test(r);
+            return '<span class="chip' + (isCard ? " chip-card" : "") + '">' + esc(r) + "</span>";
+          }).join("");
+          return '<div class="el">' +
+            '<div class="p"><code>' + esc(it.path) + "</code>" + (chips ? '<div class="chips">' + chips + "</div>" : "") + "</div>" +
+            '<div class="s">' + (it.sql ? "<code>" + esc(it.sql) + "</code>" : '<span class="none">geen kolom — enkel profielregel</span>') + "</div>" +
+          "</div>";
+        }).join("");
+      row.appendChild(detail);
+
+      list.appendChild(row);
+      rows[k] = row;
+    });
   });
 
   /* ---------- paint ---------- */
@@ -458,41 +363,35 @@ dialog textarea{
 
   function paint() {
     var term = q.value.trim().toLowerCase();
-    var fRel = rel.value;
-    var fSt = st.value;
+    var fRel = rel.value, fSt = st.value;
     var n = { must: 0, useful: 0, skip: 0 };
+    var shownPer = { R4: 0, R5: 0 };
 
     PROFILES.forEach(function (p) {
-      var card = document.getElementById(p.release.toLowerCase() + "-" + p.id);
-      var shown = 0, open = 0;
-
-      p.items.forEach(function (it) {
-        var k = key(p, it);
-        var v = state[k] || "";
-        if (v) { n[v]++; } else { open++; }
-
-        var row = card.querySelector('[data-k="' + cssq(k) + '"]');
-        if (v) { row.dataset.v = v; } else { delete row.dataset.v; }
-        row.querySelectorAll(".seg button").forEach(function (b) {
-          b.setAttribute("aria-pressed", String(b.dataset.v === v));
-        });
-
-        var ok = true;
-        if (term && row.dataset.search.indexOf(term) === -1) ok = false;
-        if (fRel && p.release !== fRel) ok = false;
-        if (fSt === "open" && v) ok = false;
-        else if (fSt && fSt !== "open" && v !== fSt) ok = false;
-        row.style.display = ok ? "" : "none";
-        if (ok) shown++;
+      var k = p.release + ":" + p.id;
+      var v = state[k] || "";
+      if (v) n[v]++;
+      var row = rows[k];
+      if (v) { row.dataset.v = v; } else { delete row.dataset.v; }
+      row.querySelectorAll(".seg button").forEach(function (b) {
+        b.setAttribute("aria-pressed", String(b.dataset.v === v));
       });
 
-      card.style.display = shown ? "" : "none";
-      var link = rail.querySelector('[data-pid="' + cssq(p.release + ":" + p.id) + '"]');
-      link.classList.toggle("done", open === 0);
-      var did = p.items.length - open;
-      link.querySelector(".rest").textContent = open === 0 ? "✓" : did + "/" + p.items.length;
-      link.title = did + " van " + p.items.length + " beoordeeld";
-      link.parentElement.style.display = shown ? "" : "none";
+      var ok = true;
+      if (term && row.dataset.search.indexOf(term) === -1) ok = false;
+      if (fRel && p.release !== fRel) ok = false;
+      if (fSt === "open" && v) ok = false;
+      else if (fSt && fSt !== "open" && v !== fSt) ok = false;
+      row.style.display = ok ? "" : "none";
+      if (ok) shownPer[p.release]++;
+    });
+
+    ["R4", "R5"].forEach(function (r) {
+      var h = main.querySelector('.grouphead[data-release="' + r + '"]');
+      var l = main.querySelector('.list[data-release="' + r + '"]');
+      if (!h) return;
+      h.style.display = shownPer[r] ? "" : "none";
+      l.style.display = shownPer[r] ? "" : "none";
     });
 
     var done = n.must + n.useful + n.skip;
@@ -504,17 +403,15 @@ dialog textarea{
       document.getElementById("bar-" + v).style.width = (n[v] / TOTAL * 100) + "%";
     });
 
-    var anyCard = main.querySelector(".card:not([style*='display: none'])");
     var msg = document.getElementById("noresult");
-    if (!anyCard && !msg) {
-      msg = document.createElement("p");
-      msg.id = "noresult";
-      msg.className = "empty";
-      msg.textContent = "Geen elementen voor deze filters.";
-      main.appendChild(msg);
-    } else if (anyCard && msg) {
-      msg.remove();
-    }
+    if (!shownPer.R4 && !shownPer.R5) {
+      if (!msg) {
+        msg = document.createElement("p");
+        msg.id = "noresult"; msg.className = "empty";
+        msg.textContent = "Geen profielen voor deze filters.";
+        main.appendChild(msg);
+      }
+    } else if (msg) { msg.remove(); }
   }
 
   [q, rel, st].forEach(function (el) { el.addEventListener("input", paint); });
@@ -529,24 +426,30 @@ dialog textarea{
   var out = document.getElementById("out");
 
   document.getElementById("export").addEventListener("click", function () {
-    var lines = ["# Tonnard & Verpaele — FHIR triage", ""];
-    var n = { must: 0, useful: 0, skip: 0, open: 0 };
+    var n = { must: [], useful: [], skip: [], open: [] };
     PROFILES.forEach(function (p) {
-      p.items.forEach(function (it) { n[state[key(p, it)] || "open"]++; });
+      n[state[p.release + ":" + p.id] || "open"].push(p);
     });
-    lines.push("noodzakelijk " + n.must + " · nuttig " + n.useful +
-               " · niet noodzakelijk " + n.skip + " · nog te doen " + n.open +
+    var lines = ["# Tonnard & Verpaele — FHIR profielen triage", ""];
+    lines.push("noodzakelijk " + n.must.length + " · nuttig " + n.useful.length +
+               " · niet noodzakelijk " + n.skip.length + " · nog te doen " + n.open.length +
                " (van " + TOTAL + ")", "");
-    PROFILES.forEach(function (p) {
-      var rows = p.items.map(function (it) {
-        var v = state[key(p, it)];
-        return "| `" + it.path + "` | " + (it.sql ? "`" + it.sql + "`" : "—") + " | " +
-               (v ? LABEL[v] : "—") + " |";
+    [["must", "Noodzakelijk"], ["useful", "Nuttig"], ["skip", "Niet noodzakelijk"], ["open", "Nog te beoordelen"]]
+      .forEach(function (pair) {
+        var g = n[pair[0]];
+        if (!g.length) return;
+        lines.push("## " + pair[1] + " (" + g.length + ")", "");
+        g.forEach(function (p) {
+          lines.push("- **" + p.title + "** — " + p.release + " " + p.parent +
+                     " · `" + (p.table || "—") + "` · " + p.items.length + " elementen");
+        });
+        lines.push("");
       });
-      lines.push("## " + p.title + " (" + p.release + " " + p.parent + " → " + (p.table || "—") + ")");
-      lines.push("", "| element | kolom | beoordeling |", "| --- | --- | --- |");
-      lines.push.apply(lines, rows);
-      lines.push("");
+    lines.push("---", "", "| profiel | release | basis | tabel | beoordeling |", "| --- | --- | --- | --- | --- |");
+    PROFILES.forEach(function (p) {
+      var v = state[p.release + ":" + p.id];
+      lines.push("| " + p.title + " | " + p.release + " | " + p.parent + " | `" +
+                 (p.table || "—") + "` | " + (v ? LABEL[v] : "—") + " |");
     });
     out.value = lines.join("\n");
     if (typeof dlg.showModal === "function") { dlg.showModal(); } else { dlg.setAttribute("open", ""); }
@@ -556,19 +459,20 @@ dialog textarea{
   document.getElementById("dlg-close").addEventListener("click", function () { dlg.close(); });
   document.getElementById("dlg-copy").addEventListener("click", function (e) {
     out.select();
-    var done = function () { e.target.textContent = "Gekopieerd"; setTimeout(function () { e.target.textContent = "Kopieer"; }, 1600); };
+    var done = function () {
+      e.target.textContent = "Gekopieerd";
+      setTimeout(function () { e.target.textContent = "Kopieer"; }, 1600);
+    };
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(out.value).then(done, function () { document.execCommand("copy"); done(); });
     } else { document.execCommand("copy"); done(); }
   });
 
-  /* ---------- utils ---------- */
   function esc(s) {
     return String(s).replace(/[&<>"']/g, function (c) {
       return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
     });
   }
-  function cssq(s) { return s.replace(/"/g, '\\"'); }
 
   paint();
 })();
