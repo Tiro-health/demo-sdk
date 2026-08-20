@@ -1,0 +1,575 @@
+<title>Tonnard &amp; Verpaele FHIR Triage</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:wght@500;600&display=swap">
+
+<style>
+:root{
+  --ground:#f4f6f7; --surface:#ffffff; --surface-2:#fafbfc;
+  --ink:#15191d; --ink-2:#3d454d; --muted:#6d757e; --faint:#98a0a8;
+  --line:#dde2e6; --line-strong:#c6ced4;
+  --must:#1c6f52; --must-bg:#e4f1eb; --must-line:#9dc9b7;
+  --useful:#96660f; --useful-bg:#f7eeda; --useful-line:#dcc08a;
+  --skip:#6f7780; --skip-bg:#eceef0; --skip-line:#c8ced3;
+  --focus:#2f6fa8;
+  --radius:6px;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --sans:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  --serif:"IBM Plex Serif",Georgia,serif;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ground:#0f1215; --surface:#161a1e; --surface-2:#1b2025;
+    --ink:#e6eaed; --ink-2:#c0c7cd; --muted:#939ba3; --faint:#6f777f;
+    --line:#272d33; --line-strong:#39424a;
+    --must:#5cbf95; --must-bg:#12291f; --must-line:#2c5d47;
+    --useful:#dfae4f; --useful-bg:#2b2214; --useful-line:#5f4c22;
+    --skip:#89919a; --skip-bg:#1e2328; --skip-line:#39424a;
+    --focus:#5d9fd8;
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0f1215; --surface:#161a1e; --surface-2:#1b2025;
+  --ink:#e6eaed; --ink-2:#c0c7cd; --muted:#939ba3; --faint:#6f777f;
+  --line:#272d33; --line-strong:#39424a;
+  --must:#5cbf95; --must-bg:#12291f; --must-line:#2c5d47;
+  --useful:#dfae4f; --useful-bg:#2b2214; --useful-line:#5f4c22;
+  --skip:#89919a; --skip-bg:#1e2328; --skip-line:#39424a;
+  --focus:#5d9fd8;
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--ground); color:var(--ink);
+  font-family:var(--sans); font-size:15px; line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+:focus-visible{outline:2px solid var(--focus); outline-offset:2px; border-radius:3px}
+button{font:inherit; color:inherit}
+
+/* ---------- masthead ---------- */
+.masthead{
+  position:sticky; top:0; z-index:20;
+  background:var(--surface); border-bottom:1px solid var(--line);
+}
+.masthead-inner{max-width:1400px; margin:0 auto; padding:14px 24px 0}
+.brand{display:flex; align-items:baseline; gap:14px; flex-wrap:wrap}
+.brand h1{
+  font-family:var(--serif); font-weight:600; font-size:20px;
+  margin:0; letter-spacing:-.01em; text-wrap:balance;
+}
+.brand .sub{color:var(--muted); font-size:13px}
+
+.tally{display:flex; align-items:center; gap:22px; flex-wrap:wrap; margin-top:12px}
+.bar{
+  flex:1 1 260px; min-width:200px; height:8px; border-radius:99px;
+  background:var(--surface-2); border:1px solid var(--line);
+  display:flex; overflow:hidden;
+}
+.bar span{display:block; height:100%; transition:width .18s ease}
+.bar .s-must{background:var(--must)}
+.bar .s-useful{background:var(--useful)}
+.bar .s-skip{background:var(--skip)}
+.counts{display:flex; gap:16px; flex-wrap:wrap; font-size:13px; font-variant-numeric:tabular-nums}
+.counts b{font-weight:600}
+.dot{width:9px; height:9px; border-radius:2px; display:inline-block; margin-right:6px; vertical-align:baseline}
+.d-must{background:var(--must)} .d-useful{background:var(--useful)} .d-skip{background:var(--skip)}
+.d-open{background:var(--line-strong)}
+
+.toolbar{
+  display:flex; gap:10px; align-items:center; flex-wrap:wrap;
+  padding:12px 0 14px;
+}
+.field{
+  display:flex; align-items:center; gap:8px;
+  background:var(--surface-2); border:1px solid var(--line);
+  border-radius:var(--radius); padding:0 10px; height:34px;
+}
+.field input,.field select{
+  border:0; background:transparent; color:inherit; font:inherit; height:100%;
+  min-width:60px; outline:none;
+}
+.field input{width:230px}
+.field label{font-size:11px; letter-spacing:.07em; text-transform:uppercase; color:var(--muted)}
+.btn{
+  height:34px; padding:0 14px; border-radius:var(--radius);
+  border:1px solid var(--line-strong); background:var(--surface-2);
+  cursor:pointer; font-size:14px;
+}
+.btn:hover{border-color:var(--ink-2)}
+.btn-primary{background:var(--ink); color:var(--surface); border-color:var(--ink)}
+.btn-primary:hover{opacity:.88}
+.spacer{flex:1 1 auto}
+
+/* ---------- layout ---------- */
+.wrap{
+  max-width:1400px; margin:0 auto; padding:22px 24px 90px;
+  display:grid; grid-template-columns:232px minmax(0,1fr); gap:26px; align-items:start;
+}
+@media (max-width:960px){ .wrap{grid-template-columns:1fr} .rail{display:none} }
+
+.rail{position:sticky; top:150px; max-height:calc(100vh - 175px); overflow:auto}
+.rail h2{
+  font-size:11px; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--muted); margin:0 0 10px; font-weight:600; font-family:var(--sans);
+}
+.rail ol{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:1px}
+.rail a{
+  display:grid; grid-template-columns:1fr auto; gap:8px; align-items:center;
+  padding:5px 8px; border-radius:4px; text-decoration:none; color:var(--ink-2);
+  font-size:13px; border-left:2px solid transparent;
+}
+.rail a:hover{background:var(--surface); color:var(--ink)}
+.rail a.done{border-left-color:var(--must)}
+.rail .rest{font-variant-numeric:tabular-nums; font-size:11px; color:var(--faint); font-family:var(--mono)}
+.rail a.done .rest{color:var(--must)}
+
+/* ---------- profile card ---------- */
+.stack{display:flex; flex-direction:column; gap:18px}
+.card{
+  background:var(--surface); border:1px solid var(--line);
+  border-radius:8px; overflow:hidden;
+}
+.card-head{padding:16px 18px; display:flex; flex-direction:column; gap:8px}
+.card-title{display:flex; align-items:baseline; gap:10px; flex-wrap:wrap}
+.card-title h3{
+  margin:0; font-family:var(--serif); font-size:17px; font-weight:600; letter-spacing:-.01em;
+}
+.tag{
+  font-family:var(--mono); font-size:11px; padding:2px 6px; border-radius:3px;
+  border:1px solid var(--line-strong); color:var(--muted); background:var(--surface-2);
+}
+.tag-r5{border-color:var(--useful-line); color:var(--useful); background:var(--useful-bg)}
+.meta{font-family:var(--mono); font-size:12px; color:var(--muted)}
+.meta b{color:var(--ink-2); font-weight:500}
+.desc{
+  font-size:13.5px; color:var(--ink-2); max-width:74ch; margin:0;
+}
+.desc.clamped{display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden}
+.more{
+  align-self:flex-start; background:none; border:0; padding:0; cursor:pointer;
+  font-size:12px; color:var(--focus); text-decoration:underline; text-underline-offset:2px;
+}
+.bulk{display:flex; gap:6px; align-items:center; flex-wrap:wrap; font-size:12px; color:var(--muted)}
+.bulk button{
+  border:1px solid var(--line); background:var(--surface-2); border-radius:4px;
+  padding:2px 8px; font-size:12px; cursor:pointer;
+}
+.bulk button:hover{border-color:var(--line-strong)}
+
+/* ---------- items ---------- */
+.items{border-top:1px solid var(--line)}
+.colhead{
+  display:grid; grid-template-columns:3px minmax(180px,1.1fr) minmax(160px,1.2fr) 232px;
+  gap:0; padding:7px 18px 7px 0; background:var(--surface-2);
+  border-bottom:1px solid var(--line);
+  font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--faint);
+}
+.colhead div{padding-left:14px}
+.colhead .c-ctl{text-align:right; padding-right:0}
+
+.item{
+  display:grid; grid-template-columns:3px minmax(180px,1.1fr) minmax(160px,1.2fr) 232px;
+  align-items:center; border-bottom:1px solid var(--line);
+  background:var(--surface);
+}
+.item:last-child{border-bottom:0}
+.item:hover{background:var(--surface-2)}
+.item .stripe{align-self:stretch; background:transparent}
+.item[data-v="must"] .stripe{background:var(--must)}
+.item[data-v="useful"] .stripe{background:var(--useful)}
+.item[data-v="skip"] .stripe{background:var(--skip-line)}
+.item[data-v="skip"] .path code{text-decoration:line-through; text-decoration-color:var(--skip-line)}
+.item[data-v="skip"]{color:var(--muted)}
+
+.cell{padding:9px 14px; min-width:0}
+.path code{font-family:var(--mono); font-size:13px; color:var(--ink); word-break:break-word}
+.item[data-v="skip"] .path code{color:var(--muted)}
+.chips{display:flex; gap:5px; flex-wrap:wrap; margin-top:4px}
+.chip{
+  font-family:var(--mono); font-size:10.5px; padding:1px 5px; border-radius:3px;
+  border:1px solid var(--line-strong); color:var(--muted); white-space:nowrap;
+}
+.chip-card{border-color:var(--must-line); color:var(--must)}
+.sql code{font-family:var(--mono); font-size:12.5px; color:var(--muted); word-break:break-word}
+.sql .none{font-family:var(--sans); font-size:12px; color:var(--faint); font-style:italic}
+.note{
+  margin-top:5px; font-size:12px; color:var(--muted); max-width:70ch;
+  border-left:2px solid var(--line-strong); padding-left:8px;
+}
+
+.seg{display:flex; justify-content:flex-end; padding:8px 18px 8px 14px; gap:0}
+.seg button{
+  border:1px solid var(--line-strong); background:var(--surface);
+  padding:4px 9px; font-size:12px; cursor:pointer; white-space:nowrap;
+  color:var(--muted);
+}
+.seg button:first-child{border-radius:4px 0 0 4px}
+.seg button:last-child{border-radius:0 4px 4px 0}
+.seg button + button{border-left:0}
+.seg button:hover{color:var(--ink); background:var(--surface-2)}
+.seg button[aria-pressed="true"]{font-weight:600}
+.seg .v-must[aria-pressed="true"]{background:var(--must-bg); color:var(--must); border-color:var(--must-line)}
+.seg .v-useful[aria-pressed="true"]{background:var(--useful-bg); color:var(--useful); border-color:var(--useful-line)}
+.seg .v-skip[aria-pressed="true"]{background:var(--skip-bg); color:var(--skip); border-color:var(--skip-line)}
+
+@media (max-width:820px){
+  .colhead{display:none}
+  .item{grid-template-columns:3px 1fr}
+  .item .cell{padding:8px 14px 0}
+  .item .cell.sql{padding-top:2px}
+  .seg{grid-column:2; justify-content:flex-start; padding:8px 14px 10px}
+}
+
+.empty{padding:30px; text-align:center; color:var(--muted); font-size:14px}
+
+/* ---------- export dialog ---------- */
+dialog{
+  border:1px solid var(--line-strong); border-radius:8px; padding:0;
+  background:var(--surface); color:var(--ink); max-width:760px; width:92vw;
+}
+dialog::backdrop{background:rgba(10,14,18,.55)}
+.dlg-head{padding:16px 18px 10px; display:flex; align-items:baseline; gap:12px}
+.dlg-head h3{margin:0; font-family:var(--serif); font-size:17px; font-weight:600}
+.dlg-head p{margin:0; font-size:13px; color:var(--muted)}
+dialog textarea{
+  width:calc(100% - 36px); margin:0 18px; height:44vh; resize:vertical;
+  font-family:var(--mono); font-size:12px; line-height:1.55;
+  background:var(--surface-2); color:var(--ink);
+  border:1px solid var(--line); border-radius:var(--radius); padding:12px;
+}
+.dlg-foot{display:flex; gap:8px; justify-content:flex-end; padding:14px 18px 16px}
+
+@media (prefers-reduced-motion:reduce){ *{transition:none !important; animation:none !important} }
+</style>
+
+<header class="masthead">
+  <div class="masthead-inner">
+    <div class="brand">
+      <h1>Tonnard &amp; Verpaele FHIR Triage</h1>
+      <span class="sub">26 profielen &middot; <span id="total-items">0</span> elementen &middot; R4 + R5 &middot; bron: <code style="font-family:var(--mono);font-size:12px">fhir/*/input/fsh</code></span>
+    </div>
+
+    <div class="tally">
+      <div class="bar" role="img" aria-label="Voortgang van de beoordeling">
+        <span class="s-must" id="bar-must" style="width:0"></span>
+        <span class="s-useful" id="bar-useful" style="width:0"></span>
+        <span class="s-skip" id="bar-skip" style="width:0"></span>
+      </div>
+      <div class="counts">
+        <span><i class="dot d-must"></i>noodzakelijk <b id="n-must">0</b></span>
+        <span><i class="dot d-useful"></i>nuttig <b id="n-useful">0</b></span>
+        <span><i class="dot d-skip"></i>niet noodzakelijk <b id="n-skip">0</b></span>
+        <span><i class="dot d-open"></i>nog te doen <b id="n-open">0</b></span>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <div class="field">
+        <label for="q">Zoek</label>
+        <input id="q" type="search" placeholder="element, kolom of resource" autocomplete="off">
+      </div>
+      <div class="field">
+        <label for="rel">Release</label>
+        <select id="rel"><option value="">alle</option><option>R4</option><option>R5</option></select>
+      </div>
+      <div class="field">
+        <label for="st">Status</label>
+        <select id="st">
+          <option value="">alle</option>
+          <option value="open">nog te doen</option>
+          <option value="must">noodzakelijk</option>
+          <option value="useful">nuttig</option>
+          <option value="skip">niet noodzakelijk</option>
+        </select>
+      </div>
+      <div class="spacer"></div>
+      <button class="btn" id="reset" type="button">Alles wissen</button>
+      <button class="btn btn-primary" id="export" type="button">Resultaat exporteren</button>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <nav class="rail" aria-label="Profielen">
+    <h2>Profielen</h2>
+    <ol id="rail"></ol>
+  </nav>
+  <main class="stack" id="main"></main>
+</div>
+
+<dialog id="dlg">
+  <div class="dlg-head">
+    <h3>Resultaat</h3>
+    <p>Markdown &mdash; plak dit in Notion, een issue of een mail.</p>
+  </div>
+  <textarea id="out" readonly></textarea>
+  <div class="dlg-foot">
+    <button class="btn" id="dlg-close" type="button">Sluiten</button>
+    <button class="btn btn-primary" id="dlg-copy" type="button">Kopieer</button>
+  </div>
+</dialog>
+
+<script id="profiles" type="application/json">[{"release":"R4","id":"ehr-allergy-intolerance","title":"EHR AllergyIntolerance","parent":"AllergyIntolerance","table":"patient_allergies","description":"FHIR AllergyIntolerance backed by the patient_allergies table.","items":[{"path":"patient","sql":"patient_allergies.patient_id","rules":["1..1"],"note":""},{"path":"code","sql":null,"rules":["1..1"],"note":""},{"path":"code.text","sql":"patient_allergies.substance","rules":[],"note":""},{"path":"reaction.description","sql":"patient_allergies.reaction","rules":[],"note":""},{"path":"recorder","sql":"patient_allergies.noted_by","rules":[],"note":""},{"path":"extension[firstCreated]","sql":"patient_allergies.created_at","rules":["1..1 (extension firstCreated)"],"note":""},{"path":"meta.versionId","sql":"patient_allergies.version","rules":[],"note":""},{"path":"meta.lastUpdated","sql":"patient_allergies.updated_at","rules":[],"note":""}]},{"release":"R4","id":"ehr-appointment","title":"EHR Appointment","parent":"Appointment","table":"appointments","description":"FHIR Appointment backed by appointments + appointment_participant + appointment_identifier tables. appointments.agenda_id (no R4 Appointment.schedule element — the Schedule link runs through Slot), class_code/class_system/class_code_display (reserved for the future Encounter link; R4 Appointment has no class element, R5 does), recurrence (R4 has no recurrence; R5 has recurrenceTemplate), booking_origin, checked_in_at, cancelled_at and cancelled_by carry no standard R4 element. created_by/updated_by/deleted_at are audit/soft-delete columns and are not serialized.","items":[{"path":"extension","sql":"appointments.extensions","rules":[],"note":""},{"path":"identifier","sql":"appointment_identifier","rules":[],"note":""},{"path":"status","sql":"appointments.status","rules":["1..1","from EHRAppointmentStatusVS (required)"],"note":""},{"path":"serviceCategory","sql":"appointments.service_category","rules":["from EHRServiceCategoryVS (extensible)"],"note":""},{"path":"serviceType","sql":"appointments.healthcare_service_id","rules":[],"note":""},{"path":"start","sql":"appointments.start","rules":[],"note":""},{"path":"end","sql":"appointments.end_","rules":[],"note":""},{"path":"minutesDuration","sql":"appointments.minutes_duration","rules":[],"note":""},{"path":"created","sql":"appointments.created_at","rules":[],"note":""},{"path":"description","sql":"appointments.description","rules":[],"note":""},{"path":"comment","sql":"appointments.remark","rules":[],"note":""},{"path":"cancelationReason","sql":"appointments.cancellation_reason_code / appointments.cancellation_reason_system / appointments.cancellation_reason_display","rules":["from EHRCancellationReasonVS (extensible)"],"note":""},{"path":"slot","sql":"appointments.slot_id","rules":[],"note":""},{"path":"participant","sql":"appointment_participant","rules":[],"note":""},{"path":"participant.actor","sql":"appointments.patient_id / appointments.site_id","rules":[],"note":""},{"path":"meta.versionId","sql":"appointments.version","rules":[],"note":""},{"path":"meta.lastUpdated","sql":"appointments.updated_at","rules":[],"note":""}]},{"release":"R4","id":"ehr-charge-item-definition","title":"EHR ChargeItemDefinition","parent":"ChargeItemDefinition","table":"service_catalog","description":"FHIR ChargeItemDefinition backed by the service_catalog table (the priced services a quote line is picked from). Pricing is one propertyGroup with two priceComponents: the base component carries unit_price (netto, excl. VAT) as priceComponent.amount, and a tax component carries vat_rate as priceComponent.factor. active (boolean) is serialized as status active | retired. category and group_name are local catalogue groupings with no standard R4 ChargeItemDefinition element. created_at has no native ChargeItemDefinition creation element (ChargeItemDefinition.date is the publication date, not the row's creation).","items":[{"path":"title","sql":"service_catalog.label","rules":["1..1"],"note":""},{"path":"code","sql":"service_catalog.code","rules":[],"note":""},{"path":"description","sql":"service_catalog.description","rules":[],"note":""},{"path":"status","sql":"service_catalog.active","rules":[],"note":""},{"path":"propertyGroup.priceComponent.amount","sql":"service_catalog.unit_price","rules":[],"note":""},{"path":"propertyGroup.priceComponent.factor","sql":"service_catalog.vat_rate","rules":[],"note":""},{"path":"meta.versionId","sql":"service_catalog.version","rules":[],"note":""},{"path":"meta.lastUpdated","sql":"service_catalog.updated_at","rules":[],"note":""}]},{"release":"R4","id":"ehr-clinical-report","title":"EHR Clinical Report","parent":"Composition","table":"clinical_reports","description":"FHIR Composition backed by clinical_reports + clinical_report_sections. One row is one attested report (operative note in this slice); its sections are rows in clinical_report_sections, frozen at attestation time. Distinct from EHREncounterNote, which is the un-attested per-encounter note Composition over encounter_notes. clinical_reports.document_id (the generated DocumentReference rendition) and clinical_report_sections.position (section ordering) have no Composition element — see the mapping notes.","items":[{"path":"status","sql":"clinical_reports.status","rules":["1..1"],"note":""},{"path":"type","sql":"clinical_reports.type_code / clinical_reports.type_system / clinical_reports.type_display","rules":[],"note":""},{"path":"subject","sql":"clinical_reports.patient_id","rules":["1..1"],"note":""},{"path":"encounter","sql":"clinical_reports.encounter_id","rules":["1..1"],"note":""},{"path":"attester.time","sql":"clinical_reports.attested_at","rules":[],"note":""},{"path":"attester.party","sql":"clinical_reports.attested_by","rules":[],"note":""},{"path":"relatesTo","sql":"clinical_reports.supersedes_id","rules":[],"note":"relatesTo carries code #replaces: the amendment's new draft points at the report it supersedes."},{"path":"event.detail","sql":"clinical_reports.primary_procedure_id","rules":[],"note":"Composition.event.detail is the standard slot for \"the clinical service being documented\" — the operative note's primary procedure. Not section.entry: it belongs to the report as a whole, not to one section, and section.entry is already taken by the frozen entries bundle."},{"path":"section","sql":"clinical_report_sections","rules":["1..*"],"note":""},{"path":"section.code","sql":"clinical_report_sections.section_code / clinical_report_sections.section_system","rules":["1..1"],"note":""},{"path":"section.title","sql":"clinical_report_sections.section_title","rules":["1..1"],"note":""},{"path":"section.text","sql":"clinical_report_sections.text_xhtml / clinical_report_sections.text_status","rules":["1..1"],"note":""},{"path":"section.entry","sql":"clinical_report_sections.entries","rules":[],"note":""},{"path":"extension[firstCreated]","sql":"clinical_reports.created_at","rules":["1..1 (extension firstCreated)"],"note":""},{"path":"meta.versionId","sql":"clinical_reports.version","rules":[],"note":""},{"path":"meta.lastUpdated","sql":"clinical_reports.updated_at","rules":[],"note":""}]},{"release":"R4","id":"ehr-communication","title":"EHR Communication","parent":"Communication","table":"communication","description":"FHIR Communication backed by the communication table — one row per dispatched send (the adapter accepted the payload). identifier is the provider-issued message id as a (system, value) pair: provider ('mailgun', …) is the system, provider_message_id the value; the value is NULL until the adapter returns, so the element carries no cardinality rule. category carries intent_key ('booking_confirmed', …), the message type the intent registry resolved. payload carries the whole rendered_snapshot jsonb ({subject, html, text, variables, template_key, template_version}) — the full renderer output retained so the exact message can be reconstructed after the template is redeployed. status (1..1 in the base) has no backing column: a communication row exists only because the send made it out, so status is derived at serialization — completed by default, downgraded from the latest communication_delivery_event (a permanent failed event serializes as not-done). communication.org_id is tenancy and R4 Communication has no organization element (no managingOrganization / serviceProvider counterpart). communication.created_at is the row-insert timestamp and duplicates sent_at, which is the semantically meaningful one and is mapped — it is not serialized separately. The communication_delivery_event child table (provider-reported delivered/failed/opened events) has no R4 Communication element and is not serialized here.","items":[{"path":"identifier","sql":"communication.provider / communication.provider_message_id","rules":[],"note":""},{"path":"basedOn","sql":"communication.request_id","rules":["1..1"],"note":""},{"path":"category","sql":"communication.intent_key","rules":["1..1"],"note":""},{"path":"medium","sql":"communication.channel","rules":["1..1"],"note":""},{"path":"subject","sql":"communication.patient_id","rules":[],"note":""},{"path":"sent","sql":"communication.sent_at","rules":["1..1"],"note":""},{"path":"payload","sql":"communication.rendered_snapshot","rules":["1..*"],"note":""}]},{"release":"R4","id":"ehr-communication-request","title":"EHR CommunicationRequest","parent":"CommunicationRequest","table":"communication_request","description":"FHIR CommunicationRequest backed by the communication_request table — the intent to send, one row per sendCommunication() call. basedOn is the anchor resource (based_on_appointment_id, the concrete per-resource FK named by the column comment; sibling based_on_* FKs join the same element as they are added). category carries intent_key ('booking_confirmed', …). The communication_request.subject COLUMN is the caller's optional e-mail subject-line override, not the FHIR subject: it maps to payload.contentString, while the FHIR subject element carries patient_id (the recipient). occurrence_at is NULL for 'send now' and a future timestamp for deferred pickup, so occurrenceDateTime carries no cardinality rule. status is translated onto the required R4 request-status binding at serialization: pending → active, sent → completed, skipped → revoked, failed → unknown (R4 has no failed state). created_at is the native authoredOn, so no extension[firstCreated] is needed. The dispatcher's machinery has no standard element and is not serialized: attempt_count, max_attempts, next_attempt_at (retry loop bookkeeping), last_error (quick-look error string; Sentry holds the stack), idempotency_key (org-scoped replay guard), skip_reason (the no_consent / no_address / disabled / incomplete taxonomy) and variables (the Zod-validated template inputs, whose rendered result is retained on the communication row instead). communication_request.org_id is tenancy and R4 CommunicationRequest has no organization element.","items":[{"path":"basedOn","sql":"communication_request.based_on_appointment_id","rules":[],"note":""},{"path":"category","sql":"communication_request.intent_key","rules":["1..1"],"note":""},{"path":"medium","sql":"communication_request.channel","rules":["1..1"],"note":""},{"path":"subject","sql":"communication_request.patient_id","rules":[],"note":""},{"path":"payload.contentString","sql":"communication_request.subject","rules":[],"note":""},{"path":"occurrenceDateTime","sql":"communication_request.occurrence_at","rules":[],"note":""},{"path":"status","sql":"communication_request.status","rules":["1..1"],"note":""},{"path":"authoredOn","sql":"communication_request.created_at","rules":["1..1"],"note":""},{"path":"requester","sql":"communication_request.created_by","rules":[],"note":""},{"path":"meta.lastUpdated","sql":"communication_request.updated_at","rules":[],"note":""}]},{"release":"R4","id":"ehr-consent","title":"EHR Consent","parent":"Consent","table":"communication_preference","description":"FHIR Consent backed by the communication_preference table — the per-patient, per-channel contact-consent gate the dispatcher reads before every send. One row is one provision: consented maps to provision.type (true → permit, false → deny) and channel to provision.action ('email', 'sms', 'whatsapp', 'ehealth-box', 'in-app'). provision.action is chosen over provision.class because its binding is example (so a urn:tv:communication-channel coding is conformant), whereas provision.class is extensible against consent-content-class — resource and media types, not contact channels. created_at is the native Consent.dateTime, so no extension[firstCreated] is needed; updated_by is the staff member who last touched the row and maps to performer (NULL when the patient set it themselves). org_id maps to organization, the custodian of the consent. The three required elements have no backing column and are populated at serialization time: status is always #active (a preference row that exists is in force; GDPR erasure deletes the row rather than inactivating it), scope is fixed to #patient-privacy from the consent-scope value set, and category is fixed to the single coding #59284-0 (Patient Consent) from LOINC. No 1..1 rules are declared for them because no column backs them. communication_preference.source (the provenance enum 'default' | 'patient_settings' | 'staff' | 'import') has no standard R4 element — it is neither a policy URI nor an Attachment/Reference source[x] — and is left unmapped pending a decision on a project extension.","items":[{"path":"patient","sql":"communication_preference.patient_id","rules":["1..1"],"note":""},{"path":"dateTime","sql":"communication_preference.created_at","rules":["1..1"],"note":""},{"path":"performer","sql":"communication_preference.updated_by","rules":[],"note":""},{"path":"organization","sql":"communication_preference.org_id","rules":[],"note":""},{"path":"provision","sql":null,"rules":["1..1"],"note":""},{"path":"provision.type","sql":"communication_preference.consented","rules":["1..1"],"note":""},{"path":"provision.action","sql":"communication_preference.channel","rules":["1..1"],"note":""},{"path":"meta.versionId","sql":"communication_preference.version","rules":[],"note":""},{"path":"meta.lastUpdated","sql":"communication_preference.updated_at","rules":[],"note":""}]},{"release":"R4","id":"ehr-document-reference","title":"EHR DocumentReference","parent":"DocumentReference","table":"documents","description":"FHIR DocumentReference backed by the documents table (operatieverslag, ECG, lab, consent, correspondence).","items":[{"path":"identifier","sql":"document_identifier","rules":[],"note":""},{"path":"subject","sql":"documents.patient_id","rules":["1..1"],"note":""},{"path":"context.encounter","sql":"documents.encounter_id","rules":[],"note":""},{"path":"type","sql":"documents.kind","rules":["from EHRDocumentKindVS (extensible)"],"note":""},{"path":"content","sql":null,"rules":["1..*"],"note":""},{"path":"content.attachment.title","sql":"documents.title","rules":[],"note":""},{"path":"content.attachment.url","sql":"documents.storage_path","rules":["1..1"],"note":""},{"path":"content.attachment.contentType","sql":"documents.mime_type","rules":[],"note":""},{"path":"content.attachment.size","sql":"documents.file_size","rules":[],"note":""},{"path":"content.attachment.creation","sql":"documents.document_date","rules":[],"note":"documents.document_date is the date the document PERTAINS to (lab date, scan date), not the indexing instant. DocumentReference.date is defined as \"when the document reference was created\" — that is documents.created_at — so the clinical date belongs on the attachment."},{"path":"description","sql":"documents.note","rules":[],"note":""},{"path":"custodian","sql":"documents.org_id","rules":[],"note":""},{"path":"author","sql":"documents.uploaded_by","rules":[],"note":""},{"path":"extension[firstCreated]","sql":"documents.created_at","rules":["1..1 (extension firstCreated)"],"note":""},{"path":"status","sql":"documents.deleted_at","rules":[],"note":""},{"path":"meta.versionId","sql":"documents.version","rules":[],"note":""},{"path":"meta.lastUpdated","sql":"documents.updated_at","rules":[],"note":""}]},{"release":"R4","id":"ehr-encounter","title":"EHR Encounter","parent":"Encounter","table":"encounters","description":"FHIR Encounter backed by the encounters table (a raadpleging / consultation).","items":[{"path":"identifier","sql":"encounter_identifier","rules":[],"note":""},{"path":"subject","sql":"encounters.patient_id","rules":["1..1"],"note":""},{"path":"status","sql":"encounters.status","rules":[],"note":""},{"path":"class","sql":"encounters.class_code / encounters.class_system / encounters.class_code_display","rules":[],"note":""},{"path":"type","sql":"encounters.type_code / encounters.type_system / encounters.type_code_display","rules":[],"note":""},{"path":"period","sql":null,"rules":["1..1"],"note":""},{"path":"period.start","sql":"encounters.occurred_on","rules":["1..1"],"note":""},{"path":"reasonCode","sql":"encounters.reason","rules":[],"note":""},{"path":"participant.individual","sql":"encounters.created_by","rules":[],"note":""},{"path":"serviceProvider","sql":"encounters.org_id","rules":[],"note":""},{"path":"meta.versionId","sql":"encounters.version","rules":[],"note":""},{"path":"meta.lastUpdated","sql":"encounters.updated_at","rules":[],"note":""}]},{"release":"R4","id":"ehr-encounter-note","title":"EHR Encounter Note","parent":"Composition","table":"encounter_notes","description":"FHIR Composition backed by encounter_notes rows. Each row is one section; all rows for an encounter form a single Composition. Per-section author_id is non-standard (Composition.section.author exists in R4 but is not a core constraint).","items":[{"path":"encounter","sql":"encounter_notes.encounter_id","rules":["1..1"],"note":""},{"path":"section","sql":null,"rules":["1..*"],"note":""},{"path":"section.code","sql":"encounter_notes.section_code / encounter_notes.section_system / encounter_notes.section_code_display","rules":["1..1","from EHRNoteSectionVS (extensible)"],"note":"EXTENSIBLE, not required (issue #872): a row may carry a section code outside our bundle — content imported from another EHR or a scanned document — which the app stores and renders read-only. Use one of ours when it fits; otherwise carry the source's own code."},{"path":"section.text","sql":"encounter_notes.body","rules":["1..1"],"note":""},{"path":"section.author","sql":"encounter_notes.author_id","rules":["1..*"],"note":""},{"path":"extension[firstCreated]","sql":"encounter_notes.created_at","rules":["1..1 (extension firstCreated)"],"note":""},{"path":"meta.lastUpdated","sql":"encounter_notes.updated_at","rules":[],"note":""}]},{"release":"R4","id":"ehr-healthcare-service","title":"EHR HealthcareService","parent":"HealthcareService","table":"healthcare_service","description":"FHIR HealthcareService backed by the healthcare_service table (the bookable service catalogue behind an appointment's serviceType). category is the service KIND (consultation | treatment) and is the source of truth for appointments.service_category; code + code_system are the machine key pair and map to HealthcareService.type. default_room_id is a booking pre-fill rather than an exhaustive list of sites, but it is the only room the service is bound to, so it is surfaced as HealthcareService.location. default_agenda_id (the preset target agenda — R4 has no HealthcareService->Schedule element; the link runs Schedule->actor), color, icon, sort_order and bookable_online (patient-facing online-booking opt-in; appointmentRequired and referralMethod both mean something else) carry no standard R4 element. created_at has no native HealthcareService creation element. deleted_at is soft-delete and is not serialized. The per-(service, practitioner) duration_estimate table has no R4 HealthcareService element either.","items":[{"path":"extension","sql":"healthcare_service.extensions","rules":[],"note":""},{"path":"active","sql":"healthcare_service.active","rules":["1..1"],"note":""},{"path":"category","sql":"healthcare_service.category","rules":["1..*"],"note":""},{"path":"type","sql":"healthcare_service.code / healthcare_service.code_system","rules":["1..*"],"note":""},{"path":"name","sql":"healthcare_service.label","rules":["1..1"],"note":""},{"path":"providedBy","sql":"healthcare_service.org_id","rules":["1..1"],"note":""},{"path":"location","sql":"healthcare_service.default_room_id","rules":[],"note":""},{"path":"meta.versionId","sql":"healthcare_service.version","rules":[],"note":""},{"path":"meta.lastUpdated","sql":"healthcare_service.updated_at","rules":[],"note":""}]},{"release":"R4","id":"ehr-location","title":"EHR Location","parent":"Location","table":"locations","description":"FHIR Location backed by the locations table (sites and the consultation rooms inside them). location_type (site|room) is the physical form of the location, so it maps to Location.physicalType; room_kind (consult|operating|procedure|...) is the function performed there, so it maps to Location.type. locations.code, schedulable and timezone carry no standard R4 Location element.","items":[{"path":"extension","sql":"locations.extensions","rules":[],"note":""},{"path":"name","sql":"locations.name","rules":["1..1"],"note":""},{"path":"status","sql":"locations.status","rules":["1..1"],"note":""},{"path":"type","sql":"locations.room_kind","rules":[],"note":""},{"path":"address","sql":"locations.address","rules":[],"note":""},{"path":"physicalType","sql":"locations.location_type","rules":[],"note":""},{"path":"managingOrganization","sql":"locations.org_id","rules":[],"note":""},{"path":"partOf","sql":"locations.parent_id","rules":[],"note":""},{"path":"meta.versionId","sql":"locations.version","rules":[],"note":""},{"path":"meta.lastUpdated","sql":"locations.updated_at","rules":[],"note":""}]},{"release":"R4","id":"ehr-media","title":"EHR Media","parent":"Media","table":"media","description":"FHIR Media (R4) backed by the media table (clinical photos/video).","items":[{"path":"identifier","sql":"media_identifier","rules":[],"note":""},{"path":"subject","sql":"media.patient_id","rules":["1..1"],"note":""},{"path":"encounter","sql":"media.encounter_id","rules":[],"note":""},{"path":"createdDateTime","sql":"media.captured_on","rules":["1..1"],"note":""},{"path":"content","sql":null,"rules":["1..1"],"note":""},{"path":"content.url","sql":"media.storage_path","rules":[],"note":""},{"path":"content.title","sql":"media.title","rules":[],"note":""},{"path":"type","sql":"media.kind","rules":[],"note":""},{"path":"status","sql":"media.deleted_at","rules":[],"note":""},{"path":"operator","sql":"media.uploaded_by","rules":[],"note":""},{"path":"extension[firstCreated]","sql":"media.created_at","rules":["1..1 (extension firstCreated)"],"note":""},{"path":"meta.versionId","sql":"media.version","rules":[],"note":""},{"path":"meta.lastUpdated","sql":"media.updated_at","rules":[],"note":""}]},{"release":"R4","id":"ehr-medication","title":"EHR Medication","parent":"Medication","table":"drug_catalogue","description":"FHIR Medication backed by the drug_catalogue table — the Belgian SAM reference catalogue (read-only import, not a patient record). code carries two codings: the SAM concept code (code) and the ATC classification (atc_code), each under its own system. The catalogue is bilingual: code.text and form.text are serialized in the requesting user's language (name_nl / form_nl for nl-BE, name_fr / form_fr for fr-BE) and the other language is not emitted, since R4 CodeableConcept carries a single text — the standard translation extension would be needed to emit both and is deliberately not profiled here. commercialized (AMPP packs only) is serialized as status active | inactive; it is null for VTM/VMP rows, where status is simply omitted. parent_code (the VTM -> VMP -> AMP -> AMPP hierarchy) and product_kind (which level of that hierarchy a row is) have no R4 Medication element — Medication has no partOf and no type/category. drug_catalogue.id is the row key, not a clinical identifier.","items":[{"path":"code","sql":null,"rules":["1..1"],"note":""},{"path":"code.coding","sql":"drug_catalogue.code / drug_catalogue.atc_code","rules":[],"note":""},{"path":"code.text","sql":"drug_catalogue.name_nl / drug_catalogue.name_fr","rules":[],"note":""},{"path":"form.text","sql":"drug_catalogue.form_nl / drug_catalogue.form_fr","rules":[],"note":""},{"path":"ingredient.strength","sql":"drug_catalogue.strength","rules":[],"note":""},{"path":"status","sql":"drug_catalogue.commercialized","rules":[],"note":""}]},{"release":"R4","id":"ehr-medication-administration","title":"EHR MedicationAdministration","parent":"MedicationAdministration","table":"medication_administrations","description":"FHIR MedicationAdministration backed by the medication_administrations table — the anaesthetic and intra-op agents given during a theatre session. partOf is narrowed to 0..1 and points at the anaesthesia Procedure (procedure_id, a single non-null FK). R4 names the encounter link `context`, not `encounter`. The dose is a UCUM SimpleQuantity: dose_unit is the UCUM symbol, so it carries both dose.unit (human-readable) and dose.code (the coded form paired with dose.system = dose_unit_system). medication_administrations.org_id (tenancy) and created_at have no standard element here — MedicationAdministration has no serviceProvider/recorder and no native creation element. `medicationCodeableConcept` carries no 1..1 rule even though medication_code is NOT NULL: the element flattens a triple whose cached label (medication_display) is nullable.","items":[{"path":"subject","sql":"medication_administrations.patient_id","rules":["1..1"],"note":""},{"path":"context","sql":"medication_administrations.encounter_id","rules":["1..1"],"note":""},{"path":"partOf","sql":"medication_administrations.procedure_id","rules":["1..1"],"note":""},{"path":"status","sql":"medication_administrations.status","rules":[],"note":""},{"path":"medicationCodeableConcept","sql":"medication_administrations.medication_code / medication_administrations.medication_code_system / medication_administrations.medication_display","rules":[],"note":""},{"path":"effectivePeriod.start","sql":"medication_administrations.effective_start","rules":["1..1"],"note":""},{"path":"effectivePeriod.end","sql":"medication_administrations.effective_end","rules":[],"note":""},{"path":"performer.actor","sql":"medication_administrations.performer_id","rules":[],"note":""},{"path":"dosage","sql":null,"rules":["1..1"],"note":""},{"path":"dosage.dose","sql":null,"rules":["1..1"],"note":""},{"path":"dosage.dose.value","sql":"medication_administrations.dose_value","rules":["1..1"],"note":""},{"path":"dosage.dose.unit","sql":"medication_administrations.dose_unit","rules":["1..1"],"note":""},{"path":"dosage.dose.code","sql":"medication_administrations.dose_unit","rules":["1..1"],"note":""},{"path":"dosage.dose.system","sql":"medication_administrations.dose_unit_system","rules":["1..1"],"note":""},{"path":"dosage.route","sql":"medication_administrations.route_code / medication_administrations.route_code_system / medication_administrations.route_display","rules":[],"note":""},{"path":"meta.versionId","sql":"medication_administrations.version","rules":[],"note":""},{"path":"meta.lastUpdated","sql":"medication_administrations.updated_at","rules":[],"note":""}]},{"release":"R4","id":"ehr-organization","title":"EHR Organization","parent":"Organization","table":"org","description":"FHIR Organization backed by the org table (the single tenant), with the practice legal name, contact details and address flattened in from org_settings.","items":[{"path":"identifier","sql":"org_settings.vat_number","rules":[],"note":""},{"path":"name","sql":"org.name","rules":["1..1"],"note":""},{"path":"alias","sql":"org_settings.legal_name","rules":[],"note":""},{"path":"telecom","sql":"org_settings.phone / org_settings.email / org_settings.website","rules":[],"note":""},{"path":"address","sql":"org_settings.address","rules":[],"note":""},{"path":"meta.lastUpdated","sql":"org.updated_at","rules":[],"note":""}]},{"release":"R4","id":"ehr-patient","title":"EHR Patient","parent":"Patient","table":"patients","description":"FHIR Patient backed by the patients + patient_identifier tables.","items":[{"path":"identifier","sql":"patient_identifier","rules":[],"note":""},{"path":"name","sql":null,"rules":["1..*"],"note":""},{"path":"name.family","sql":"patients.family","rules":["0..1"],"note":""},{"path":"name.given","sql":"patients.given","rules":[],"note":""},{"path":"name.prefix","sql":"patients.prefix","rules":[],"note":""},{"path":"name.text","sql":"patients.name_text","rules":[],"note":""},{"path":"birthDate","sql":"patients.birth_date","rules":[],"note":""},{"path":"gender","sql":"patients.gender","rules":[],"note":""},{"path":"telecom","sql":"patients.mobile / patients.landline / patients.email","rules":[],"note":""},{"path":"address","sql":"patients.address","rules":[],"note":""},{"path":"deceasedBoolean","sql":"patients.deceased_boolean","rules":[],"note":""},{"path":"managingOrganization","sql":"patients.org_id","rules":[],"note":""},{"path":"link","sql":"patients.merged_into_id","rules":[],"note":""},{"path":"meta.versionId","sql":"patients.version","rules":[],"note":""},{"path":"meta.lastUpdated","sql":"patients.updated_at","rules":[],"note":""},{"path":"communication","sql":null,"rules":["0..1"],"note":""},{"path":"communication.language","sql":"patients.communication_language","rules":[],"note":""}]},{"release":"R4","id":"ehr-practitioner","title":"EHR Practitioner","parent":"Practitioner","table":"profile","description":"FHIR Practitioner backed by the profile + profile_identifier tables. PractitionerRole (org, role) is collapsed into the same row.","items":[{"path":"identifier","sql":"profile_identifier","rules":[],"note":""},{"path":"name.family","sql":"profile.family","rules":[],"note":""},{"path":"name.given","sql":"profile.given","rules":[],"note":""},{"path":"name.prefix","sql":"profile.prefix","rules":[],"note":""},{"path":"active","sql":"profile.active","rules":[],"note":""},{"path":"meta.versionId","sql":"profile.version","rules":[],"note":""},{"path":"meta.lastUpdated","sql":"profile.updated_at","rules":[],"note":""}]},{"release":"R4","id":"ehr-procedure","title":"EHR Procedure","parent":"Procedure","table":"procedures","description":"FHIR Procedure backed by the procedures + procedure_performer tables — the surgical procedure(s) AND the session anaesthesia of a theatre encounter, distinguished by category (surgical | anaesthesia). partOf is narrowed to 0..1: part_of_id is a single self-FK reserved for genuine sub-step nesting, and is never set for category='anaesthesia' (anaesthesia is a sibling of the surgical procedures, associated via the shared encounter). performer.actor carries either the internal staff FK (actor_id) or the external free-text fallback (actor_display). procedures.org_id (tenancy) and procedures.created_at have no standard element here — Procedure has no serviceProvider and no native creation element. `code` carries no 1..1 rule even though procedures.code is NOT NULL: the element flattens a triple whose cached label (code_display) is nullable.","items":[{"path":"subject","sql":"procedures.patient_id","rules":["1..1"],"note":""},{"path":"encounter","sql":"procedures.encounter_id","rules":["1..1"],"note":""},{"path":"status","sql":"procedures.status","rules":[],"note":""},{"path":"category","sql":"procedures.category","rules":["1..1","from EHRProcedureCategoryVS (extensible)"],"note":""},{"path":"code","sql":"procedures.code / procedures.code_system / procedures.code_display","rules":["from EHRProcedureCode (extensible)"],"note":""},{"path":"performedPeriod.start","sql":"procedures.performed_start","rules":[],"note":""},{"path":"performedPeriod.end","sql":"procedures.performed_end","rules":[],"note":""},{"path":"note.text","sql":"procedures.note","rules":[],"note":""},{"path":"partOf","sql":"procedures.part_of_id","rules":["0..1"],"note":""},{"path":"recorder","sql":"procedures.created_by","rules":[],"note":""},{"path":"performer","sql":"procedure_performer","rules":[],"note":""},{"path":"performer.function","sql":"procedure_performer.function","rules":["1..1","from EHRProcedurePerformerFunctionVS (extensible)"],"note":""},{"path":"performer.actor","sql":"procedure_performer.actor_id / procedure_performer.actor_display","rules":[],"note":""},{"path":"meta.versionId","sql":"procedures.version","rules":[],"note":""},{"path":"meta.lastUpdated","sql":"procedures.updated_at","rules":[],"note":""}]},{"release":"R4","id":"ehr-questionnaire","title":"EHR Questionnaire","parent":"Questionnaire","table":"questionnaires / questionnaires.definition","description":"FHIR Questionnaire backed by the questionnaires table — surgical-risk disclosure templates pinned by questionnaire_responses. The resource is stored verbatim in questionnaires.definition; key/version/status are denormalized columns over it. questionnaires.version is a business label the clinic sets ('2026-07', '1.0'), never a row-version counter, so it maps to Questionnaire.version and NOT to meta.versionId; the table has no updated_at, so there is no meta.lastUpdated either.","items":[{"path":"name","sql":"questionnaires.key","rules":["1..1"],"note":""},{"path":"version","sql":"questionnaires.version","rules":["1..1"],"note":""},{"path":"status","sql":"questionnaires.status","rules":["1..1"],"note":""},{"path":"extension[firstCreated]","sql":"questionnaires.created_at","rules":["1..1 (extension firstCreated)"],"note":""}]},{"release":"R4","id":"ehr-questionnaire-response","title":"EHR QuestionnaireResponse","parent":"QuestionnaireResponse","table":"questionnaire_responses","description":"FHIR QuestionnaireResponse backed by the questionnaire_responses table — one surgical-risk disclosure conversation, pinning the exact Questionnaire version that was disclosed. questionnaire_responses.version IS the optimistic-lock counter, so it maps to meta.versionId (unlike questionnaires.version, a business label). QuestionnaireResponse.source is left unmapped on purpose. The amendment trail in questionnaire_response_versions is out of scope for this profile.","items":[{"path":"questionnaire","sql":"questionnaire_responses.questionnaire_id","rules":["1..1"],"note":""},{"path":"status","sql":"questionnaire_responses.status","rules":["1..1"],"note":""},{"path":"subject","sql":"questionnaire_responses.patient_id","rules":["1..1"],"note":""},{"path":"encounter","sql":"questionnaire_responses.encounter_id","rules":["1..1"],"note":""},{"path":"authored","sql":"questionnaire_responses.completed_at","rules":[],"note":""},{"path":"author","sql":"questionnaire_responses.disclosed_by_profile_id","rules":["1..1"],"note":".author (who is responsible for the content), deliberately NOT .source (who supplied the answers — the patient, about whom this record makes no claim)."},{"path":"item","sql":"questionnaire_responses.answers","rules":[],"note":""},{"path":"extension[firstCreated]","sql":"questionnaire_responses.created_at","rules":["1..1 (extension firstCreated)"],"note":""},{"path":"meta.versionId","sql":"questionnaire_responses.version","rules":[],"note":""},{"path":"meta.lastUpdated","sql":"questionnaire_responses.updated_at","rules":[],"note":""}]},{"release":"R4","id":"ehr-schedule","title":"EHR Schedule","parent":"Schedule","table":"agenda","description":"FHIR Schedule backed by the agenda + agenda_actor + agenda_identifier tables. agenda.kind/color/sort_order/online_bookable are non-standard extensions.","items":[{"path":"extension","sql":"agenda.extensions","rules":[],"note":""},{"path":"identifier","sql":"agenda_identifier","rules":[],"note":""},{"path":"comment","sql":"agenda.name","rules":["1..1"],"note":""},{"path":"actor","sql":"agenda_actor","rules":[],"note":""},{"path":"active","sql":"agenda.active","rules":[],"note":""},{"path":"meta.versionId","sql":"agenda.version","rules":[],"note":""},{"path":"meta.lastUpdated","sql":"agenda.updated_at","rules":[],"note":""}]},{"release":"R4","id":"ehr-slot","title":"EHR Slot","parent":"Slot","table":"slot","description":"FHIR Slot backed by the slot table.","items":[{"path":"extension","sql":"slot.extensions","rules":[],"note":""},{"path":"schedule","sql":"slot.agenda_id","rules":[],"note":""},{"path":"status","sql":"slot.status","rules":[],"note":""},{"path":"start","sql":"slot.start","rules":[],"note":""},{"path":"end","sql":"slot.end_","rules":[],"note":""},{"path":"appointmentType","sql":"slot.appointment_type","rules":[],"note":""},{"path":"comment","sql":"slot.comment","rules":[],"note":""},{"path":"overbooked","sql":"slot.overbooked","rules":[],"note":""},{"path":"meta.versionId","sql":"slot.version","rules":[],"note":""},{"path":"meta.lastUpdated","sql":"slot.updated_at","rules":[],"note":""}]},{"release":"R4","id":"ehr-task","title":"EHR Task","parent":"Task","table":"tasks","description":"FHIR Task backed by the tasks table (Takenlijst).","items":[{"path":"for","sql":"tasks.patient_id","rules":[],"note":""},{"path":"description","sql":"tasks.title","rules":["1..1"],"note":""},{"path":"owner","sql":"tasks.owner_id","rules":[],"note":""},{"path":"priority","sql":"tasks.priority","rules":[],"note":""},{"path":"status","sql":"tasks.status","rules":[],"note":""},{"path":"requester","sql":"tasks.created_by","rules":[],"note":""},{"path":"restriction.period.end","sql":"tasks.due_date","rules":[],"note":""},{"path":"extension[firstCreated]","sql":"tasks.created_at","rules":["1..1 (extension firstCreated)"],"note":""},{"path":"lastModified","sql":"tasks.updated_at","rules":[],"note":""},{"path":"meta.versionId","sql":"tasks.version","rules":[],"note":""}]},{"release":"R5","id":"ehr-charge-item","title":"EHR Charge Item","parent":"ChargeItem","table":"quote_lines","description":"FHIR R5 ChargeItem backed by one quote_lines row, referenced from EHRInvoice.lineItem.chargeItem[x]. quote_lines.position is not mapped here — it lives on EHRInvoice.lineItem.sequence, since ChargeItem has no sequence element in R5. unitPriceComponent replaces R4 ChargeItem's priceOverride field. quote_lines.code is the optional free-text billing/nomenclature code and rides on code (a bare code with no code_system column yet); the human label stays on code.text. quote_lines.catalog_id is the provenance pointer at the service_catalog row and maps to definitionCanonical (EHRChargeItemDefinition). Not mapped here: quote_id (the parent link is expressed from the Invoice side as EHRInvoice.lineItem -> quote_lines), discount/discount_kind/vat_rate (carried on EHRInvoice.lineItem.priceComponent), category and source (no standard ChargeItem element).","items":[{"path":"definitionCanonical","sql":"quote_lines.catalog_id","rules":[],"note":""},{"path":"code","sql":"quote_lines.code","rules":[],"note":""},{"path":"code.text","sql":"quote_lines.label","rules":["1..1"],"note":""},{"path":"quantity","sql":"quote_lines.quantity","rules":["1..1"],"note":""},{"path":"unitPriceComponent","sql":"quote_lines.unit_price","rules":["1..1"],"note":""},{"path":"note","sql":"quote_lines.description","rules":[],"note":""}]},{"release":"R5","id":"ehr-invoice","title":"EHR Invoice","parent":"Invoice","table":"quotes","description":"FHIR R5 Invoice backed by the quotes table (kostenraming / offerte). Replaces the R4 EHRClaim (Claim, use=predetermination) mapping dropped in issue #144 — Claim is scoped to insurance adjudication and was a loose fit for an internal cost estimate. quote_lines are carried as lineItem entries whose chargeItem[x] references an EHRChargeItem (see EHRChargeItem.fsh); quote_lines.position lives on lineItem.sequence here because ChargeItem itself has no sequence element in R5. quotes.created_at maps to the native Invoice.creation, so no firstCreated extension is used. The per-line discount/discount_kind/vat_rate columns are carried on lineItem.priceComponent (a MonetaryComponent with type=discount / type=tax), not on the ChargeItem. Unmapped: recipient_name/recipient_address/recipient_country (a frozen snapshot; Invoice.recipient is a Reference), encounter_id (R5 Invoice has no encounter element), deposit_amount/deposit_percentage (no standard element), and the accepted_at/by, declined_at/by, sent_by, voided_at/by status-transition pairs (Provenance concern). created_by/updated_by/deleted_at are audit/soft-delete columns and are not serialized.","items":[{"path":"identifier","sql":"quote_identifier","rules":[],"note":""},{"path":"subject","sql":"quotes.patient_id","rules":["1..1","only Reference(Patient)"],"note":""},{"path":"participant.actor","sql":"quotes.practitioner_id","rules":["only Reference(Practitioner)"],"note":""},{"path":"issuer","sql":"quotes.org_id","rules":[],"note":""},{"path":"status","sql":"quotes.status","rules":[],"note":""},{"path":"cancelledReason","sql":"quotes.void_reason","rules":[],"note":""},{"path":"creation","sql":"quotes.created_at","rules":[],"note":""},{"path":"date","sql":"quotes.sent_at","rules":[],"note":""},{"path":"note","sql":"quotes.intro_text / quotes.internal_notes","rules":[],"note":""},{"path":"lineItem","sql":"quote_lines","rules":[],"note":""},{"path":"lineItem.sequence","sql":"quote_lines.position","rules":["1..1"],"note":""},{"path":"lineItem.priceComponent","sql":"quote_lines.discount / quote_lines.discount_kind / quote_lines.vat_rate","rules":[],"note":""},{"path":"meta.versionId","sql":"quotes.version","rules":[],"note":""},{"path":"meta.lastUpdated","sql":"quotes.updated_at","rules":[],"note":""},{"path":"lineItem.chargeItem[x]","sql":null,"rules":["only Reference(EHRChargeItem)"],"note":""}]}]</script>
+<script>
+(function () {
+  "use strict";
+  var PROFILES = JSON.parse(document.getElementById("profiles").textContent);
+  var KEY = "tv-fhir-triage-v1";
+  var LABEL = { must: "noodzakelijk", useful: "nuttig", skip: "niet noodzakelijk" };
+  var ORDER = ["must", "useful", "skip"];
+
+  var state = {};
+  try { state = JSON.parse(localStorage.getItem(KEY) || "{}"); } catch (e) { state = {}; }
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
+
+  var TOTAL = 0;
+  PROFILES.forEach(function (p) { TOTAL += p.items.length; });
+  document.getElementById("total-items").textContent = TOTAL;
+
+  function key(p, it) { return p.release + ":" + p.id + ":" + it.path; }
+
+  /* ---------- render ---------- */
+  var main = document.getElementById("main");
+  var rail = document.getElementById("rail");
+
+  PROFILES.forEach(function (p) {
+    var a = document.createElement("a");
+    a.href = "#" + p.release.toLowerCase() + "-" + p.id;
+    a.dataset.pid = p.release + ":" + p.id;
+    a.innerHTML = '<span>' + esc(p.title.replace(/^EHR /, "")) + '</span><span class="rest"></span>';
+    var li = document.createElement("li");
+    li.appendChild(a);
+    rail.appendChild(li);
+
+    var card = document.createElement("section");
+    card.className = "card";
+    card.id = p.release.toLowerCase() + "-" + p.id;
+    card.dataset.pid = p.release + ":" + p.id;
+    card.dataset.release = p.release;
+
+    var head = document.createElement("div");
+    head.className = "card-head";
+    head.innerHTML =
+      '<div class="card-title">' +
+        '<h3>' + esc(p.title) + '</h3>' +
+        '<span class="tag' + (p.release === "R5" ? " tag-r5" : "") + '">' + p.release + " " + esc(p.parent) + '</span>' +
+        '<span class="tag">' + esc(p.id) + '</span>' +
+      '</div>' +
+      '<div class="meta">tabel <b>' + esc(p.table || "—") + '</b> &middot; ' + p.items.length + ' elementen</div>';
+
+    if (p.description) {
+      var d = document.createElement("p");
+      d.className = "desc clamped";
+      d.textContent = p.description;
+      head.appendChild(d);
+      if (p.description.length > 190) {
+        var more = document.createElement("button");
+        more.className = "more";
+        more.type = "button";
+        more.textContent = "Toon volledige toelichting";
+        more.addEventListener("click", function () {
+          var open = d.classList.toggle("clamped");
+          more.textContent = open ? "Toon volledige toelichting" : "Verberg toelichting";
+        });
+        head.appendChild(more);
+      }
+    }
+
+    var bulk = document.createElement("div");
+    bulk.className = "bulk";
+    bulk.innerHTML = "<span>Heel dit profiel:</span>";
+    ORDER.forEach(function (v) {
+      var b = document.createElement("button");
+      b.type = "button";
+      b.textContent = LABEL[v];
+      b.addEventListener("click", function () {
+        p.items.forEach(function (it) { state[key(p, it)] = v; });
+        save(); paint();
+      });
+      bulk.appendChild(b);
+    });
+    var clr = document.createElement("button");
+    clr.type = "button";
+    clr.textContent = "wissen";
+    clr.addEventListener("click", function () {
+      p.items.forEach(function (it) { delete state[key(p, it)]; });
+      save(); paint();
+    });
+    bulk.appendChild(clr);
+    head.appendChild(bulk);
+    card.appendChild(head);
+
+    var items = document.createElement("div");
+    items.className = "items";
+    items.innerHTML =
+      '<div class="colhead"><div></div><div>FHIR-element</div><div>SQL-kolom</div><div class="c-ctl">Beoordeling</div></div>';
+
+    p.items.forEach(function (it) {
+      var k = key(p, it);
+      var row = document.createElement("div");
+      row.className = "item";
+      row.dataset.k = k;
+      row.dataset.search = (p.title + " " + p.id + " " + p.table + " " + it.path + " " + (it.sql || "")).toLowerCase();
+
+      var chips = it.rules.map(function (r) {
+        var card2 = /^\d+\.\.[\d*]+/.test(r);
+        return '<span class="chip' + (card2 ? " chip-card" : "") + '">' + esc(r) + "</span>";
+      }).join("");
+
+      row.innerHTML =
+        '<div class="stripe"></div>' +
+        '<div class="cell path"><code>' + esc(it.path) + "</code>" +
+          (chips ? '<div class="chips">' + chips + "</div>" : "") +
+          (it.note ? '<div class="note">' + esc(it.note) + "</div>" : "") +
+        "</div>" +
+        '<div class="cell sql">' +
+          (it.sql ? "<code>" + esc(it.sql) + "</code>" : '<span class="none">geen kolom — enkel profielregel</span>') +
+        "</div>";
+
+      var seg = document.createElement("div");
+      seg.className = "seg";
+      ORDER.forEach(function (v) {
+        var b = document.createElement("button");
+        b.type = "button";
+        b.className = "v-" + v;
+        b.dataset.v = v;
+        b.setAttribute("aria-pressed", "false");
+        b.setAttribute("aria-label", LABEL[v] + " — " + p.title + " " + it.path);
+        b.textContent = LABEL[v];
+        b.addEventListener("click", function () {
+          if (state[k] === v) { delete state[k]; } else { state[k] = v; }
+          save(); paint();
+        });
+        seg.appendChild(b);
+      });
+      row.appendChild(seg);
+      items.appendChild(row);
+    });
+
+    card.appendChild(items);
+    main.appendChild(card);
+  });
+
+  /* ---------- paint ---------- */
+  var q = document.getElementById("q");
+  var rel = document.getElementById("rel");
+  var st = document.getElementById("st");
+
+  function paint() {
+    var term = q.value.trim().toLowerCase();
+    var fRel = rel.value;
+    var fSt = st.value;
+    var n = { must: 0, useful: 0, skip: 0 };
+
+    PROFILES.forEach(function (p) {
+      var card = document.getElementById(p.release.toLowerCase() + "-" + p.id);
+      var shown = 0, open = 0;
+
+      p.items.forEach(function (it) {
+        var k = key(p, it);
+        var v = state[k] || "";
+        if (v) { n[v]++; } else { open++; }
+
+        var row = card.querySelector('[data-k="' + cssq(k) + '"]');
+        if (v) { row.dataset.v = v; } else { delete row.dataset.v; }
+        row.querySelectorAll(".seg button").forEach(function (b) {
+          b.setAttribute("aria-pressed", String(b.dataset.v === v));
+        });
+
+        var ok = true;
+        if (term && row.dataset.search.indexOf(term) === -1) ok = false;
+        if (fRel && p.release !== fRel) ok = false;
+        if (fSt === "open" && v) ok = false;
+        else if (fSt && fSt !== "open" && v !== fSt) ok = false;
+        row.style.display = ok ? "" : "none";
+        if (ok) shown++;
+      });
+
+      card.style.display = shown ? "" : "none";
+      var link = rail.querySelector('[data-pid="' + cssq(p.release + ":" + p.id) + '"]');
+      link.classList.toggle("done", open === 0);
+      var did = p.items.length - open;
+      link.querySelector(".rest").textContent = open === 0 ? "✓" : did + "/" + p.items.length;
+      link.title = did + " van " + p.items.length + " beoordeeld";
+      link.parentElement.style.display = shown ? "" : "none";
+    });
+
+    var done = n.must + n.useful + n.skip;
+    document.getElementById("n-must").textContent = n.must;
+    document.getElementById("n-useful").textContent = n.useful;
+    document.getElementById("n-skip").textContent = n.skip;
+    document.getElementById("n-open").textContent = TOTAL - done;
+    ORDER.forEach(function (v) {
+      document.getElementById("bar-" + v).style.width = (n[v] / TOTAL * 100) + "%";
+    });
+
+    var anyCard = main.querySelector(".card:not([style*='display: none'])");
+    var msg = document.getElementById("noresult");
+    if (!anyCard && !msg) {
+      msg = document.createElement("p");
+      msg.id = "noresult";
+      msg.className = "empty";
+      msg.textContent = "Geen elementen voor deze filters.";
+      main.appendChild(msg);
+    } else if (anyCard && msg) {
+      msg.remove();
+    }
+  }
+
+  [q, rel, st].forEach(function (el) { el.addEventListener("input", paint); });
+
+  document.getElementById("reset").addEventListener("click", function () {
+    if (!confirm("Alle beoordelingen wissen?")) return;
+    state = {}; save(); paint();
+  });
+
+  /* ---------- export ---------- */
+  var dlg = document.getElementById("dlg");
+  var out = document.getElementById("out");
+
+  document.getElementById("export").addEventListener("click", function () {
+    var lines = ["# Tonnard & Verpaele — FHIR triage", ""];
+    var n = { must: 0, useful: 0, skip: 0, open: 0 };
+    PROFILES.forEach(function (p) {
+      p.items.forEach(function (it) { n[state[key(p, it)] || "open"]++; });
+    });
+    lines.push("noodzakelijk " + n.must + " · nuttig " + n.useful +
+               " · niet noodzakelijk " + n.skip + " · nog te doen " + n.open +
+               " (van " + TOTAL + ")", "");
+    PROFILES.forEach(function (p) {
+      var rows = p.items.map(function (it) {
+        var v = state[key(p, it)];
+        return "| `" + it.path + "` | " + (it.sql ? "`" + it.sql + "`" : "—") + " | " +
+               (v ? LABEL[v] : "—") + " |";
+      });
+      lines.push("## " + p.title + " (" + p.release + " " + p.parent + " → " + (p.table || "—") + ")");
+      lines.push("", "| element | kolom | beoordeling |", "| --- | --- | --- |");
+      lines.push.apply(lines, rows);
+      lines.push("");
+    });
+    out.value = lines.join("\n");
+    if (typeof dlg.showModal === "function") { dlg.showModal(); } else { dlg.setAttribute("open", ""); }
+    out.focus();
+  });
+
+  document.getElementById("dlg-close").addEventListener("click", function () { dlg.close(); });
+  document.getElementById("dlg-copy").addEventListener("click", function (e) {
+    out.select();
+    var done = function () { e.target.textContent = "Gekopieerd"; setTimeout(function () { e.target.textContent = "Kopieer"; }, 1600); };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(out.value).then(done, function () { document.execCommand("copy"); done(); });
+    } else { document.execCommand("copy"); done(); }
+  });
+
+  /* ---------- utils ---------- */
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+  function cssq(s) { return s.replace(/"/g, '\\"'); }
+
+  paint();
+})();
+</script>
