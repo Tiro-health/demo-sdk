@@ -11,6 +11,7 @@
   --must:#1c6f52; --must-bg:#e4f1eb; --must-line:#9dc9b7;
   --useful:#96660f; --useful-bg:#f7eeda; --useful-line:#dcc08a;
   --skip:#6f7780; --skip-bg:#eceef0; --skip-line:#c8ced3;
+  --maybe:#2f6fa8; --maybe-bg:#e7f0f8; --maybe-line:#a6c5df;
   --focus:#2f6fa8;
   --radius:6px;
   --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
@@ -25,6 +26,7 @@
     --must:#5cbf95; --must-bg:#12291f; --must-line:#2c5d47;
     --useful:#dfae4f; --useful-bg:#2b2214; --useful-line:#5f4c22;
     --skip:#89919a; --skip-bg:#1e2328; --skip-line:#39424a;
+    --maybe:#7bb2e2; --maybe-bg:#132330; --maybe-line:#31536f;
     --focus:#5d9fd8;
   }
 }
@@ -35,6 +37,7 @@
   --must:#5cbf95; --must-bg:#12291f; --must-line:#2c5d47;
   --useful:#dfae4f; --useful-bg:#2b2214; --useful-line:#5f4c22;
   --skip:#89919a; --skip-bg:#1e2328; --skip-line:#39424a;
+  --maybe:#7bb2e2; --maybe-bg:#132330; --maybe-line:#31536f;
   --focus:#5d9fd8;
 }
 
@@ -61,11 +64,13 @@ button{font:inherit; color:inherit}
   background:var(--surface-2); border:1px solid var(--line); display:flex; overflow:hidden;
 }
 .bar span{display:block; height:100%; transition:width .18s ease}
-.bar .s-must{background:var(--must)} .bar .s-useful{background:var(--useful)} .bar .s-skip{background:var(--skip)}
+.bar .s-must{background:var(--must)} .bar .s-useful{background:var(--useful)}
+.bar .s-skip{background:var(--skip)} .bar .s-maybe{background:var(--maybe)}
 .counts{display:flex; gap:16px; flex-wrap:wrap; font-size:13px; font-variant-numeric:tabular-nums}
 .counts b{font-weight:600}
 .dot{width:9px; height:9px; border-radius:2px; display:inline-block; margin-right:6px}
-.d-must{background:var(--must)} .d-useful{background:var(--useful)} .d-skip{background:var(--skip)} .d-open{background:var(--line-strong)}
+.d-must{background:var(--must)} .d-useful{background:var(--useful)} .d-skip{background:var(--skip)}
+.d-maybe{background:var(--maybe)} .d-open{background:var(--line-strong)}
 
 .toolbar{display:flex; gap:10px; align-items:center; flex-wrap:wrap; padding:12px 0 14px}
 .field{display:flex; align-items:center; gap:8px; background:var(--surface-2); border:1px solid var(--line); border-radius:var(--radius); padding:0 10px; height:34px}
@@ -96,6 +101,7 @@ button{font:inherit; color:inherit}
 .row[data-v="must"] .stripe{background:var(--must)}
 .row[data-v="useful"] .stripe{background:var(--useful)}
 .row[data-v="skip"] .stripe{background:var(--skip-line)}
+.row[data-v="maybe"] .stripe{background:var(--maybe)}
 .row[data-v="skip"] .body h3{color:var(--muted)}
 .row[data-v="skip"]{background:var(--surface-2)}
 
@@ -122,6 +128,32 @@ button{font:inherit; color:inherit}
 .seg .v-must[aria-pressed="true"]{background:var(--must-bg); color:var(--must); border-color:var(--must-line)}
 .seg .v-useful[aria-pressed="true"]{background:var(--useful-bg); color:var(--useful); border-color:var(--useful-line)}
 .seg .v-skip[aria-pressed="true"]{background:var(--skip-bg); color:var(--skip); border-color:var(--skip-line)}
+.seg .v-maybe{padding-left:14px; padding-right:14px; font-weight:600}
+.seg .v-maybe[aria-pressed="true"]{background:var(--maybe-bg); color:var(--maybe); border-color:var(--maybe-line)}
+
+/* ---------- notitie ---------- */
+.notepreview{
+  margin:2px 0 0; font-size:13px; color:var(--ink-2);
+  border-left:2px solid var(--maybe-line); padding:1px 0 1px 9px;
+  white-space:pre-wrap; max-width:72ch;
+}
+.notepreview:empty{display:none}
+.notewrap{
+  grid-column:1 / -1; border-top:1px solid var(--line);
+  padding:12px 16px 14px; display:none; flex-direction:column; gap:6px;
+  background:var(--surface-2);
+}
+.row.note-open .notewrap{display:flex}
+.notewrap label{
+  font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); font-weight:600;
+}
+.notewrap textarea{
+  width:100%; min-height:74px; resize:vertical; font:inherit; font-size:13.5px; line-height:1.5;
+  color:var(--ink); background:var(--surface); border:1px solid var(--line-strong);
+  border-radius:var(--radius); padding:9px 11px;
+}
+.notewrap textarea::placeholder{color:var(--faint)}
+.notewrap .hint{font-size:12px; color:var(--faint)}
 
 /* ---------- element detail (read-only) ---------- */
 .detail{grid-column:1 / -1; border-top:1px solid var(--line); display:none}
@@ -180,11 +212,13 @@ dialog textarea{
         <span class="s-must" id="bar-must" style="width:0"></span>
         <span class="s-useful" id="bar-useful" style="width:0"></span>
         <span class="s-skip" id="bar-skip" style="width:0"></span>
+        <span class="s-maybe" id="bar-maybe" style="width:0"></span>
       </div>
       <div class="counts">
         <span><i class="dot d-must"></i>noodzakelijk <b id="n-must">0</b></span>
         <span><i class="dot d-useful"></i>nuttig <b id="n-useful">0</b></span>
         <span><i class="dot d-skip"></i>niet noodzakelijk <b id="n-skip">0</b></span>
+        <span><i class="dot d-maybe"></i>? te bespreken <b id="n-maybe">0</b></span>
         <span><i class="dot d-open"></i>nog te doen <b id="n-open">0</b></span>
       </div>
     </div>
@@ -206,6 +240,7 @@ dialog textarea{
           <option value="must">noodzakelijk</option>
           <option value="useful">nuttig</option>
           <option value="skip">niet noodzakelijk</option>
+          <option value="maybe">? te bespreken</option>
         </select>
       </div>
       <div class="spacer"></div>
@@ -235,13 +270,20 @@ dialog textarea{
   "use strict";
   var PROFILES = JSON.parse(document.getElementById("profiles").textContent);
   var KEY = "tv-fhir-triage-profiles-v1";
-  var LABEL = { must: "noodzakelijk", useful: "nuttig", skip: "niet noodzakelijk" };
-  var ORDER = ["must", "useful", "skip"];
+  var LABEL = { must: "noodzakelijk", useful: "nuttig", skip: "niet noodzakelijk", maybe: "?" };
+  var LONG = {
+    must: "noodzakelijk", useful: "nuttig",
+    skip: "niet noodzakelijk", maybe: "? te bespreken"
+  };
+  var ORDER = ["must", "useful", "skip", "maybe"];
   var TOTAL = PROFILES.length;
 
-  var state = {};
+  var NKEY = "tv-fhir-triage-notes-v1";
+  var state = {}, notes = {};
   try { state = JSON.parse(localStorage.getItem(KEY) || "{}"); } catch (e) { state = {}; }
+  try { notes = JSON.parse(localStorage.getItem(NKEY) || "{}"); } catch (e) { notes = {}; }
   function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
+  function saveNotes() { try { localStorage.setItem(NKEY, JSON.stringify(notes)); } catch (e) {} }
 
   var main = document.getElementById("main");
   var rows = {};
@@ -291,6 +333,10 @@ dialog textarea{
         body.appendChild(d);
       }
 
+      var preview = document.createElement("p");
+      preview.className = "notepreview";
+      body.appendChild(preview);
+
       var links = document.createElement("div");
       links.className = "links";
       if (p.description && p.description.length > 190) {
@@ -313,6 +359,12 @@ dialog textarea{
         toggle.textContent = (open ? "Verberg de " : "Toon de ") + p.items.length + " elementen";
       });
       links.appendChild(toggle);
+
+      var noteBtn = document.createElement("button");
+      noteBtn.className = "more"; noteBtn.type = "button";
+      noteBtn.setAttribute("aria-expanded", "false");
+      links.appendChild(noteBtn);
+
       body.appendChild(links);
       row.appendChild(body);
 
@@ -324,7 +376,8 @@ dialog textarea{
         var b = document.createElement("button");
         b.type = "button"; b.className = "v-" + v; b.dataset.v = v;
         b.setAttribute("aria-pressed", "false");
-        b.setAttribute("aria-label", LABEL[v] + " — " + p.title);
+        b.setAttribute("aria-label", LONG[v] + " — " + p.title);
+        if (v === "maybe") b.title = "Nog te bespreken";
         b.textContent = LABEL[v];
         b.addEventListener("click", function () {
           if (state[k] === v) { delete state[k]; } else { state[k] = v; }
@@ -334,6 +387,40 @@ dialog textarea{
       });
       control.appendChild(seg);
       row.appendChild(control);
+
+      var notewrap = document.createElement("div");
+      notewrap.className = "notewrap";
+      var ta = document.createElement("textarea");
+      ta.id = "note-" + p.release + "-" + p.id;
+      ta.placeholder = "Waarom dit oordeel? Wat mist er? Wie beslist hierover?";
+      ta.value = notes[k] || "";
+      var lab = document.createElement("label");
+      lab.setAttribute("for", ta.id);
+      lab.textContent = "Notitie bij " + p.title;
+      var hint = document.createElement("p");
+      hint.className = "hint";
+      hint.textContent = "Wordt mee geëxporteerd.";
+      ta.addEventListener("input", function () {
+        if (ta.value.trim()) { notes[k] = ta.value; } else { delete notes[k]; }
+        saveNotes(); paintNote();
+      });
+      notewrap.appendChild(lab); notewrap.appendChild(ta); notewrap.appendChild(hint);
+      row.appendChild(notewrap);
+
+      function paintNote() {
+        var has = !!(notes[k] && notes[k].trim());
+        var open = row.classList.contains("note-open");
+        preview.textContent = has && !open ? notes[k] : "";
+        noteBtn.textContent = open ? "Notitie sluiten" : (has ? "Notitie bewerken" : "Notitie toevoegen");
+      }
+      noteBtn.addEventListener("click", function () {
+        var open = row.classList.toggle("note-open");
+        noteBtn.setAttribute("aria-expanded", String(open));
+        paintNote();
+        if (open) ta.focus();
+      });
+      row.paintNote = paintNote;
+      paintNote();
 
       var detail = document.createElement("div");
       detail.className = "detail";
@@ -364,7 +451,7 @@ dialog textarea{
   function paint() {
     var term = q.value.trim().toLowerCase();
     var fRel = rel.value, fSt = st.value;
-    var n = { must: 0, useful: 0, skip: 0 };
+    var n = { must: 0, useful: 0, skip: 0, maybe: 0 };
     var shownPer = { R4: 0, R5: 0 };
 
     PROFILES.forEach(function (p) {
@@ -394,10 +481,11 @@ dialog textarea{
       l.style.display = shownPer[r] ? "" : "none";
     });
 
-    var done = n.must + n.useful + n.skip;
+    var done = n.must + n.useful + n.skip + n.maybe;
     document.getElementById("n-must").textContent = n.must;
     document.getElementById("n-useful").textContent = n.useful;
     document.getElementById("n-skip").textContent = n.skip;
+    document.getElementById("n-maybe").textContent = n.maybe;
     document.getElementById("n-open").textContent = TOTAL - done;
     ORDER.forEach(function (v) {
       document.getElementById("bar-" + v).style.width = (n[v] / TOTAL * 100) + "%";
@@ -417,8 +505,15 @@ dialog textarea{
   [q, rel, st].forEach(function (el) { el.addEventListener("input", paint); });
 
   document.getElementById("reset").addEventListener("click", function () {
-    if (!confirm("Alle beoordelingen wissen?")) return;
-    state = {}; save(); paint();
+    if (!confirm("Alle beoordelingen én notities wissen?")) return;
+    state = {}; notes = {}; save(); saveNotes();
+    PROFILES.forEach(function (p) {
+      var r = rows[p.release + ":" + p.id];
+      var t = r.querySelector(".notewrap textarea");
+      if (t) t.value = "";
+      if (r.paintNote) r.paintNote();
+    });
+    paint();
   });
 
   /* ---------- export ---------- */
@@ -426,15 +521,16 @@ dialog textarea{
   var out = document.getElementById("out");
 
   document.getElementById("export").addEventListener("click", function () {
-    var n = { must: [], useful: [], skip: [], open: [] };
+    var n = { must: [], useful: [], skip: [], maybe: [], open: [] };
     PROFILES.forEach(function (p) {
       n[state[p.release + ":" + p.id] || "open"].push(p);
     });
     var lines = ["# Tonnard & Verpaele — FHIR profielen triage", ""];
     lines.push("noodzakelijk " + n.must.length + " · nuttig " + n.useful.length +
-               " · niet noodzakelijk " + n.skip.length + " · nog te doen " + n.open.length +
-               " (van " + TOTAL + ")", "");
-    [["must", "Noodzakelijk"], ["useful", "Nuttig"], ["skip", "Niet noodzakelijk"], ["open", "Nog te beoordelen"]]
+               " · niet noodzakelijk " + n.skip.length + " · te bespreken " + n.maybe.length +
+               " · nog te doen " + n.open.length + " (van " + TOTAL + ")", "");
+    [["must", "Noodzakelijk"], ["useful", "Nuttig"], ["skip", "Niet noodzakelijk"],
+     ["maybe", "? — te bespreken"], ["open", "Nog te beoordelen"]]
       .forEach(function (pair) {
         var g = n[pair[0]];
         if (!g.length) return;
@@ -442,14 +538,24 @@ dialog textarea{
         g.forEach(function (p) {
           lines.push("- **" + p.title + "** — " + p.release + " " + p.parent +
                      " · `" + (p.table || "—") + "` · " + p.items.length + " elementen");
+          var note = notes[p.release + ":" + p.id];
+          if (note && note.trim()) {
+            note.trim().split(/\n+/).forEach(function (l, i) {
+              lines.push("  - " + (i === 0 ? "_notitie:_ " : "") + l.trim());
+            });
+          }
         });
         lines.push("");
       });
-    lines.push("---", "", "| profiel | release | basis | tabel | beoordeling |", "| --- | --- | --- | --- | --- |");
+    lines.push("---", "",
+      "| profiel | release | basis | tabel | beoordeling | notitie |",
+      "| --- | --- | --- | --- | --- | --- |");
     PROFILES.forEach(function (p) {
-      var v = state[p.release + ":" + p.id];
+      var pk = p.release + ":" + p.id;
+      var v = state[pk];
+      var note = (notes[pk] || "").trim().replace(/\s*\n+\s*/g, " / ").replace(/\|/g, "\\|");
       lines.push("| " + p.title + " | " + p.release + " | " + p.parent + " | `" +
-                 (p.table || "—") + "` | " + (v ? LABEL[v] : "—") + " |");
+                 (p.table || "—") + "` | " + (v ? LONG[v] : "—") + " | " + (note || "—") + " |");
     });
     out.value = lines.join("\n");
     if (typeof dlg.showModal === "function") { dlg.showModal(); } else { dlg.setAttribute("open", ""); }
